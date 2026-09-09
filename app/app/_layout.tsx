@@ -1,15 +1,10 @@
-import { useEffect } from 'react';
-import { I18nManager } from 'react-native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-
-// Force RTL for Hebrew
-I18nManager.allowRTL(true);
-I18nManager.forceRTL(true);
+import { BranchProvider } from '../lib/branchContext';
 
 export default function RootLayout() {
   return (
-    <>
+    <BranchProvider>
       <StatusBar style="light" />
       <Stack
         screenOptions={{
@@ -20,23 +15,14 @@ export default function RootLayout() {
         }}
       >
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="contact/[id]"
-          options={{ title: 'פרטי איש קשר' }}
-        />
-        <Stack.Screen
-          name="admin/login"
-          options={{ title: 'כניסת מנהל', presentation: 'modal' }}
-        />
-        <Stack.Screen
-          name="admin/contacts"
-          options={{ title: 'ניהול אנשי קשר' }}
-        />
-        <Stack.Screen
-          name="admin/index"
-          options={{ title: 'פאנל ניהול' }}
-        />
+        <Stack.Screen name="admin/login" options={{ title: 'Acceso del personal', presentation: 'modal' }} />
+        <Stack.Screen name="admin/index" options={{ title: 'Panel del peluquero' }} />
+        <Stack.Screen name="admin/branches" options={{ title: 'Sucursales' }} />
+        <Stack.Screen name="admin/staff" options={{ title: 'Peluqueros' }} />
+        <Stack.Screen name="admin/services" options={{ title: 'Servicios' }} />
+        <Stack.Screen name="admin/schedule" options={{ title: 'Horarios' }} />
+        <Stack.Screen name="admin/settings" options={{ title: 'Configuración' }} />
       </Stack>
-    </>
+    </BranchProvider>
   );
 }

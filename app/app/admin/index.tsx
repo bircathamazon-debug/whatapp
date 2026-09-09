@@ -4,29 +4,38 @@ import { useRouter } from 'expo-router';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../lib/firebase';
 
+const MENU = [
+  { icon: '🏢', label: 'Sucursales', route: '/admin/branches' as const },
+  { icon: '💈', label: 'Peluqueros', route: '/admin/staff' as const },
+  { icon: '💇', label: 'Servicios', route: '/admin/services' as const },
+  { icon: '🗓️', label: 'Horarios y días bloqueados', route: '/admin/schedule' as const },
+  { icon: '⚙️', label: 'Configuración (depósitos, Shabat, Google Calendar)', route: '/admin/settings' as const },
+];
+
 export default function AdminIndexScreen() {
   const router = useRouter();
 
   const logout = async () => {
-    await signOut(auth);
-    router.replace('/');
+    Alert.alert('Cerrar sesión', '¿Seguro que quieres salir?', [
+      { text: 'Cancelar', style: 'cancel' },
+      { text: 'Salir', style: 'destructive', onPress: async () => { await signOut(auth); router.replace('/admin/login'); } },
+    ]);
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>פאנל ניהול</Text>
+      <Text style={styles.title}>Panel del peluquero</Text>
 
-      <TouchableOpacity
-        style={styles.menuItem}
-        onPress={() => router.push('/admin/contacts')}
-      >
-        <Text style={styles.menuIcon}>✅</Text>
-        <Text style={styles.menuText}>אישור אנשי קשר ממתינים</Text>
-      </TouchableOpacity>
+      {MENU.map((item) => (
+        <TouchableOpacity key={item.route} style={styles.menuItem} onPress={() => router.push(item.route)}>
+          <Text style={styles.menuIcon}>{item.icon}</Text>
+          <Text style={styles.menuText}>{item.label}</Text>
+        </TouchableOpacity>
+      ))}
 
       <TouchableOpacity style={[styles.menuItem, styles.logoutItem]} onPress={logout}>
         <Text style={styles.menuIcon}>🚪</Text>
-        <Text style={[styles.menuText, styles.logoutText]}>התנתקות</Text>
+        <Text style={[styles.menuText, styles.logoutText]}>Cerrar sesión</Text>
       </TouchableOpacity>
     </View>
   );
@@ -34,16 +43,9 @@ export default function AdminIndexScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f8fafc', padding: 16 },
-  title: {
-    fontSize: 22,
-    fontWeight: '800',
-    color: '#1a3c5e',
-    textAlign: 'right',
-    marginBottom: 20,
-    marginTop: 8,
-  },
+  title: { fontSize: 22, fontWeight: '800', color: '#1a3c5e', marginBottom: 20, marginTop: 8 },
   menuItem: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#fff',
     borderRadius: 12,
@@ -58,6 +60,6 @@ const styles = StyleSheet.create({
   },
   logoutItem: { backgroundColor: '#fff5f5' },
   menuIcon: { fontSize: 22 },
-  menuText: { fontSize: 16, color: '#1a3c5e', fontWeight: '600' },
+  menuText: { fontSize: 15, color: '#1a3c5e', fontWeight: '600', flex: 1 },
   logoutText: { color: '#e53e3e' },
 });

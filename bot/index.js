@@ -1,25 +1,25 @@
 /**
- * Yeshiva Contacts WhatsApp Bot (Baileys)
+ * Bot de WhatsApp (Baileys) para reservar citas de la peluquería.
  *
- * First run: scan the QR code with the admin WhatsApp account.
- * Session is saved to ./auth_info_baileys/ for subsequent runs.
+ * Primera ejecución: escanea el QR con el número de WhatsApp de la sucursal.
+ * La sesión se guarda en ./auth_info_baileys/ para las siguientes ejecuciones.
  *
- * Set WA_GROUP_ID in .env. To find it, run this bot and send any
- * message to the target group — the group JID will be logged.
+ * Cada instancia del bot atiende UNA sucursal (ver BRANCH_ID en .env). Para
+ * varias sucursales, corre una instancia por cada número de WhatsApp.
  */
-
-import makeWASocket, {
-  DisconnectReason,
-  useMultiFileAuthState,
-} from '@whiskeysockets/baileys';
+import makeWASocket, { DisconnectReason, useMultiFileAuthState } from '@whiskeysockets/baileys';
 import { Boom } from '@hapi/boom';
 import qrcode from 'qrcode-terminal';
-import cron from 'node-cron';
 import 'dotenv/config';
-import { parseMessage } from './parser.js';
-import { upsertContact } from './firebaseClient.js';
+import { handleIncomingMessage } from './conversation.js';
+import { startNotificationsWatcher } from './notificationsWatcher.js';
 
-const GROUP_ID = process.env.WA_GROUP_ID;
+const BRANCH_ID = process.env.BRANCH_ID;
+
+if (!BRANCH_ID) {
+  console.error('[bot] Falta BRANCH_ID en bot/.env — crea la sucursal en Firestore y copia su id.');
+  process.exit(1);
+}
 
 async function connectToWhatsApp() {
   const { state, saveCreds } = await useMultiFileAuthState('auth_info_baileys');
@@ -33,60 +33,40 @@ async function connectToWhatsApp() {
 
   sock.ev.on('connection.update', ({ connection, lastDisconnect, qr }) => {
     if (qr) {
-      console.log('\n[bot] Scan this QR code with WhatsApp:');
+      console.log('\n[bot] Escanea este código QR con WhatsApp:');
       qrcode.generate(qr, { small: true });
     }
 
     if (connection === 'close') {
-      const shouldReconnect =
-        new Boom(lastDisconnect?.error)?.output?.statusCode !==
-        DisconnectReason.loggedOut;
-      console.log('[bot] Connection closed. Reconnecting:', shouldReconnect);
+      const shouldReconnect = new Boom(lastDisconnect?.error)?.output?.statusCode !== DisconnectReason.loggedOut;
+      console.log('[bot] Conexión cerrada. Reconectando:', shouldReconnect);
       if (shouldReconnect) connectToWhatsApp();
     } else if (connection === 'open') {
-      console.log('[bot] Connected to WhatsApp');
-      if (!GROUP_ID) {
-        console.log(
-          '[bot] WA_GROUP_ID not set. Listening for ANY group message to discover group IDs...'
-        );
-      }
+      console.log(`[bot] Conectado a WhatsApp para la sucursal ${BRANCH_ID}`);
+      startNotificationsWatcher(sock, BRANCH_ID);
     }
   });
 
   sock.ev.on('messages.upsert', async ({ messages }) => {
     for (const msg of messages) {
       const jid = msg.key.remoteJid ?? '';
-      if (!jid.endsWith('@g.us')) continue;
-
-      // Help user discover group JID
-      if (!GROUP_ID) {
-        console.log(`[bot] Group JID detected: ${jid}`);
-        continue;
-      }
-
-      if (jid !== GROUP_ID) continue;
+      if (!jid.endsWith('@s.whatsapp.net')) continue; // ignorar grupos y broadcasts
       if (msg.key.fromMe) continue;
 
-      const text =
-        msg.message?.conversation ||
-        msg.message?.extendedTextMessage?.text ||
-        '';
+      const text = msg.message?.conversation || msg.message?.extendedTextMessage?.text || msg.message?.buttonsResponseMessage?.selectedDisplayText || '';
+      if (!text) continue;
 
-      const senderName =
-        msg.pushName || msg.key.participant?.split('@')[0] || 'לא ידוע';
-
-      const contact = parseMessage(text, senderName);
-      if (contact) {
-        console.log(`[bot] Parsed contact from ${senderName}:`, contact);
-        await upsertContact(contact).catch(console.error);
+      try {
+        const replies = await handleIncomingMessage(jid, text, BRANCH_ID, msg.pushName);
+        for (const reply of replies) {
+          await sock.sendMessage(jid, { text: reply });
+        }
+      } catch (err) {
+        console.error('[bot] error procesando mensaje', err);
+        await sock.sendMessage(jid, { text: 'Ocurrió un error. Intenta de nuevo escribiendo "menu".' }).catch(() => {});
       }
     }
   });
 }
 
 connectToWhatsApp();
-
-// Daily sync reminder log at 02:00 Israel time (UTC+3)
-cron.schedule('0 23 * * *', () => {
-  console.log('[cron] Daily sync check — bot is live and listening.');
-});

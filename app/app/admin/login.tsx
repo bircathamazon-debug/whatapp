@@ -26,7 +26,7 @@ export default function LoginScreen() {
       await signInWithEmailAndPassword(auth, email, password);
       router.replace('/admin');
     } catch {
-      Alert.alert('שגיאה', 'אימייל או סיסמה שגויים');
+      Alert.alert('Error', 'Email o contraseña incorrectos');
     } finally {
       setLoading(false);
     }
@@ -38,16 +38,15 @@ export default function LoginScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <View style={styles.card}>
-        <Text style={styles.title}>כניסת מנהל</Text>
-        <Text style={styles.subtitle}>אנשי קשר ישיבה</Text>
+        <Text style={styles.title}>Acceso del personal</Text>
+        <Text style={styles.subtitle}>Sistema de citas de la peluquería</Text>
 
         <TextInput
           style={styles.input}
           value={email}
           onChangeText={setEmail}
-          placeholder="אימייל"
+          placeholder="Email"
           placeholderTextColor="#aaa"
-          textAlign="right"
           keyboardType="email-address"
           autoCapitalize="none"
           autoCorrect={false}
@@ -56,9 +55,8 @@ export default function LoginScreen() {
           style={styles.input}
           value={password}
           onChangeText={setPassword}
-          placeholder="סיסמה"
+          placeholder="Contraseña"
           placeholderTextColor="#aaa"
-          textAlign="right"
           secureTextEntry
         />
 
@@ -67,7 +65,7 @@ export default function LoginScreen() {
           onPress={login}
           disabled={loading}
         >
-          <Text style={styles.btnText}>{loading ? 'מתחבר...' : 'כניסה'}</Text>
+          <Text style={styles.btnText}>{loading ? 'Ingresando...' : 'Ingresar'}</Text>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>

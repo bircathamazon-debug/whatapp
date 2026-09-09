@@ -1,5 +1,5 @@
 import { initializeApp, cert } from 'firebase-admin/app';
-import { getFirestore, Timestamp } from 'firebase-admin/firestore';
+import { getFirestore } from 'firebase-admin/firestore';
 import 'dotenv/config';
 
 const app = initializeApp({
@@ -10,39 +10,4 @@ const app = initializeApp({
   }),
 });
 
-const db = getFirestore(app);
-
-/**
- * Insert a new contact or update the review if the phone already exists.
- * New contacts are marked approved:false for admin review.
- */
-export async function upsertContact(data) {
-  const { phone, name, category, zone, review, recommendedBy } = data;
-
-  const existing = await db
-    .collection('contacts')
-    .where('phone', '==', phone)
-    .limit(1)
-    .get();
-
-  if (!existing.empty) {
-    const doc = existing.docs[0];
-    await doc.ref.update({ review, updatedAt: Timestamp.now() });
-    console.log(`[firebase] updated contact ${phone}`);
-    return;
-  }
-
-  await db.collection('contacts').add({
-    name,
-    phone,
-    category,
-    zone,
-    review,
-    recommendedBy,
-    approved: false,
-    createdAt: Timestamp.now(),
-    updatedAt: Timestamp.now(),
-  });
-
-  console.log(`[firebase] added new contact ${name} (${phone})`);
-}
+export const db = getFirestore(app);

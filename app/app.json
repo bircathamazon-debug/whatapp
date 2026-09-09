@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "אנשי קשר",
-    "slug": "yeshiva-contacts",
-    "scheme": "yeshivacontacts",
+    "name": "Citas Peluquería",
+    "slug": "salon-appointments",
+    "scheme": "salonappointments",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -15,14 +15,14 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.yeshiva.contacts"
+      "bundleIdentifier": "com.salon.appointments"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#1a3c5e"
       },
-      "package": "com.yeshiva.contacts"
+      "package": "com.salon.appointments"
     },
     "web": {
       "bundler": "metro",
@@ -32,12 +32,6 @@
     "plugins": ["expo-router"],
     "experiments": {
       "typedRoutes": true
-    },
-    "extra": {
-      "firebaseApiKey": "",
-      "firebaseAuthDomain": "",
-      "firebaseProjectId": "",
-      "firebaseAppId": ""
     }
   }
 }

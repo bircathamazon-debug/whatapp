@@ -37,9 +37,13 @@ export default function AdminLayout() {
         headerTitleStyle: { fontWeight: '700' },
       }}
     >
-      <Stack.Screen name="index" options={{ title: 'פאנל ניהול' }} />
-      <Stack.Screen name="login" options={{ title: 'כניסת מנהל' }} />
-      <Stack.Screen name="contacts" options={{ title: 'ניהול אנשי קשר' }} />
+      <Stack.Screen name="index" options={{ title: 'Panel del peluquero' }} />
+      <Stack.Screen name="login" options={{ title: 'Acceso del personal' }} />
+      <Stack.Screen name="branches" options={{ title: 'Sucursales' }} />
+      <Stack.Screen name="staff" options={{ title: 'Peluqueros' }} />
+      <Stack.Screen name="services" options={{ title: 'Servicios' }} />
+      <Stack.Screen name="schedule" options={{ title: 'Horarios' }} />
+      <Stack.Screen name="settings" options={{ title: 'Configuración' }} />
     </Stack>
   );
 }
