@@ -53,6 +53,17 @@ detalle técnico completo de arquitectura y setup.
     servicios) en Firestore.
   - ⬜ Conectar el número real de WhatsApp (bot) y probar reserva de punta
     a punta.
+- **Ideas para el backlog (feedback del usuario, no bloquean el piloto):**
+  - Los servicios hoy son una sola línea plana (nombre+duración+precio). El
+    usuario pidió poder tener "variantes" dentro de un mismo servicio (ej.
+    corte adulto/niño/con barba) en vez de crear servicios sueltos por cada
+    combinación. Repensar el modelo de datos (categorías + variantes) antes
+    de escalar a Fase 1 — también dejaría la puerta abierta a otros rubros
+    (uñas, etc.) más adelante.
+  - Separar el número personal del peluquero (recibe avisos) del número de
+    WhatsApp del bot (línea de trabajo nueva, la que hablan los clientes) —
+    ya soportado por el modelo de datos actual (`staff.phone` vs el número
+    conectado al bot), confirmado como el enfoque correcto para el piloto.
 - **Decisiones ya tomadas con el usuario:**
   - El piloto se hace en la peluquería propia o de un familiar.
   - Se arranca con Baileys (gratis) y se migra a la API oficial de WhatsApp
