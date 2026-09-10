@@ -34,7 +34,8 @@ detalle técnico completo de arquitectura y setup.
 - **Progreso del despliegue (Fase 0):**
   - ✅ Proyecto de Firebase creado. Nombre: "BOT PARA PELUQUERIA". Project ID:
     `bot-para-peluqueria`. Plan actual: Spark (gratis).
-  - ⬜ Activar Firestore (base de datos).
+  - ✅ Firestore activado (base de datos creada en `me-west1`, Tel Aviv;
+    `firestore.rules` y `firestore.indexes.json` ya desplegados).
   - ⬜ Activar Authentication (login del peluquero en la app).
   - ⬜ Pasar a plan Blaze (pago por uso — necesario para que las Cloud
     Functions puedan llamar a Twilio/Hebcal).
