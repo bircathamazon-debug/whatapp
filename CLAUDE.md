@@ -41,11 +41,13 @@ detalle técnico completo de arquitectura y setup.
   - ✅ App web registrada en Firebase (App ID
     `1:1017514154625:web:e894e2af37d94deb6b8b80`) y `app/.env` ya configurado
     con las credenciales reales (no se sube a git).
-  - ⬜ Pasar a plan Blaze (pago por uso — necesario para que las Cloud
-    Functions puedan llamar a Twilio/Hebcal).
-  - ⬜ Generar credenciales (Service Account para el bot, config web para
-    la app) y correr `setup.sh`.
-  - ⬜ Desplegar `firestore.rules`, `firestore.indexes.json` y `functions/`.
+  - ✅ Plan Blaze activo (facturación vinculada: "My Billing Account 1",
+    ₪891 de crédito de prueba gratis de Google por 90 días).
+  - ✅ `functions/` desplegado (25 funciones activas en
+    `bot-para-peluqueria`). URL base:
+    `https://us-central1-bot-para-peluqueria.cloudfunctions.net`.
+  - ⬜ Generar el secreto compartido (`BOT_SHARED_SECRET`) y el Service
+    Account para que el bot de WhatsApp pueda hablar con las funciones.
   - ⬜ Conectar el número real de WhatsApp (bot) y probar reserva de punta
     a punta.
 - **Decisiones ya tomadas con el usuario:**
