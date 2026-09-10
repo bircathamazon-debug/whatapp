@@ -31,6 +31,18 @@ detalle técnico completo de arquitectura y setup.
      (Stripe) y migración de WhatsApp de Baileys (gratis, no oficial, riesgo
      de bloqueo) a la API oficial de WhatsApp Business (Meta Cloud API).
   3. Fase 2 — Lanzamiento: primeros clientes de pago, iterar.
+- **Progreso del despliegue (Fase 0):**
+  - ✅ Proyecto de Firebase creado. Nombre: "BOT PARA PELUQUERIA". Project ID:
+    `bot-para-peluqueria`. Plan actual: Spark (gratis).
+  - ⬜ Activar Firestore (base de datos).
+  - ⬜ Activar Authentication (login del peluquero en la app).
+  - ⬜ Pasar a plan Blaze (pago por uso — necesario para que las Cloud
+    Functions puedan llamar a Twilio/Hebcal).
+  - ⬜ Generar credenciales (Service Account para el bot, config web para
+    la app) y correr `setup.sh`.
+  - ⬜ Desplegar `firestore.rules`, `firestore.indexes.json` y `functions/`.
+  - ⬜ Conectar el número real de WhatsApp (bot) y probar reserva de punta
+    a punta.
 - **Decisiones ya tomadas con el usuario:**
   - El piloto se hace en la peluquería propia o de un familiar.
   - Se arranca con Baileys (gratis) y se migra a la API oficial de WhatsApp
