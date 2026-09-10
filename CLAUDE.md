@@ -49,10 +49,14 @@ detalle técnico completo de arquitectura y setup.
   - ✅ Secreto compartido y Service Account generados y verificados
     (`bot/.env` y `functions/.env` configurados; probado con curl: sin
     secreto da 401, con secreto pasa la autenticación).
-  - ⬜ Cargar los datos reales de la peluquería (sucursal, peluquero(s),
-    servicios) en Firestore.
-  - ⬜ Conectar el número real de WhatsApp (bot) y probar reserva de punta
-    a punta.
+  - ✅ Datos reales cargados en Firestore: sucursal "Peluquería"
+    (BRANCH_ID `lvR7XmCtJEFm1FDxW7r7`, Jerusalén/`me-west1`, modo Shabat
+    silencioso), peluquero יעקב אמסלם (número personal +972543147000, para
+    avisos — NO es el número del bot), servicio "Corte de pelo" (15 min,
+    ₪60). `bot/.env` ya tiene el `BRANCH_ID` cargado.
+  - ⬜ **Bloqueado esperando al usuario**: comprar la línea nueva dedicada
+    para el bot (distinta del número personal del peluquero) y conectarla
+    escaneando el QR de WhatsApp.
 - **Ideas para el backlog (feedback del usuario, no bloquean el piloto):**
   - Los servicios hoy son una sola línea plana (nombre+duración+precio). El
     usuario pidió poder tener "variantes" dentro de un mismo servicio (ej.
