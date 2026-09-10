@@ -46,8 +46,11 @@ detalle técnico completo de arquitectura y setup.
   - ✅ `functions/` desplegado (25 funciones activas en
     `bot-para-peluqueria`). URL base:
     `https://us-central1-bot-para-peluqueria.cloudfunctions.net`.
-  - ⬜ Generar el secreto compartido (`BOT_SHARED_SECRET`) y el Service
-    Account para que el bot de WhatsApp pueda hablar con las funciones.
+  - ✅ Secreto compartido y Service Account generados y verificados
+    (`bot/.env` y `functions/.env` configurados; probado con curl: sin
+    secreto da 401, con secreto pasa la autenticación).
+  - ⬜ Cargar los datos reales de la peluquería (sucursal, peluquero(s),
+    servicios) en Firestore.
   - ⬜ Conectar el número real de WhatsApp (bot) y probar reserva de punta
     a punta.
 - **Decisiones ya tomadas con el usuario:**
