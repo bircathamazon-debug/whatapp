@@ -57,6 +57,24 @@ detalle técnico completo de arquitectura y setup.
   - ⬜ **Bloqueado esperando al usuario**: comprar la línea nueva dedicada
     para el bot (distinta del número personal del peluquero) y conectarla
     escaneando el QR de WhatsApp.
+  - 🔄 **EN CURSO — traducción a hebreo de todo el sistema** (decisión del
+    usuario: "todo en hebreo, panel incluido", el código/comentarios quedan
+    en español). Estado:
+    - ✅ `bot/conversation.js` — todos los mensajes del bot de WhatsApp ya
+      están en hebreo (verificado: sintaxis OK con `node --check`).
+    - ⬜ `functions/src/notify.ts` — el objeto `templates` (recordatorios,
+      confirmaciones, cumpleaños, fidelidad, etc.) todavía está en español.
+      Falta traducir y volver a desplegar `functions/`.
+    - ⬜ `functions/src/ivr.ts` — el `<Say>` ya estaba en hebreo; falta
+      revisar el nombre por defecto `'Cliente telefónico'` → hebreo.
+    - ⬜ `app/` (toda la app del panel) — falta traducir TODOS los textos
+      (botones, menús, alertas, placeholders) y volver a activar RTL
+      (`I18nManager.forceRTL(true)` en `app/app/_layout.tsx`, como tenía el
+      proyecto original antes de reescribirlo). Es el bloque más grande que
+      falta.
+    - **Próximo paso al retomar**: seguir con `functions/src/notify.ts`,
+      después `app/`, y al final volver a desplegar `functions/` y avisar
+      al usuario para que revise cómo quedó.
 - **Ideas para el backlog (feedback del usuario, no bloquean el piloto):**
   - Los servicios hoy son una sola línea plana (nombre+duración+precio). El
     usuario pidió poder tener "variantes" dentro de un mismo servicio (ej.

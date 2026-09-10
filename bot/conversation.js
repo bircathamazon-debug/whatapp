@@ -2,6 +2,9 @@
  * Máquina de estados de la conversación de reserva por WhatsApp.
  * El estado de cada cliente se persiste en Firestore (waConversations/{phone})
  * para sobrevivir reinicios del bot.
+ *
+ * Todos los textos que ve el cliente están en hebreo (el negocio es en Israel).
+ * Los comentarios del código quedan en español para quien mantiene el proyecto.
  */
 import { db } from './firebaseClient.js';
 import { getAvailableSlots } from '../shared/availability.js';
@@ -9,7 +12,7 @@ import * as api from './botApiClient.js';
 
 const CONV_COL = 'waConversations';
 const DAYS_TO_OFFER = 6;
-const WEEKDAY_NAMES = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+const WEEKDAY_NAMES = ['יום ראשון', 'יום שני', 'יום שלישי', 'יום רביעי', 'יום חמישי', 'יום שישי', 'שבת'];
 
 function normalizePhone(jid) {
   return `+${jid.split('@')[0].replace(/\D/g, '')}`;
@@ -46,12 +49,12 @@ async function getActiveStaff(branchId) {
 
 function mainMenuText() {
   return [
-    '¿Qué necesitas?',
-    '1️⃣ Agendar una cita',
-    '2️⃣ Cancelar una cita',
-    '3️⃣ Ver mis próximas citas',
+    'במה נוכל לעזור?',
+    '1️⃣ לקבוע תור',
+    '2️⃣ לבטל תור',
+    '3️⃣ לצפייה בתורים הקרובים שלי',
     '',
-    'Escribe el número de la opción.',
+    'כתבו את מספר האפשרות הרצויה.',
   ].join('\n');
 }
 
@@ -63,12 +66,12 @@ export async function handleIncomingMessage(jid, rawText, branchId, pushName) {
   const phone = normalizePhone(jid);
   const text = (rawText || '').trim();
   const branch = await getBranch(branchId);
-  if (!branch) return ['El bot no está configurado correctamente (falta BRANCH_ID). Avisa al peluquero.'];
+  if (!branch) return ['הבוט לא הוגדר כראוי (חסר מזהה סניף). יש להודיע לספר.'];
 
   // Comandos globales, funcionan en cualquier paso.
-  if (/^(menu|menú|hola|hi)$/i.test(text)) {
+  if (/^(menu|תפריט|היי|שלום|hi)$/i.test(text)) {
     await resetToMainMenu(phone);
-    return [`Hola! Bienvenido a ${branch.name}.`, mainMenuText()];
+    return [`שלום! ברוכים הבאים ל${branch.name}.`, mainMenuText()];
   }
 
   const state = await getConversation(phone);
@@ -123,24 +126,24 @@ async function handlePendingReply(phone, doc, digit, branch) {
     if (digit === '1') {
       await api.confirmAppointment(data.relatedAppointmentId);
       await doc.ref.update({ replyHandledAt: Date.now() });
-      return ['✅ Cita confirmada. ¡Te esperamos!'];
+      return ['✅ התור אושר. מחכים לך!'];
     }
     await api.cancelAppointment(data.relatedAppointmentId);
     await doc.ref.update({ replyHandledAt: Date.now() });
-    return ['Tu cita fue cancelada. Escribe "menu" si quieres agendar otra.'];
+    return ['התור בוטל. כתבו "menu" כדי לקבוע תור חדש.'];
   }
   if (data.awaitingReply === 'waitlist_offer') {
     if (digit !== '1') {
       await doc.ref.update({ replyHandledAt: Date.now() });
-      return ['Entendido, seguirás en la lista de espera.'];
+      return ['הבנו, תישארו ברשימת ההמתנה.'];
     }
     try {
       await api.acceptWaitlistOffer(data.data?.waitlistId);
       await doc.ref.update({ replyHandledAt: Date.now() });
-      return ['✅ Turno confirmado. ¡Te esperamos!'];
+      return ['✅ התור אושר. מחכים לך!'];
     } catch {
       await doc.ref.update({ replyHandledAt: Date.now() });
-      return ['Uy, ese turno ya fue tomado por otra persona. Sigues en la lista de espera para el próximo que se libere.'];
+      return ['אופס, התור הזה כבר נתפס על ידי מישהו אחר. תישארו ברשימת ההמתנה לתור הבא שיתפנה.'];
     }
   }
   return [mainMenuText()];
@@ -149,30 +152,30 @@ async function handlePendingReply(phone, doc, digit, branch) {
 async function handleMainMenu(phone, text, branch, state) {
   if (text === '1') {
     const services = await getActiveServices(branch.id);
-    if (services.length === 0) return ['Aún no hay servicios configurados. Avisa al peluquero.'];
+    if (services.length === 0) return ['עדיין לא הוגדרו שירותים. יש להודיע לספר.'];
     await saveConversation(phone, { step: 'BOOK_SERVICE', data: { ...state.data, services: services.map((s) => s.id) } });
-    const lines = services.map((s, i) => `${i + 1}️⃣ ${s.name} (${s.durationMinutes} min, ₪${s.price})`);
-    return ['¿Qué servicio quieres reservar?', ...lines];
+    const lines = services.map((s, i) => `${i + 1}️⃣ ${s.name} (${s.durationMinutes} דקות, ₪${s.price})`);
+    return ['איזה שירות תרצו להזמין?', ...lines];
   }
   if (text === '2') {
     const appts = await upcomingAppointments(phone);
-    if (appts.length === 0) return ['No tienes citas próximas.', mainMenuText()];
+    if (appts.length === 0) return ['אין לך תורים קרובים.', mainMenuText()];
     await saveConversation(phone, { step: 'CANCEL_SELECT', data: { ...state.data, appointmentIds: appts.map((a) => a.id) } });
-    return ['¿Cuál cita quieres cancelar?', ...appts.map((a, i) => `${i + 1}️⃣ ${a.label}`)];
+    return ['איזה תור תרצו לבטל?', ...appts.map((a, i) => `${i + 1}️⃣ ${a.label}`)];
   }
   if (text === '3') {
     const appts = await upcomingAppointments(phone);
-    if (appts.length === 0) return ['No tienes citas próximas.', mainMenuText()];
-    return ['Tus próximas citas:', ...appts.map((a) => `• ${a.label}`), '', mainMenuText()];
+    if (appts.length === 0) return ['אין לך תורים קרובים.', mainMenuText()];
+    return ['התורים הקרובים שלך:', ...appts.map((a) => `• ${a.label}`), '', mainMenuText()];
   }
-  return ['No entendí. Escribe "menu" para ver las opciones.', mainMenuText()];
+  return ['לא הבנתי. כתבו "menu" לצפייה באפשרויות.', mainMenuText()];
 }
 
 async function handleBookService(phone, text, branch, state) {
   const services = await getActiveServices(branch.id);
   const idx = Number(text) - 1;
   const service = services[idx];
-  if (!service) return ['Opción inválida. Escribe el número del servicio.'];
+  if (!service) return ['בחירה לא תקינה. כתבו את מספר השירות.'];
 
   const staff = await getActiveStaff(branch.id);
   await saveConversation(phone, { step: 'BOOK_STAFF', data: { ...state.data, serviceId: service.id, staffOptions: staff.map((s) => s.id) } });
@@ -181,7 +184,7 @@ async function handleBookService(phone, text, branch, state) {
     return handleBookStaff(phone, '1', branch, { data: { ...state.data, serviceId: service.id, staffOptions: [staff[0].id] } });
   }
   const lines = staff.map((s, i) => `${i + 1}️⃣ ${s.name}`);
-  return ['¿Con quién prefieres tu cita?', `0️⃣ Cualquiera disponible`, ...lines];
+  return ['עם מי תרצו לקבוע את התור?', '0️⃣ כל מי שפנוי', ...lines];
 }
 
 async function handleBookStaff(phone, text, branch, state) {
@@ -192,20 +195,20 @@ async function handleBookStaff(phone, text, branch, state) {
   } else {
     const idx = Number(text) - 1;
     const chosen = allStaff[idx];
-    if (!chosen) return ['Opción inválida.'];
+    if (!chosen) return ['בחירה לא תקינה.'];
     staffId = chosen.id;
   }
 
   const dateOptions = buildDateOptions(branch.timezone);
   await saveConversation(phone, { step: 'BOOK_DAY', data: { ...state.data, staffId, dateOptions } });
   const lines = dateOptions.map((d, i) => `${i + 1}️⃣ ${d.label}`);
-  return ['¿Qué día te viene bien?', ...lines];
+  return ['איזה יום מתאים לך?', ...lines];
 }
 
 async function handleBookDay(phone, text, branch, state) {
   const idx = Number(text) - 1;
   const chosen = state.data.dateOptions?.[idx];
-  if (!chosen) return ['Opción inválida. Elige uno de los días de la lista.'];
+  if (!chosen) return ['בחירה לא תקינה. יש לבחור אחד מהימים ברשימה.'];
 
   const service = await docById('services', state.data.serviceId);
   const staffList = state.data.staffId === 'any' ? await getActiveStaff(branch.id) : [await docById('staff', state.data.staffId)];
@@ -221,18 +224,18 @@ async function handleBookDay(phone, text, branch, state) {
 
   if (allSlots.length === 0) {
     await saveConversation(phone, { step: 'BOOK_WAITLIST_ASK', data: { ...state.data, dateStr: chosen.dateStr, dateLabel: chosen.label } });
-    return [`No quedan horarios libres el ${chosen.label}.`, '¿Quieres que te avisemos automáticamente si se libera un turno ese día? (responde SI o NO)'];
+    return [`אין תורים פנויים ב-${chosen.label}.`, 'נעדכן אותך אוטומטית אם יתפנה תור באותו היום? כתבו כן או לא.'];
   }
 
   await saveConversation(phone, { step: 'BOOK_TIME', data: { ...state.data, dateStr: chosen.dateStr, slots: allSlots } });
   const lines = allSlots.map((s, i) => `${i + 1}️⃣ ${formatTime(s.startsAt, branch.timezone)}${staffList.length > 1 ? ` — ${s.staffName}` : ''}`);
-  return [`Horarios disponibles el ${chosen.label}:`, ...lines];
+  return [`תורים פנויים ב-${chosen.label}:`, ...lines];
 }
 
 async function handleBookTime(phone, text, branch, state) {
   const idx = Number(text) - 1;
   const slot = state.data.slots?.[idx];
-  if (!slot) return ['Opción inválida. Elige uno de los horarios de la lista.'];
+  if (!slot) return ['בחירה לא תקינה. יש לבחור אחת מהשעות ברשימה.'];
 
   const service = await docById('services', state.data.serviceId);
 
@@ -242,7 +245,7 @@ async function handleBookTime(phone, text, branch, state) {
       staffId: slot.staffId,
       serviceId: service.id,
       clientPhone: phone,
-      clientName: state.data.clientName || 'Cliente',
+      clientName: state.data.clientName || 'לקוח',
       startsAt: slot.startsAt,
       source: 'whatsapp',
     });
@@ -258,49 +261,49 @@ async function handleBookTime(phone, text, branch, state) {
       },
     });
     return [
-      `✅ Cita confirmada el ${formatDate(slot.startsAt, branch.timezone)} a las ${formatTime(slot.startsAt, branch.timezone)}.`,
-      '¿Quieres que se repita automáticamente cada semana a esta misma hora? (SI / NO)',
+      `✅ התור אושר לתאריך ${formatDate(slot.startsAt, branch.timezone)} בשעה ${formatTime(slot.startsAt, branch.timezone)}.`,
+      'תרצו שהתור יחזור אוטומטית כל שבוע באותה שעה? כתבו כן או לא.',
     ];
   } catch (err) {
     if (err.code === 'slot_taken') {
-      return ['Uy, justo alguien tomó ese horario. Escribe "menu" para elegir otro.'];
+      return ['אופס, מישהו אחר תפס את השעה הזו הרגע. כתבו "menu" לבחירת שעה אחרת.'];
     }
     console.error('[conversation] error creando cita', err);
-    return ['Ocurrió un error agendando la cita. Intenta de nuevo en unos minutos.'];
+    return ['אירעה שגיאה בקביעת התור. נסו שוב בעוד כמה דקות.'];
   }
 }
 
 async function handleRecurringAsk(phone, text, branch, state) {
-  if (/^s(i|í)/i.test(text)) {
+  if (/^כן/.test(text)) {
     await api.createRecurringBooking({
       branchId: branch.id,
       staffId: state.data.staffId,
       serviceId: state.data.serviceId,
       clientPhone: phone,
-      clientName: state.data.clientName || 'Cliente',
+      clientName: state.data.clientName || 'לקוח',
       dayOfWeek: state.data.dayOfWeek,
       time: state.data.time,
     });
     await resetToMainMenu(phone);
-    return [`Listo, quedará reservado todos los ${WEEKDAY_NAMES[state.data.dayOfWeek]} a las ${state.data.time}.`, mainMenuText()];
+    return [`מעולה, התור ייקבע אוטומטית כל ${WEEKDAY_NAMES[state.data.dayOfWeek]} בשעה ${state.data.time}.`, mainMenuText()];
   }
   await resetToMainMenu(phone);
-  return ['Perfecto, nos vemos en tu cita.', mainMenuText()];
+  return ['מצוין, נתראה בתור.', mainMenuText()];
 }
 
 async function handleWaitlistAsk(phone, text, branch, state) {
-  if (/^s(i|í)/i.test(text)) {
+  if (/^כן/.test(text)) {
     await api.addToWaitlist({
       branchId: branch.id,
       staffId: state.data.staffId === 'any' ? null : state.data.staffId,
       serviceId: state.data.serviceId,
       clientPhone: phone,
-      clientName: state.data.clientName || 'Cliente',
+      clientName: state.data.clientName || 'לקוח',
       desiredDate: state.data.dateStr,
       desiredWindow: null,
     });
     await resetToMainMenu(phone);
-    return ['Te avisaremos por aquí en cuanto se libere un turno ese día.', mainMenuText()];
+    return ['נודיע לך כאן ברגע שיתפנה תור באותו היום.', mainMenuText()];
   }
   await resetToMainMenu(phone);
   return [mainMenuText()];
@@ -309,10 +312,10 @@ async function handleWaitlistAsk(phone, text, branch, state) {
 async function handleCancelSelect(phone, text, branch, state) {
   const idx = Number(text) - 1;
   const appointmentId = state.data.appointmentIds?.[idx];
-  if (!appointmentId) return ['Opción inválida.'];
+  if (!appointmentId) return ['בחירה לא תקינה.'];
   await api.cancelAppointment(appointmentId);
   await resetToMainMenu(phone);
-  return ['Tu cita fue cancelada.', mainMenuText()];
+  return ['התור בוטל.', mainMenuText()];
 }
 
 // --- Helpers ---
@@ -352,16 +355,16 @@ function buildDateOptions(timezone) {
     const t = now + i * 86400000;
     const dateStr = new Intl.DateTimeFormat('en-CA', { timeZone: timezone }).format(t);
     const weekday = WEEKDAY_NAMES[new Date(`${dateStr}T00:00:00Z`).getUTCDay()];
-    const label = i === 0 ? `Hoy (${weekday})` : i === 1 ? `Mañana (${weekday})` : `${weekday} ${dateStr.slice(8, 10)}/${dateStr.slice(5, 7)}`;
+    const label = i === 0 ? `היום (${weekday})` : i === 1 ? `מחר (${weekday})` : `${weekday} ${dateStr.slice(8, 10)}/${dateStr.slice(5, 7)}`;
     options.push({ dateStr, label });
   }
   return options;
 }
 
 function formatDate(epochMs, timezone) {
-  return new Intl.DateTimeFormat('es-ES', { timeZone: timezone, day: '2-digit', month: '2-digit', year: 'numeric' }).format(epochMs);
+  return new Intl.DateTimeFormat('he-IL', { timeZone: timezone, day: '2-digit', month: '2-digit', year: 'numeric' }).format(epochMs);
 }
 
 function formatTime(epochMs, timezone) {
-  return new Intl.DateTimeFormat('es-ES', { timeZone: timezone, hour: '2-digit', minute: '2-digit', hour12: false }).format(epochMs);
+  return new Intl.DateTimeFormat('he-IL', { timeZone: timezone, hour: '2-digit', minute: '2-digit', hour12: false }).format(epochMs);
 }
