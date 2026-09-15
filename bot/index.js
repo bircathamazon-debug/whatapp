@@ -9,7 +9,8 @@
  */
 import makeWASocket, { DisconnectReason, useMultiFileAuthState } from '@whiskeysockets/baileys';
 import { Boom } from '@hapi/boom';
-import qrcode from 'qrcode-terminal';
+import qrcodeTerminal from 'qrcode-terminal';
+import QRCode from 'qrcode';
 import 'dotenv/config';
 import { handleIncomingMessage } from './conversation.js';
 import { startNotificationsWatcher } from './notificationsWatcher.js';
@@ -24,7 +25,7 @@ if (!BRANCH_ID) {
 async function connectToWhatsApp() {
   const { state, saveCreds } = await useMultiFileAuthState('auth_info_baileys');
 
-  const sock = makeWASocket.default({
+  const sock = makeWASocket({
     auth: state,
     printQRInTerminal: false,
   });
@@ -34,7 +35,12 @@ async function connectToWhatsApp() {
   sock.ev.on('connection.update', ({ connection, lastDisconnect, qr }) => {
     if (qr) {
       console.log('\n[bot] Escanea este código QR con WhatsApp:');
-      qrcode.generate(qr, { small: true });
+      qrcodeTerminal.generate(qr, { small: true });
+      // También lo guardamos como imagen: útil en servidores sin pantalla,
+      // donde no se puede leer el QR de la terminal.
+      QRCode.toFile('./whatsapp-qr.png', qr, { width: 400 }).catch((err) =>
+        console.error('[bot] no se pudo guardar whatsapp-qr.png', err)
+      );
     }
 
     if (connection === 'close') {

@@ -9,9 +9,10 @@
   "dependencies": {
     "@hapi/boom": "^10.0.1",
     "@whiskeysockets/baileys": "^6.7.16",
-    "firebase-admin": "^12.0.0",
     "dotenv": "^16.4.5",
-    "qrcode-terminal": "^0.12.0",
-    "pino": "^9.0.0"
+    "firebase-admin": "^12.0.0",
+    "pino": "^9.0.0",
+    "qrcode": "^1.5.4",
+    "qrcode-terminal": "^0.12.0"
   }
 }

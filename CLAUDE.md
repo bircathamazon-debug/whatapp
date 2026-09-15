@@ -54,9 +54,27 @@ detalle técnico completo de arquitectura y setup.
     silencioso), peluquero יעקב אמסלם (número personal +972543147000, para
     avisos — NO es el número del bot), servicio "Corte de pelo" (15 min,
     ₪60). `bot/.env` ya tiene el `BRANCH_ID` cargado.
-  - ⬜ **Bloqueado esperando al usuario**: comprar la línea nueva dedicada
-    para el bot (distinta del número personal del peluquero) y conectarla
-    escaneando el QR de WhatsApp.
+  - ✅ Línea nueva de WhatsApp comprada por el usuario (número dedicado
+    para el bot, distinto del personal).
+  - 🐛 Se encontró y corrigió un bug real: `bot/index.js` llamaba
+    `makeWASocket.default(...)` pero la versión instalada de Baileys
+    (6.7.21) exporta la función directamente — corregido a
+    `makeWASocket(...)`. También se agregó generación de QR como imagen
+    PNG (`bot/whatsapp-qr.png`, vía el paquete `qrcode`) además del ASCII
+    en consola, para poder mandar el QR como archivo en vez de depender de
+    leerlo en una terminal.
+  - ⚠️ **Hallazgo importante**: el bot NO puede correr dentro de este
+    entorno de sesión de Claude Code (el proxy de red de este sandbox
+    interfiere con el protocolo Noise/WebSocket binario que usa Baileys
+    para conectarse a WhatsApp — falla con "Connection Failure" en el
+    handshake, en loop de reconexión). Esto no es un bug del código: es
+    una restricción de red de este entorno de trabajo específico. El bot
+    necesita correr en un servidor real (VPS/hosting normal) para
+    conectarse — ahí no debería tener este problema.
+  - ⬜ **Siguiente paso**: elegir y configurar el hosting permanente del
+    bot (ej. Railway, Fly.io, o un VPS tipo DigitalOcean — pendiente
+    decidir con el usuario), desplegar `bot/` ahí, y recién ahí escanear
+    el QR real con la línea nueva.
   - 🔄 **EN CURSO — traducción a hebreo de todo el sistema** (decisión del
     usuario: "todo en hebreo, panel incluido", el código/comentarios quedan
     en español). Estado:
