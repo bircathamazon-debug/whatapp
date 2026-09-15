@@ -148,88 +148,70 @@ detalle técnico completo de arquitectura y setup.
     calendario del peluquero. Requiere crear credenciales OAuth en Google
     Cloud (`GOOGLE_OAUTH_CLIENT_ID`/`SECRET` en `functions/.env`, hoy
     vacíos).
-  - 🔄 **EN CURSO — traducción a hebreo de todo el sistema** (decisión del
+  - ✅ **Traducción a hebreo de todo el sistema — COMPLETA** (decisión del
     usuario: "todo en hebreo, panel incluido", el código/comentarios quedan
-    en español). Estado:
-    - ✅ `bot/conversation.js` — todos los mensajes del bot de WhatsApp en
-      hebreo.
+    en español):
+    - ✅ `bot/conversation.js` — mensajes del bot de WhatsApp en hebreo.
     - ✅ `functions/src/notify.ts` (templates) y `functions/src/ivr.ts`
       (nombre por defecto) — en hebreo, desplegado.
-    - ⬜ **Único pendiente**: `app/` (toda la app del panel) — falta
-      traducir TODOS los textos (botones, menús, alertas, placeholders) y
-      volver a activar RTL (`I18nManager.forceRTL(true)` en
-      `app/app/_layout.tsx`, como tenía el proyecto original antes de
-      reescribirlo).
-    - **Próximo paso al retomar**: hacer `app/` completo y avisar al
-      usuario para que revise cómo quedó (probablemente conviene correr
-      la app con `npx expo start` para mostrársela). Ver también el
-      rediseño visual acordado abajo — conviene hacerlo junto con esto,
-      ya que toca las mismas pantallas.
-- 🎨 **Rediseño visual de `app/` acordado con el usuario (mostrado como
-  maquetas/Artifacts, todavía NO programado en el código real):**
-  - Pantalla de agenda en formato **"línea de tiempo"**: las horas del día
-    en un costado, las citas chicas ubicadas junto a su horario — se
-    descartaron una versión de lista compacta y otra agrupada por
-    mañana/tarde/noche que también se mostraron como alternativas.
-  - Tarjetas de cada cita mucho más chicas que las actuales (el pedido
-    original era que no se veía el día completo de un vistazo).
-  - Fondo **"gris niebla"** (gris clarito `#eef0f4`, tarjetas blancas
-    flotando con sombra suave) — se descartó el fondo crema con
-    tipografía serif original por verse anticuado, y también una opción
-    de fondo oscuro "premium" que se había ofrecido.
-  - Tipografía: se sacó la fuente serif (Frank Ruhl Libre) por pedido
-    explícito de "líneas limpias, moderno" — queda una sans geométrica
-    (Manrope para títulos/números grandes, Assistant para el resto del
-    texto en hebreo).
-  - Color de acento: azul **zafiro** (`#1d4ed8`), mostrado junto con el
-    fondo gris niebla y aprobado en conjunto — ⚠️ falta confirmación
-    explícita del usuario, ya que se ofrecieron otras dos variantes de
-    azul (marino+celeste eléctrico, petróleo) que no se descartaron
-    formalmente.
-  - Colores de estado de cada cita: verde esmeralda = confirmada, naranja
-    = espera depósito, azul índigo/gris = completada, rojo = no se
-    presentó, gris piedra = cancelada.
-  - **Función nueva pedida, sin programar todavía**: en Ajustes, que el
-    peluquero pueda (a) **bloquear horarios** puntuales (feriado, turno
-    médico, vacaciones — esas horas dejan de ofrecerse a los clientes) y
-    (b) **cerrar el día completo** a nuevas reservas sin tocar las citas
-    ya confirmadas. Falta: el modelo de datos real en Firestore, la
-    pantalla de Ajustes real, y que el motor de disponibilidad
-    (`bot/availability.js` + `functions/src/availability.ts`) respete
-    esos bloqueos al ofrecer horarios por WhatsApp/teléfono.
-  - **Próximo paso al retomar**: confirmar el tono de azul final, y
-    programar todo esto de verdad — junto con la traducción a hebreo de
-    `app/` que sigue pendiente (mismo trabajo, mismas pantallas).
-- 📞 **Pedido del usuario: opción de hablar con una persona real (WhatsApp
-  y teléfono) + voz natural en el IVR.**
-  - ✅ **WhatsApp**: se agregó la opción **4️⃣ "לדבר ישירות עם הספר"**
-    (hablar directamente con el peluquero) al menú principal de
-    `bot/conversation.js` — el bot le pasa al cliente el número personal
-    del peluquero (`staff.phone`) y un link directo de WhatsApp
-    (`wa.me/...`) para escribirle. Código ya en el repo (rama
-    `claude/salon-appointment-app-cg11sw`) — **falta el `railway up`
-    para que quede en producción** (esta sesión no tenía la sesión de
-    Railway iniciada; avisar al usuario / retomar con el flujo de login
-    de Railway usado la primera vez).
-  - ✅ **Teléfono (IVR)**: ya existía — al presionar **0** en la llamada,
-    `functions/src/ivr.ts` transfiere la llamada a `branch.phone`, que
-    hoy es el mismo número personal del peluquero (+972543147000). No
-    hizo falta tocar código, solo se confirma que ya cumple el pedido.
+    - ✅ `app/` (toda la app del panel) — todas las pantallas traducidas
+      (agenda, lista de espera, clientes, campañas, login, panel, sucursales,
+      servicios, peluqueros, horarios, ajustes) y RTL activado
+      (`I18nManager.forceRTL(true)` en `app/app/_layout.tsx`).
+- ✅ **Rediseño visual de `app/` — PROGRAMADO** (antes solo maquetas/Artifacts,
+  ahora en el código real, rama `claude/salon-appointment-app-cg11sw`):
+  - Agenda (`app/app/(tabs)/index.tsx`) reescrita como **línea de tiempo**:
+    horas del día en un costado (08:00-20:00), citas chicas junto a su
+    horario, muestra los bloqueos de horario del día.
+  - `app/lib/theme.ts`: paleta clara **"gris niebla"** y oscura **"oscuro
+    premium"**, azul **zafiro** (`#1d4ed8` claro / `#5b9dff` oscuro) como
+    acento, colores de estado vivos (verde esmeralda/naranja/gris-azulado/
+    rojo). El modo se guarda en `branch.themeMode` y se elige con un
+    interruptor (☀️/🌙) en Ajustes — no hizo falta descartar ninguna opción
+    de fondo, quedan las dos disponibles.
+  - Nota: no se cargó la tipografía Manrope/Assistant de las maquetas (para
+    eso hay que empaquetar fuentes con `expo-font`, se dejó para más
+    adelante) — por ahora usa la fuente del sistema, con el mismo esquema
+    de colores y layout.
+  - ✅ **Bloquear horarios / cerrar el día — PROGRAMADO**: nuevo modelo
+    `BlockedTime` en Firestore (`shared/types.ts` /
+    `functions/src/types.ts`), CRUD en `app/lib/blockedTimes.ts`, pantalla
+    en Ajustes para bloquear una franja horaria o el día completo (por
+    peluquero o para todo el equipo), y el motor de disponibilidad
+    (`bot/availability.js` + `functions/src/availability.ts`, y los 4
+    puntos que ofrecen horarios: `getAvailability`, `botGetAvailability`,
+    el IVR y el bot de WhatsApp) ya respeta esos bloqueos.
+- 📞 **Hablar con una persona real (WhatsApp y teléfono) — PROGRAMADO.**
+  - ✅ **WhatsApp**: opción **4️⃣ "לדבר ישירות עם הספר"** en el menú
+    principal de `bot/conversation.js` — el bot le pasa al cliente el
+    número personal del peluquero (`staff.phone`) y un link directo de
+    WhatsApp (`wa.me/...`).
+  - ✅ **Teléfono (IVR)**: ya existía — al presionar **0**,
+    `functions/src/ivr.ts` transfiere la llamada a `branch.phone` (hoy el
+    mismo número personal del peluquero).
   - ⬜ **Voz natural en el IVR, entrenada para responder cualquier
-    pregunta** — pedido nuevo, sin programar, requiere que el usuario
-    decida entre opciones porque cambia el presupuesto mensual (hoy
-    ~$50-150/mes) y agrega un proveedor nuevo de pago. El IVR actual es
-    un menú robótico de "apretá 1, apretá 2"; esto sería una IA que
-    escucha la pregunta hablada, la entiende y responde por voz de forma
-    natural, sin menú. Falta decidir con el usuario:
-    1. Proveedor de voz IA (ej. ElevenLabs Conversational AI, o el
-       Realtime API de OpenAI) + costo por minuto de llamada.
-    2. Alcance de "responder cualquier pregunta": lista de temas que
-       sabe responder (horarios, precios, servicios, reservar, cancelar)
-       vs. IA totalmente abierta.
-    3. Si mantiene Twilio como hoy o cambia de proveedor telefónico.
-    **Antes de programar esto se le explica al usuario el costo estimado
-    y las opciones, como se hizo con Firebase/Railway/Twilio.**
+    pregunta** — el usuario decidió **seguir por ahora con el menú
+    robótico actual** ("apretá 1, apretá 2") y no avanzar con esto todavía.
+    Queda anotado para cuando se retome: requiere elegir un proveedor de
+    voz IA de pago (ej. ElevenLabs Conversational AI, Realtime API de
+    OpenAI) que cambiaría el presupuesto mensual (hoy ~$50-150/mes) —
+    explicar costo y opciones antes de programarlo, como se hizo con
+    Firebase/Railway/Twilio.
+- 🚧 **Pendiente de esta sesión: falta el paso de despliegue.** Todo lo de
+  arriba (rediseño, tema, bloqueo de horarios, hablar con una persona,
+  traducción del panel) está programado y compila limpio (`tsc --noEmit`
+  en `app/` y `functions/`, `node --check` en `bot/`), pero esta sesión de
+  Claude Code (entorno remoto) **no tenía las sesiones de Firebase CLI ni
+  Railway CLI iniciadas** (son logins aparte, por dispositivo). Falta, al
+  retomar con el usuario:
+  1. `firebase deploy --only firestore:rules,functions --project
+     bot-para-peluqueria` (nuevas reglas para `blockedTimes` + las
+     funciones actualizadas con el chequeo de horarios bloqueados).
+  2. `railway up` para el bot (opción de hablar con el peluquero + que
+     respete los bloqueos de horario al ofrecer turnos).
+  3. Mostrarle al usuario la app del panel actualizada — probablemente
+     con `npx expo start` — para que la revise antes de darla por
+     terminada (regla de "verificar antes de seguir" del proyecto).
 - **Ideas para el backlog (más adelante, el usuario lo aclaró
   explícitamente — no bloquean el piloto):**
   - Página web y video publicitario explicando el ahorro de tiempo/dinero
