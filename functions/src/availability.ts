@@ -1,8 +1,9 @@
 /**
  * Cálculo de huecos disponibles para reservar.
- * Copia en TypeScript de shared/availability.js — se mantiene independiente
- * porque Firebase despliega solo el contenido de functions/ (sin acceso al
- * resto del monorepo). Cualquier cambio de lógica debe reflejarse en ambos.
+ * Copia en TypeScript de bot/availability.js — se mantiene independiente
+ * porque tanto Firebase Functions como el hosting del bot despliegan solo
+ * su propia carpeta (sin acceso al resto del monorepo). Cualquier cambio
+ * de lógica debe reflejarse en ambas copias.
  */
 
 export interface DayHours {

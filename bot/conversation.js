@@ -7,7 +7,7 @@
  * Los comentarios del código quedan en español para quien mantiene el proyecto.
  */
 import { db } from './firebaseClient.js';
-import { getAvailableSlots } from '../shared/availability.js';
+import { getAvailableSlots } from './availability.js';
 import * as api from './botApiClient.js';
 
 const CONV_COL = 'waConversations';

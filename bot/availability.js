@@ -1,7 +1,11 @@
 /**
  * Cálculo de huecos disponibles para reservar.
- * Módulo JS puro (sin dependencias) para poder importarse tanto desde
- * el bot de WhatsApp (Node/ESM) como desde las Cloud Functions (TS, allowJs).
+ * Copia local (ESM) para que `bot/` sea una carpeta autocontenida y se
+ * pueda desplegar sola a un hosting (Railway, etc.) sin depender de
+ * archivos fuera de esta carpeta. La misma lógica también vive, por la
+ * misma razón, en `functions/src/availability.ts` (Cloud Functions solo
+ * despliega esa carpeta). Cualquier cambio de lógica debe reflejarse en
+ * ambas copias.
  */
 
 const SLOT_STEP_MINUTES = 15;
@@ -15,7 +19,7 @@ const SLOT_STEP_MINUTES = 15;
  * @param {number} nowMs epoch ms actual (para no ofrecer huecos en el pasado)
  * @returns {{startsAt:number, endsAt:number}[]}
  */
-function getAvailableSlots(staff, durationMinutes, dateStr, existingAppointments, timezone, nowMs) {
+export function getAvailableSlots(staff, durationMinutes, dateStr, existingAppointments, timezone, nowMs) {
   if (staff.blockedDates.includes(dateStr)) return [];
 
   const date = new Date(`${dateStr}T00:00:00`);
@@ -44,12 +48,12 @@ function getAvailableSlots(staff, durationMinutes, dateStr, existingAppointments
  * condición de carrera entre WhatsApp y teléfono).
  * @param {{startsAt:number, endsAt:number}[]} existingAppointments
  */
-function isSlotFree(existingAppointments, startsAt, endsAt) {
+export function isSlotFree(existingAppointments, startsAt, endsAt) {
   return !existingAppointments.some((a) => startsAt < a.endsAt && endsAt > a.startsAt);
 }
 
 /** Convierte 'YYYY-MM-DD' + 'HH:mm' (hora local de la sucursal) a epoch ms. */
-function toEpoch(dateStr, timeStr, timezone) {
+export function toEpoch(dateStr, timeStr, timezone) {
   // Enfoque simple y dependency-free: asumimos que el servidor corre en UTC
   // y aplicamos el offset fijo de Israel (+2 invierno / +3 verano) resuelto
   // vía Intl, que sí conoce DST reales.
@@ -59,7 +63,7 @@ function toEpoch(dateStr, timeStr, timezone) {
   return naive.getTime() - offsetMinutes * 60000;
 }
 
-function getTimezoneOffsetMinutes(timezone, date) {
+export function getTimezoneOffsetMinutes(timezone, date) {
   const dtf = new Intl.DateTimeFormat('en-US', {
     timeZone: timezone,
     hourCycle: 'h23',
@@ -82,4 +86,4 @@ function getTimezoneOffsetMinutes(timezone, date) {
   return (asUTC - date.getTime()) / 60000;
 }
 
-module.exports = { getAvailableSlots, isSlotFree, toEpoch, getTimezoneOffsetMinutes, SLOT_STEP_MINUTES };
+export { SLOT_STEP_MINUTES };

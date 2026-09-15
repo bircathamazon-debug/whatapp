@@ -63,18 +63,33 @@ detalle técnico completo de arquitectura y setup.
     PNG (`bot/whatsapp-qr.png`, vía el paquete `qrcode`) además del ASCII
     en consola, para poder mandar el QR como archivo en vez de depender de
     leerlo en una terminal.
-  - ⚠️ **Hallazgo importante**: el bot NO puede correr dentro de este
-    entorno de sesión de Claude Code (el proxy de red de este sandbox
-    interfiere con el protocolo Noise/WebSocket binario que usa Baileys
-    para conectarse a WhatsApp — falla con "Connection Failure" en el
-    handshake, en loop de reconexión). Esto no es un bug del código: es
-    una restricción de red de este entorno de trabajo específico. El bot
-    necesita correr en un servidor real (VPS/hosting normal) para
-    conectarse — ahí no debería tener este problema.
-  - ⬜ **Siguiente paso**: elegir y configurar el hosting permanente del
-    bot (ej. Railway, Fly.io, o un VPS tipo DigitalOcean — pendiente
-    decidir con el usuario), desplegar `bot/` ahí, y recién ahí escanear
-    el QR real con la línea nueva.
+  - ✅ ~~Hallazgo de red~~ **CORREGIDO — no era la red.** La falla
+    "Connection Failure" en el handshake de Baileys pasaba tanto en este
+    sandbox como en Railway (servidor real) — no era una restricción de
+    red, era que `@whiskeysockets/baileys` estaba en una versión (6.7.21)
+    ya incompatible con el protocolo actual de WhatsApp. Se actualizó a
+    `7.0.0-rc14` (única serie 7.x publicada, son release candidates pero
+    es lo que exige conectar hoy) y la conexión llegó bien hasta generar
+    el QR. También se detectó y arregló que `bot/conversation.js`
+    importaba `../shared/availability.js` (afuera de `bot/`), lo que
+    rompía el despliegue a Railway porque solo se sube la carpeta `bot/`
+    — se movió la lógica a `bot/availability.js` (copia local, ESM) y se
+    borró `shared/availability.js` (quedó sin uso, cada carpeta
+    desplegable tiene su propia copia: `bot/availability.js` y
+    `functions/src/availability.ts`).
+  - ✅ Hosting elegido y configurado: **Railway** (proyecto
+    "bot-peluqueria", servicio `bot-peluqueria`, project id
+    `ef14404f-be0f-471f-bbb5-baf64fd2f064`). Variables de entorno de
+    `bot/.env` cargadas correctamente en Railway (ojo: al cargarlas por
+    script hay que sacar las comillas que `FIREBASE_PRIVATE_KEY` trae en
+    el archivo, si no rompe la clave — ya corregido).
+  - 🔄 **Estado actual**: el bot está corriendo en Railway, se generó un
+    QR y se le mandó al usuario como imagen para escanear con la línea
+    nueva de WhatsApp. Falta confirmar que el usuario lo escaneó y que
+    la conexión quedó abierta (buscar en los logs de Railway:
+    `railway logs --service bot-peluqueria` — debería aparecer algo como
+    "Conectado a WhatsApp para la sucursal ...", no más
+    "Connection Failure").
   - 🔄 **EN CURSO — traducción a hebreo de todo el sistema** (decisión del
     usuario: "todo en hebreo, panel incluido", el código/comentarios quedan
     en español). Estado:
