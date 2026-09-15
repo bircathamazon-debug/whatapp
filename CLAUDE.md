@@ -83,13 +83,27 @@ detalle técnico completo de arquitectura y setup.
     `bot/.env` cargadas correctamente en Railway (ojo: al cargarlas por
     script hay que sacar las comillas que `FIREBASE_PRIVATE_KEY` trae en
     el archivo, si no rompe la clave — ya corregido).
-  - 🔄 **Estado actual**: el bot está corriendo en Railway, se generó un
-    QR y se le mandó al usuario como imagen para escanear con la línea
-    nueva de WhatsApp. Falta confirmar que el usuario lo escaneó y que
-    la conexión quedó abierta (buscar en los logs de Railway:
-    `railway logs --service bot-peluqueria` — debería aparecer algo como
-    "Conectado a WhatsApp para la sucursal ...", no más
-    "Connection Failure").
+  - ✅ **¡Bot conectado y en producción!** Verificado en los logs de
+    Railway: `"Conectado a WhatsApp para la sucursal lvR7XmCtJEFm1FDxW7r7"`.
+    La línea nueva de WhatsApp ya está vinculada y el bot corre 24/7.
+    Notas para el futuro:
+    - Los QR de emparejamiento vencen en ~20s; hay que tener el mail/QR
+      generado y a la persona con la cámara YA lista antes de mandarlo
+      (aprendido tras varios intentos fallidos por timeout).
+    - Si algún día hay que re-vincular (número perdido, sesión corrupta),
+      el proceso es: `railway volume delete` + `railway volume add
+      --mount-path /app/auth_info_baileys` (sesión limpia) + `railway up`
+      para redesplegar, y volver a extraer el QR de los logs con
+      `railway logs --service bot-peluqueria | grep QR_DATA` (la app
+      también imprime el dato crudo del QR en el log, no solo el ASCII,
+      así se puede generar la imagen desde afuera sin necesitar acceso a
+      archivos del contenedor — `railway service files`/`railway ssh` no
+      funcionaron bien en este entorno).
+  - ⬜ **Siguiente paso**: probar una reserva real de punta a punta —
+    escribirle "menu" al número del bot desde otro teléfono y completar
+    todo el flujo (elegir servicio, día, hora) para confirmar que la cita
+    queda creada en Firestore y que Yaakov recibe el aviso en su número
+    personal.
   - 🔄 **EN CURSO — traducción a hebreo de todo el sistema** (decisión del
     usuario: "todo en hebreo, panel incluido", el código/comentarios quedan
     en español). Estado:
