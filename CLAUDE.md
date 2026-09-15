@@ -162,7 +162,44 @@ detalle técnico completo de arquitectura y setup.
       reescribirlo).
     - **Próximo paso al retomar**: hacer `app/` completo y avisar al
       usuario para que revise cómo quedó (probablemente conviene correr
-      la app con `npx expo start` para mostrársela).
+      la app con `npx expo start` para mostrársela). Ver también el
+      rediseño visual acordado abajo — conviene hacerlo junto con esto,
+      ya que toca las mismas pantallas.
+- 🎨 **Rediseño visual de `app/` acordado con el usuario (mostrado como
+  maquetas/Artifacts, todavía NO programado en el código real):**
+  - Pantalla de agenda en formato **"línea de tiempo"**: las horas del día
+    en un costado, las citas chicas ubicadas junto a su horario — se
+    descartaron una versión de lista compacta y otra agrupada por
+    mañana/tarde/noche que también se mostraron como alternativas.
+  - Tarjetas de cada cita mucho más chicas que las actuales (el pedido
+    original era que no se veía el día completo de un vistazo).
+  - Fondo **"gris niebla"** (gris clarito `#eef0f4`, tarjetas blancas
+    flotando con sombra suave) — se descartó el fondo crema con
+    tipografía serif original por verse anticuado, y también una opción
+    de fondo oscuro "premium" que se había ofrecido.
+  - Tipografía: se sacó la fuente serif (Frank Ruhl Libre) por pedido
+    explícito de "líneas limpias, moderno" — queda una sans geométrica
+    (Manrope para títulos/números grandes, Assistant para el resto del
+    texto en hebreo).
+  - Color de acento: azul **zafiro** (`#1d4ed8`), mostrado junto con el
+    fondo gris niebla y aprobado en conjunto — ⚠️ falta confirmación
+    explícita del usuario, ya que se ofrecieron otras dos variantes de
+    azul (marino+celeste eléctrico, petróleo) que no se descartaron
+    formalmente.
+  - Colores de estado de cada cita: verde esmeralda = confirmada, naranja
+    = espera depósito, azul índigo/gris = completada, rojo = no se
+    presentó, gris piedra = cancelada.
+  - **Función nueva pedida, sin programar todavía**: en Ajustes, que el
+    peluquero pueda (a) **bloquear horarios** puntuales (feriado, turno
+    médico, vacaciones — esas horas dejan de ofrecerse a los clientes) y
+    (b) **cerrar el día completo** a nuevas reservas sin tocar las citas
+    ya confirmadas. Falta: el modelo de datos real en Firestore, la
+    pantalla de Ajustes real, y que el motor de disponibilidad
+    (`bot/availability.js` + `functions/src/availability.ts`) respete
+    esos bloqueos al ofrecer horarios por WhatsApp/teléfono.
+  - **Próximo paso al retomar**: confirmar el tono de azul final, y
+    programar todo esto de verdad — junto con la traducción a hebreo de
+    `app/` que sigue pendiente (mismo trabajo, mismas pantallas).
 - **Ideas para el backlog (feedback del usuario, no bloquean el piloto):**
   - Los servicios hoy son una sola línea plana (nombre+duración+precio). El
     usuario pidió poder tener "variantes" dentro de un mismo servicio (ej.
