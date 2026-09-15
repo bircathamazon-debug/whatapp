@@ -7,7 +7,7 @@
  * Los comentarios del código quedan en español para quien mantiene el proyecto.
  */
 import { db } from './firebaseClient.js';
-import { getAvailableSlots } from './availability.js';
+import { getAvailableSlots, toEpoch } from './availability.js';
 import * as api from './botApiClient.js';
 
 const CONV_COL = 'waConversations';
@@ -220,16 +220,25 @@ async function handleBookDay(phone, text, branch, state) {
     allSlots.push(...slots.map((s) => ({ ...s, staffId: staff.id, staffName: staff.name })));
   }
   allSlots.sort((a, b) => a.startsAt - b.startsAt);
-  allSlots = allSlots.slice(0, 8);
 
   if (allSlots.length === 0) {
     await saveConversation(phone, { step: 'BOOK_WAITLIST_ASK', data: { ...state.data, dateStr: chosen.dateStr, dateLabel: chosen.label } });
     return [`אין תורים פנויים ב-${chosen.label}.`, 'נעדכן אותך אוטומטית אם יתפנה תור באותו היום? כתבו כן או לא.'];
   }
 
-  await saveConversation(phone, { step: 'BOOK_TIME', data: { ...state.data, dateStr: chosen.dateStr, slots: allSlots } });
-  const lines = allSlots.map((s, i) => `${i + 1}️⃣ ${formatTime(s.startsAt, branch.timezone)}${staffList.length > 1 ? ` — ${s.staffName}` : ''}`);
-  return [`תורים פנויים ב-${chosen.label}:`, ...lines, '0️⃣ לבחור יום אחר'];
+  // allSlotsForDay: lista completa del día (para buscar "la hora más cercana"
+  // si el cliente escribe una hora directamente). slots: solo lo que se
+  // muestra numerado ahora mismo (máx. 8, o menos si venimos de una
+  // búsqueda por hora).
+  const displaySlots = allSlots.slice(0, 8);
+  await saveConversation(phone, { step: 'BOOK_TIME', data: { ...state.data, dateStr: chosen.dateStr, slots: displaySlots, allSlotsForDay: allSlots } });
+  const lines = displaySlots.map((s, i) => `${i + 1}️⃣ ${formatTime(s.startsAt, branch.timezone)}${staffList.length > 1 ? ` — ${s.staffName}` : ''}`);
+  return [
+    `תורים פנויים ב-${chosen.label}:`,
+    ...lines,
+    '0️⃣ לבחור יום אחר',
+    'אפשר גם לכתוב שעה ישירות (למשל 9:30) — השעות הן בקפיצות של 15 דקות: 9:00, 9:15, 9:30...',
+  ];
 }
 
 async function handleBookTime(phone, text, branch, state) {
@@ -240,14 +249,43 @@ async function handleBookTime(phone, text, branch, state) {
   }
 
   const idx = Number(text) - 1;
-  const slot = state.data.slots?.[idx];
-  if (!slot) {
-    return [
-      'לא הבנתי את הבחירה.',
-      'כתבו את מספר השעה מהרשימה למעלה, או 0️⃣ כדי לבחור יום אחר.',
-    ];
+  const numberedSlot = state.data.slots?.[idx];
+  if (numberedSlot) {
+    return bookChosenSlot(phone, branch, state, numberedSlot);
   }
 
+  // No fue un número de la lista: probamos si escribió una hora directamente
+  // (ej. "9:30", "930", "17:00").
+  const typed = parseTimeInput(text);
+  if (typed) {
+    const daySlots = state.data.allSlotsForDay || state.data.slots || [];
+    const desiredEpoch = toEpoch(state.data.dateStr, `${String(typed.h).padStart(2, '0')}:${String(typed.m).padStart(2, '0')}`, branch.timezone);
+    const exactMatch = daySlots.find((s) => s.startsAt === desiredEpoch);
+    if (exactMatch) {
+      return bookChosenSlot(phone, branch, state, exactMatch);
+    }
+
+    const nearest = [...daySlots]
+      .sort((a, b) => Math.abs(a.startsAt - desiredEpoch) - Math.abs(b.startsAt - desiredEpoch))
+      .slice(0, 3)
+      .sort((a, b) => a.startsAt - b.startsAt);
+
+    if (nearest.length === 0) {
+      return ['לא נשארו תורים פנויים באותו יום. כתבו 0️⃣ לבחור יום אחר.'];
+    }
+
+    await saveConversation(phone, { step: 'BOOK_TIME', data: { ...state.data, slots: nearest } });
+    const lines = nearest.map((s, i) => `${i + 1}️⃣ ${formatTime(s.startsAt, branch.timezone)}${(state.data.staffId === 'any' && nearest.some((n) => n.staffId !== s.staffId)) ? ` — ${s.staffName}` : ''}`);
+    return [`השעה ${String(typed.h).padStart(2, '0')}:${String(typed.m).padStart(2, '0')} תפוסה. הכי קרובות פנויות:`, ...lines, '0️⃣ לבחור יום אחר'];
+  }
+
+  return [
+    'לא הבנתי את הבחירה.',
+    'כתבו את מספר השעה מהרשימה, כתבו שעה ישירות (למשל 9:30), או 0️⃣ כדי לבחור יום אחר.',
+  ];
+}
+
+async function bookChosenSlot(phone, branch, state, slot) {
   const service = await docById('services', state.data.serviceId);
 
   try {
@@ -282,6 +320,16 @@ async function handleBookTime(phone, text, branch, state) {
     console.error('[conversation] error creando cita', err);
     return ['אירעה שגיאה בקביעת התור. נסו שוב בעוד כמה דקות.'];
   }
+}
+
+/** Interpreta una hora escrita a mano: "9:30", "930", "9", "17:00", etc. */
+function parseTimeInput(text) {
+  const match = text.trim().match(/^(\d{1,2})[:.,]?(\d{2})?$/);
+  if (!match) return null;
+  const h = Number(match[1]);
+  const m = match[2] ? Number(match[2]) : 0;
+  if (h < 0 || h > 23 || m < 0 || m > 59) return null;
+  return { h, m };
 }
 
 async function handleRecurringAsk(phone, text, branch, state) {
