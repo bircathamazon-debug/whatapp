@@ -59,9 +59,24 @@ async function connectToWhatsApp() {
 
   sock.ev.on('messages.upsert', async ({ messages }) => {
     for (const msg of messages) {
-      const jid = msg.key.remoteJid ?? '';
-      if (!jid.endsWith('@s.whatsapp.net')) continue; // ignorar grupos y broadcasts
+      const rawJid = msg.key.remoteJid ?? '';
+      if (rawJid.endsWith('@g.us') || rawJid.endsWith('@broadcast')) continue; // ignorar grupos y difusión
       if (msg.key.fromMe) continue;
+
+      // WhatsApp puede direccionar chats personales por "LID" (identificador
+      // de privacidad, termina en @lid) en vez del número de teléfono
+      // (@s.whatsapp.net). Como identificamos clientes por su número real
+      // en toda la app, resolvemos siempre la variante con el teléfono real
+      // usando remoteJidAlt cuando el chat llega direccionado por LID.
+      const jid = rawJid.endsWith('@s.whatsapp.net')
+        ? rawJid
+        : msg.key.remoteJidAlt?.endsWith('@s.whatsapp.net')
+          ? msg.key.remoteJidAlt
+          : null;
+      if (!jid) {
+        console.warn('[bot] no se pudo resolver el número de teléfono real del mensaje', rawJid);
+        continue;
+      }
 
       const text = msg.message?.conversation || msg.message?.extendedTextMessage?.text || msg.message?.buttonsResponseMessage?.selectedDisplayText || '';
       if (!text) continue;
@@ -73,7 +88,7 @@ async function connectToWhatsApp() {
         }
       } catch (err) {
         console.error('[bot] error procesando mensaje', err);
-        await sock.sendMessage(jid, { text: 'Ocurrió un error. Intenta de nuevo escribiendo "menu".' }).catch(() => {});
+        await sock.sendMessage(jid, { text: 'אירעה שגיאה. נסו שוב בכתיבת "menu".' }).catch(() => {});
       }
     }
   });
