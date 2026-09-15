@@ -116,6 +116,15 @@ detalle técnico completo de arquitectura y setup.
     personal del peluquero solo recibe el aviso corto de "nueva cita",
     salvo que se use el mismo número para probar como cliente y como
     peluquero a la vez (como en las pruebas).
+  - 🎯 Más ajustes de UX pedidos por el usuario, ya implementados:
+    - Se sacó la pregunta de "¿querés que se repita cada semana?" después
+      de confirmar — ahora va directo al menú principal.
+    - La lista de servicios muestra solo el precio (con ✂️), no la
+      duración.
+    - En la pantalla de horarios ahora se invita primero a escribir la
+      hora directamente, y recién después se muestra la lista numerada.
+    - Se corrigió el nombre del servicio de prueba en Firestore: estaba
+      en español ("Corte de pelo"), ahora dice "תספורת (corte de pelo)".
   - ⬜ **Siguiente paso ofrecido, no confirmado todavía**: conectar Google
     Calendar (ya está construido en `functions/src/googleCalendar.ts` +
     `oauth.ts`) para que las citas confirmadas aparezcan solas en el
