@@ -41,6 +41,10 @@ async function connectToWhatsApp() {
       QRCode.toFile('./whatsapp-qr.png', qr, { width: 400 }).catch((err) =>
         console.error('[bot] no se pudo guardar whatsapp-qr.png', err)
       );
+      // Dato crudo del QR también en el log: permite reconstruir la imagen
+      // desde afuera (ej. leyendo los logs del hosting) sin necesitar
+      // acceso a archivos del servidor.
+      console.log(`[bot] QR_DATA:${qr}`);
     }
 
     if (connection === 'close') {
