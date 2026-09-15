@@ -95,8 +95,6 @@ export async function handleIncomingMessage(jid, rawText, branchId, pushName) {
       return handleBookDay(phone, text, branch, state);
     case 'BOOK_TIME':
       return handleBookTime(phone, text, branch, state);
-    case 'BOOK_RECURRING_ASK':
-      return handleRecurringAsk(phone, text, branch, state);
     case 'BOOK_WAITLIST_ASK':
       return handleWaitlistAsk(phone, text, branch, state);
     case 'CANCEL_SELECT':
@@ -154,7 +152,7 @@ async function handleMainMenu(phone, text, branch, state) {
     const services = await getActiveServices(branch.id);
     if (services.length === 0) return ['עדיין לא הוגדרו שירותים. יש להודיע לספר.'];
     await saveConversation(phone, { step: 'BOOK_SERVICE', data: { ...state.data, services: services.map((s) => s.id) } });
-    const lines = services.map((s, i) => `${i + 1}️⃣ ${s.name} (${s.durationMinutes} דקות, ₪${s.price})`);
+    const lines = services.map((s, i) => `${i + 1}️⃣ ✂️ ${s.name} — ₪${s.price}`);
     return ['איזה שירות תרצו להזמין?', ...lines];
   }
   if (text === '2') {
@@ -234,10 +232,10 @@ async function handleBookDay(phone, text, branch, state) {
   await saveConversation(phone, { step: 'BOOK_TIME', data: { ...state.data, dateStr: chosen.dateStr, slots: displaySlots, allSlotsForDay: allSlots } });
   const lines = displaySlots.map((s, i) => `${i + 1}️⃣ ${formatTime(s.startsAt, branch.timezone)}${staffList.length > 1 ? ` — ${s.staffName}` : ''}`);
   return [
-    `תורים פנויים ב-${chosen.label}:`,
+    `באיזו שעה נוח לך ב-${chosen.label}? אפשר לכתוב את השעה ישירות (למשל 9:30) — השעות הן בקפיצות של 15 דקות: 9:00, 9:15, 9:30...`,
+    'או לבחור אחת מהשעות הפנויות:',
     ...lines,
     '0️⃣ לבחור יום אחר',
-    'אפשר גם לכתוב שעה ישירות (למשל 9:30) — השעות הן בקפיצות של 15 דקות: 9:00, 9:15, 9:30...',
   ];
 }
 
@@ -298,20 +296,10 @@ async function bookChosenSlot(phone, branch, state, slot) {
       startsAt: slot.startsAt,
       source: 'whatsapp',
     });
-    await saveConversation(phone, {
-      step: 'BOOK_RECURRING_ASK',
-      data: {
-        ...state.data,
-        appointmentId: appointment.id,
-        dayOfWeek: new Date(slot.startsAt).getDay(),
-        time: formatTime(slot.startsAt, branch.timezone),
-        staffId: slot.staffId,
-        serviceId: service.id,
-      },
-    });
+    await resetToMainMenu(phone);
     return [
       `✅ התור אושר לתאריך ${formatDate(slot.startsAt, branch.timezone)} בשעה ${formatTime(slot.startsAt, branch.timezone)}.`,
-      'תרצו שהתור יחזור אוטומטית כל שבוע באותה שעה? כתבו כן או לא.',
+      mainMenuText(),
     ];
   } catch (err) {
     if (err.code === 'slot_taken') {
@@ -330,24 +318,6 @@ function parseTimeInput(text) {
   const m = match[2] ? Number(match[2]) : 0;
   if (h < 0 || h > 23 || m < 0 || m > 59) return null;
   return { h, m };
-}
-
-async function handleRecurringAsk(phone, text, branch, state) {
-  if (/^כן/.test(text)) {
-    await api.createRecurringBooking({
-      branchId: branch.id,
-      staffId: state.data.staffId,
-      serviceId: state.data.serviceId,
-      clientPhone: phone,
-      clientName: state.data.clientName || 'לקוח',
-      dayOfWeek: state.data.dayOfWeek,
-      time: state.data.time,
-    });
-    await resetToMainMenu(phone);
-    return [`מעולה, התור ייקבע אוטומטית כל ${WEEKDAY_NAMES[state.data.dayOfWeek]} בשעה ${state.data.time}.`, mainMenuText()];
-  }
-  await resetToMainMenu(phone);
-  return ['מצוין, נתראה בתור.', mainMenuText()];
 }
 
 async function handleWaitlistAsk(phone, text, branch, state) {
