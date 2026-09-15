@@ -229,13 +229,24 @@ async function handleBookDay(phone, text, branch, state) {
 
   await saveConversation(phone, { step: 'BOOK_TIME', data: { ...state.data, dateStr: chosen.dateStr, slots: allSlots } });
   const lines = allSlots.map((s, i) => `${i + 1}️⃣ ${formatTime(s.startsAt, branch.timezone)}${staffList.length > 1 ? ` — ${s.staffName}` : ''}`);
-  return [`תורים פנויים ב-${chosen.label}:`, ...lines];
+  return [`תורים פנויים ב-${chosen.label}:`, ...lines, '0️⃣ לבחור יום אחר'];
 }
 
 async function handleBookTime(phone, text, branch, state) {
+  if (text === '0') {
+    await saveConversation(phone, { step: 'BOOK_DAY', data: state.data });
+    const lines = (state.data.dateOptions || []).map((d, i) => `${i + 1}️⃣ ${d.label}`);
+    return ['איזה יום מתאים לך?', ...lines];
+  }
+
   const idx = Number(text) - 1;
   const slot = state.data.slots?.[idx];
-  if (!slot) return ['בחירה לא תקינה. יש לבחור אחת מהשעות ברשימה.'];
+  if (!slot) {
+    return [
+      'לא הבנתי את הבחירה.',
+      'כתבו את מספר השעה מהרשימה למעלה, או 0️⃣ כדי לבחור יום אחר.',
+    ];
+  }
 
   const service = await docById('services', state.data.serviceId);
 
