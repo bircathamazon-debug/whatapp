@@ -56,6 +56,7 @@ function mainMenuText() {
     '1️⃣ לקבוע תור',
     '2️⃣ לבטל תור',
     '3️⃣ לצפייה בתורים הקרובים שלי',
+    '4️⃣ לדבר ישירות עם הספר',
     '',
     'כתבו את מספר האפשרות הרצויה.',
   ].join('\n');
@@ -168,6 +169,19 @@ async function handleMainMenu(phone, text, branch, state) {
     const appts = await upcomingAppointments(phone);
     if (appts.length === 0) return ['אין לך תורים קרובים.', mainMenuText()];
     return ['התורים הקרובים שלך:', ...appts.map((a) => `• ${a.label}`), '', mainMenuText()];
+  }
+  if (text === '4') {
+    const staff = await getActiveStaff(branch.id);
+    if (staff.length === 0) return ['לא הוגדר ספר בסניף כרגע. נסו שוב מאוחר יותר.', mainMenuText()];
+    const primary = staff[0];
+    const waLink = `https://wa.me/${primary.phone.replace(/\D/g, '')}`;
+    return [
+      `אפשר לדבר ישירות עם ${primary.name}:`,
+      `📞 ${primary.phone}`,
+      waLink,
+      '',
+      mainMenuText(),
+    ];
   }
   return ['לא הבנתי. כתבו "menu" לצפייה באפשרויות.', mainMenuText()];
 }

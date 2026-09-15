@@ -200,7 +200,41 @@ detalle técnico completo de arquitectura y setup.
   - **Próximo paso al retomar**: confirmar el tono de azul final, y
     programar todo esto de verdad — junto con la traducción a hebreo de
     `app/` que sigue pendiente (mismo trabajo, mismas pantallas).
-- **Ideas para el backlog (feedback del usuario, no bloquean el piloto):**
+- 📞 **Pedido del usuario: opción de hablar con una persona real (WhatsApp
+  y teléfono) + voz natural en el IVR.**
+  - ✅ **WhatsApp**: se agregó la opción **4️⃣ "לדבר ישירות עם הספר"**
+    (hablar directamente con el peluquero) al menú principal de
+    `bot/conversation.js` — el bot le pasa al cliente el número personal
+    del peluquero (`staff.phone`) y un link directo de WhatsApp
+    (`wa.me/...`) para escribirle. Código ya en el repo (rama
+    `claude/salon-appointment-app-cg11sw`) — **falta el `railway up`
+    para que quede en producción** (esta sesión no tenía la sesión de
+    Railway iniciada; avisar al usuario / retomar con el flujo de login
+    de Railway usado la primera vez).
+  - ✅ **Teléfono (IVR)**: ya existía — al presionar **0** en la llamada,
+    `functions/src/ivr.ts` transfiere la llamada a `branch.phone`, que
+    hoy es el mismo número personal del peluquero (+972543147000). No
+    hizo falta tocar código, solo se confirma que ya cumple el pedido.
+  - ⬜ **Voz natural en el IVR, entrenada para responder cualquier
+    pregunta** — pedido nuevo, sin programar, requiere que el usuario
+    decida entre opciones porque cambia el presupuesto mensual (hoy
+    ~$50-150/mes) y agrega un proveedor nuevo de pago. El IVR actual es
+    un menú robótico de "apretá 1, apretá 2"; esto sería una IA que
+    escucha la pregunta hablada, la entiende y responde por voz de forma
+    natural, sin menú. Falta decidir con el usuario:
+    1. Proveedor de voz IA (ej. ElevenLabs Conversational AI, o el
+       Realtime API de OpenAI) + costo por minuto de llamada.
+    2. Alcance de "responder cualquier pregunta": lista de temas que
+       sabe responder (horarios, precios, servicios, reservar, cancelar)
+       vs. IA totalmente abierta.
+    3. Si mantiene Twilio como hoy o cambia de proveedor telefónico.
+    **Antes de programar esto se le explica al usuario el costo estimado
+    y las opciones, como se hizo con Firebase/Railway/Twilio.**
+- **Ideas para el backlog (más adelante, el usuario lo aclaró
+  explícitamente — no bloquean el piloto):**
+  - Página web y video publicitario explicando el ahorro de tiempo/dinero
+    del sistema para el peluquero, más una campaña de publicidad y
+    marketing "aprendiendo de los mejores" (competidores/casos de éxito).
   - Los servicios hoy son una sola línea plana (nombre+duración+precio). El
     usuario pidió poder tener "variantes" dentro de un mismo servicio (ej.
     corte adulto/niño/con barba) en vez de crear servicios sueltos por cada
