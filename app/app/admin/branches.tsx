@@ -2,12 +2,17 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, Alert } from 'react-native';
 import { useBranch } from '../../lib/branchContext';
 import { addBranch, deleteBranch } from '../../lib/branches';
+import { useTheme, type ThemeColors } from '../../lib/theme';
+
+const SHABBAT_MODE_LABEL: Record<string, string> = { off: 'כבוי', silent: 'שקט', closed: 'סגור' };
 
 export default function BranchesScreen() {
   const { branches, reload } = useBranch();
+  const { colors } = useTheme();
+  const styles = makeStyles(colors);
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
-  const [geonameId, setGeonameId] = useState('293397'); // Jerusalem por defecto (Hebcal geonameid)
+  const [geonameId, setGeonameId] = useState('293397'); // ירושלים כברירת מחדל (geonameid של Hebcal)
   const [phone, setPhone] = useState('');
 
   const save = async () => {
@@ -27,9 +32,9 @@ export default function BranchesScreen() {
   };
 
   const remove = (id: string, label: string) => {
-    Alert.alert('Eliminar sucursal', `¿Eliminar "${label}"?`, [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Eliminar', style: 'destructive', onPress: async () => { await deleteBranch(id); await reload(); } },
+    Alert.alert('מחיקת סניף', `למחוק את "${label}"?`, [
+      { text: 'ביטול', style: 'cancel' },
+      { text: 'מחיקה', style: 'destructive', onPress: async () => { await deleteBranch(id); await reload(); } },
     ]);
   };
 
@@ -40,18 +45,18 @@ export default function BranchesScreen() {
         keyExtractor={(b) => b.id}
         ListHeaderComponent={
           <View style={styles.form}>
-            <Text style={styles.label}>Nombre</Text>
-            <TextInput style={styles.input} value={name} onChangeText={setName} placeholder="Peluquería Central" placeholderTextColor="#aaa" />
-            <Text style={styles.label}>Dirección</Text>
-            <TextInput style={styles.input} value={address} onChangeText={setAddress} placeholder="Calle, ciudad" placeholderTextColor="#aaa" />
-            <Text style={styles.label}>Teléfono (para el IVR / transferencia)</Text>
-            <TextInput style={styles.input} value={phone} onChangeText={setPhone} placeholder="+972501234567" placeholderTextColor="#aaa" keyboardType="phone-pad" />
-            <Text style={styles.label}>Geoname ID (Hebcal, para horarios de Shabat)</Text>
-            <TextInput style={styles.input} value={geonameId} onChangeText={setGeonameId} placeholder="293397" placeholderTextColor="#aaa" />
+            <Text style={styles.label}>שם</Text>
+            <TextInput style={styles.input} value={name} onChangeText={setName} placeholder="מספרה מרכזית" placeholderTextColor={colors.textMuted} />
+            <Text style={styles.label}>כתובת</Text>
+            <TextInput style={styles.input} value={address} onChangeText={setAddress} placeholder="רחוב, עיר" placeholderTextColor={colors.textMuted} />
+            <Text style={styles.label}>טלפון (למענה הקולי / להעברת שיחה)</Text>
+            <TextInput style={styles.input} value={phone} onChangeText={setPhone} placeholder="+972501234567" placeholderTextColor={colors.textMuted} keyboardType="phone-pad" />
+            <Text style={styles.label}>מזהה Geoname (Hebcal, לשעות שבת)</Text>
+            <TextInput style={styles.input} value={geonameId} onChangeText={setGeonameId} placeholder="293397" placeholderTextColor={colors.textMuted} />
             <TouchableOpacity style={styles.btn} onPress={save}>
-              <Text style={styles.btnText}>Agregar sucursal</Text>
+              <Text style={styles.btnText}>הוספת סניף</Text>
             </TouchableOpacity>
-            <Text style={styles.sectionTitle}>Sucursales existentes</Text>
+            <Text style={styles.sectionTitle}>סניפים קיימים</Text>
           </View>
         }
         renderItem={({ item }) => (
@@ -59,7 +64,7 @@ export default function BranchesScreen() {
             <View style={{ flex: 1 }}>
               <Text style={styles.cardName}>{item.name}</Text>
               <Text style={styles.cardMeta}>{item.address}</Text>
-              <Text style={styles.cardMeta}>Modo Shabat: {item.shabbatMode}</Text>
+              <Text style={styles.cardMeta}>מצב שבת: {SHABBAT_MODE_LABEL[item.shabbatMode] ?? item.shabbatMode}</Text>
             </View>
             <TouchableOpacity onPress={() => remove(item.id, item.name)}>
               <Text style={styles.delete}>🗑️</Text>
@@ -72,16 +77,18 @@ export default function BranchesScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f8fafc' },
-  form: { marginBottom: 8 },
-  label: { fontSize: 12, color: '#888', fontWeight: '600', marginBottom: 6, marginTop: 10 },
-  input: { backgroundColor: '#fff', borderRadius: 10, padding: 12, borderWidth: 1, borderColor: '#e2e8f0', color: '#1a3c5e' },
-  btn: { backgroundColor: '#1a3c5e', borderRadius: 10, padding: 14, alignItems: 'center', marginTop: 16 },
-  btnText: { color: '#fff', fontWeight: '700' },
-  sectionTitle: { fontSize: 14, fontWeight: '700', color: '#1a3c5e', marginTop: 24, marginBottom: 8 },
-  card: { flexDirection: 'row', backgroundColor: '#fff', borderRadius: 12, padding: 14, marginBottom: 10, alignItems: 'center' },
-  cardName: { fontSize: 15, fontWeight: '700', color: '#1a3c5e' },
-  cardMeta: { fontSize: 12, color: '#666', marginTop: 2 },
-  delete: { fontSize: 18, paddingHorizontal: 8 },
-});
+function makeStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.bg },
+    form: { marginBottom: 8 },
+    label: { fontSize: 12, color: colors.textMuted, fontWeight: '600', marginBottom: 6, marginTop: 10 },
+    input: { backgroundColor: colors.surface, borderRadius: 10, padding: 12, borderWidth: 1, borderColor: colors.border, color: colors.text },
+    btn: { backgroundColor: colors.accent, borderRadius: 10, padding: 14, alignItems: 'center', marginTop: 16 },
+    btnText: { color: '#fff', fontWeight: '700' },
+    sectionTitle: { fontSize: 14, fontWeight: '700', color: colors.text, marginTop: 24, marginBottom: 8 },
+    card: { flexDirection: 'row', backgroundColor: colors.surface, borderRadius: 12, padding: 14, marginBottom: 10, alignItems: 'center' },
+    cardName: { fontSize: 15, fontWeight: '700', color: colors.text },
+    cardMeta: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
+    delete: { fontSize: 18, paddingHorizontal: 8 },
+  });
+}

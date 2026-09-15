@@ -12,9 +12,12 @@ import {
 import { useRouter } from 'expo-router';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../lib/firebase';
+import { useTheme, type ThemeColors } from '../../lib/theme';
 
 export default function LoginScreen() {
   const router = useRouter();
+  const { colors } = useTheme();
+  const styles = makeStyles(colors);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -26,7 +29,7 @@ export default function LoginScreen() {
       await signInWithEmailAndPassword(auth, email, password);
       router.replace('/admin');
     } catch {
-      Alert.alert('Error', 'Email o contraseña incorrectos');
+      Alert.alert('שגיאה', 'אימייל או סיסמה שגויים');
     } finally {
       setLoading(false);
     }
@@ -38,15 +41,15 @@ export default function LoginScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <View style={styles.card}>
-        <Text style={styles.title}>Acceso del personal</Text>
-        <Text style={styles.subtitle}>Sistema de citas de la peluquería</Text>
+        <Text style={styles.title}>כניסת צוות</Text>
+        <Text style={styles.subtitle}>מערכת התורים של המספרה</Text>
 
         <TextInput
           style={styles.input}
           value={email}
           onChangeText={setEmail}
-          placeholder="Email"
-          placeholderTextColor="#aaa"
+          placeholder="אימייל"
+          placeholderTextColor={colors.textMuted}
           keyboardType="email-address"
           autoCapitalize="none"
           autoCorrect={false}
@@ -55,8 +58,8 @@ export default function LoginScreen() {
           style={styles.input}
           value={password}
           onChangeText={setPassword}
-          placeholder="Contraseña"
-          placeholderTextColor="#aaa"
+          placeholder="סיסמה"
+          placeholderTextColor={colors.textMuted}
           secureTextEntry
         />
 
@@ -65,54 +68,56 @@ export default function LoginScreen() {
           onPress={login}
           disabled={loading}
         >
-          <Text style={styles.btnText}>{loading ? 'Ingresando...' : 'Ingresar'}</Text>
+          <Text style={styles.btnText}>{loading ? 'מתחבר...' : 'כניסה'}</Text>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f8fafc',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 28,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: '#1a3c5e',
-    textAlign: 'center',
-    marginBottom: 4,
-  },
-  subtitle: { fontSize: 14, color: '#888', textAlign: 'center', marginBottom: 24 },
-  input: {
-    backgroundColor: '#f1f5f9',
-    borderRadius: 10,
-    padding: 14,
-    fontSize: 15,
-    color: '#1a3c5e',
-    marginBottom: 12,
-    textAlign: 'right',
-  },
-  btn: {
-    backgroundColor: '#1a3c5e',
-    borderRadius: 10,
-    padding: 16,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  btnDisabled: { opacity: 0.6 },
-  btnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
-});
+function makeStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.bg,
+      justifyContent: 'center',
+      padding: 24,
+    },
+    card: {
+      backgroundColor: colors.surface,
+      borderRadius: 16,
+      padding: 28,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 8,
+      elevation: 4,
+    },
+    title: {
+      fontSize: 24,
+      fontWeight: '800',
+      color: colors.text,
+      textAlign: 'center',
+      marginBottom: 4,
+    },
+    subtitle: { fontSize: 14, color: colors.textMuted, textAlign: 'center', marginBottom: 24 },
+    input: {
+      backgroundColor: colors.surfaceMuted,
+      borderRadius: 10,
+      padding: 14,
+      fontSize: 15,
+      color: colors.text,
+      marginBottom: 12,
+      textAlign: 'right',
+    },
+    btn: {
+      backgroundColor: colors.accent,
+      borderRadius: 10,
+      padding: 16,
+      alignItems: 'center',
+      marginTop: 8,
+    },
+    btnDisabled: { opacity: 0.6 },
+    btnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
+  });
+}

@@ -3,12 +3,14 @@ import { View, ActivityIndicator } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../../lib/firebase';
+import { useTheme } from '../../lib/theme';
 
 export default function AdminLayout() {
   const [checking, setChecking] = useState(true);
   const [authed, setAuthed] = useState(false);
   const router = useRouter();
   const segments = useSegments();
+  const { colors } = useTheme();
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (user) => {
@@ -23,8 +25,8 @@ export default function AdminLayout() {
 
   if (checking) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator color="#1a3c5e" size="large" />
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.bg }}>
+        <ActivityIndicator color={colors.accent} size="large" />
       </View>
     );
   }
@@ -32,18 +34,18 @@ export default function AdminLayout() {
   return (
     <Stack
       screenOptions={{
-        headerStyle: { backgroundColor: '#1a3c5e' },
-        headerTintColor: '#fff',
+        headerStyle: { backgroundColor: colors.surface },
+        headerTintColor: colors.text,
         headerTitleStyle: { fontWeight: '700' },
       }}
     >
-      <Stack.Screen name="index" options={{ title: 'Panel del peluquero' }} />
-      <Stack.Screen name="login" options={{ title: 'Acceso del personal' }} />
-      <Stack.Screen name="branches" options={{ title: 'Sucursales' }} />
-      <Stack.Screen name="staff" options={{ title: 'Peluqueros' }} />
-      <Stack.Screen name="services" options={{ title: 'Servicios' }} />
-      <Stack.Screen name="schedule" options={{ title: 'Horarios' }} />
-      <Stack.Screen name="settings" options={{ title: 'Configuración' }} />
+      <Stack.Screen name="index" options={{ title: 'הפאנל שלי' }} />
+      <Stack.Screen name="login" options={{ title: 'כניסת צוות' }} />
+      <Stack.Screen name="branches" options={{ title: 'סניפים' }} />
+      <Stack.Screen name="staff" options={{ title: 'ספרים' }} />
+      <Stack.Screen name="services" options={{ title: 'שירותים' }} />
+      <Stack.Screen name="schedule" options={{ title: 'שעות עבודה' }} />
+      <Stack.Screen name="settings" options={{ title: 'הגדרות' }} />
     </Stack>
   );
 }
