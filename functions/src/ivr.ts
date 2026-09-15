@@ -1,6 +1,6 @@
 import { onRequest } from 'firebase-functions/v2/https';
 import { db } from './admin';
-import type { Appointment, Branch, Client, Service, Staff } from './types';
+import type { Appointment, Branch, BlockedTime, Client, Service, Staff } from './types';
 import { createAppointment, confirmAppointment, cancelAppointment, formatDate, formatTime } from './booking';
 import { getAvailableSlots } from './availability';
 
@@ -117,11 +117,14 @@ async function bookNextAvailableSlot(branch: Branch, clientPhone: string): Promi
   const now = Date.now();
   for (let dayOffset = 0; dayOffset < 7; dayOffset++) {
     const dateStr = new Intl.DateTimeFormat('en-CA', { timeZone: branch.timezone }).format(now + dayOffset * 86400000);
+    const blockedSnap = await db.collection('blockedTimes').where('branchId', '==', branch.id).where('date', '==', dateStr).get();
+    const blockedTimes = blockedSnap.docs.map((d) => d.data() as BlockedTime);
+
     for (const staffDoc of staffSnap.docs) {
       const staff = staffDoc.data() as Staff;
       const apptsSnap = await db.collection('appointments').where('staffId', '==', staff.id).where('status', 'in', ['confirmed', 'pending_deposit']).get();
       const existing = apptsSnap.docs.map((d) => d.data() as Appointment).map((a) => ({ startsAt: a.startsAt, endsAt: a.endsAt }));
-      const slots = getAvailableSlots(staff, service.durationMinutes, dateStr, existing, branch.timezone, now);
+      const slots = getAvailableSlots(staff, service.durationMinutes, dateStr, existing, branch.timezone, now, blockedTimes);
       if (slots.length > 0) {
         try {
           return await createAppointment({

@@ -17,9 +17,10 @@ const SLOT_STEP_MINUTES = 15;
  * @param {{startsAt:number, endsAt:number}[]} existingAppointments citas ya confirmadas ese día para ese staff
  * @param {string} timezone IANA tz, ej 'Asia/Jerusalem'
  * @param {number} nowMs epoch ms actual (para no ofrecer huecos en el pasado)
+ * @param {{staffId: string|null, date: string, allDay: boolean, startTime: string|null, endTime: string|null}[]} [blockedTimes] horarios bloqueados ese día (peluquero específico o toda la sucursal)
  * @returns {{startsAt:number, endsAt:number}[]}
  */
-export function getAvailableSlots(staff, durationMinutes, dateStr, existingAppointments, timezone, nowMs) {
+export function getAvailableSlots(staff, durationMinutes, dateStr, existingAppointments, timezone, nowMs, blockedTimes = []) {
   if (staff.blockedDates.includes(dateStr)) return [];
 
   const date = new Date(`${dateStr}T00:00:00`);
@@ -27,8 +28,15 @@ export function getAvailableSlots(staff, durationMinutes, dateStr, existingAppoi
   const hours = staff.hours[dayOfWeek];
   if (!hours) return [];
 
+  const relevantBlocks = blockedTimes.filter((b) => b.date === dateStr && (b.staffId === null || b.staffId === staff.id));
+  if (relevantBlocks.some((b) => b.allDay)) return [];
+
   const dayStart = toEpoch(dateStr, hours.start, timezone);
   const dayEnd = toEpoch(dateStr, hours.end, timezone);
+  const blockedWindows = relevantBlocks.map((b) => ({
+    startsAt: toEpoch(dateStr, b.startTime, timezone),
+    endsAt: toEpoch(dateStr, b.endTime, timezone),
+  }));
 
   const slots = [];
   for (let t = dayStart; t + durationMinutes * 60000 <= dayEnd; t += SLOT_STEP_MINUTES * 60000) {
@@ -37,7 +45,8 @@ export function getAvailableSlots(staff, durationMinutes, dateStr, existingAppoi
     const overlaps = existingAppointments.some(
       (a) => t < a.endsAt && slotEnd > a.startsAt
     );
-    if (!overlaps) slots.push({ startsAt: t, endsAt: slotEnd });
+    const blocked = blockedWindows.some((b) => t < b.endsAt && slotEnd > b.startsAt);
+    if (!overlaps && !blocked) slots.push({ startsAt: t, endsAt: slotEnd });
   }
   return slots;
 }

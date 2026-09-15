@@ -14,6 +14,7 @@ export interface Branch {
   shabbatMode: 'off' | 'closed' | 'silent';
   phone: string;
   whatsappJid?: string;
+  themeMode?: 'light' | 'dark';
 }
 
 export interface WeeklyHours {
@@ -89,6 +90,18 @@ export interface WaitlistEntry {
   status: 'waiting' | 'offered' | 'booked' | 'expired' | 'cancelled';
   offeredAppointmentSlot?: { startsAt: number; endsAt: number; staffId: string } | null;
   offerExpiresAt?: number | null;
+  createdAt: number;
+}
+
+export interface BlockedTime {
+  id: string;
+  branchId: string;
+  staffId: string | null;
+  date: string;
+  allDay: boolean;
+  startTime: string | null;
+  endTime: string | null;
+  reason?: string;
   createdAt: number;
 }
 

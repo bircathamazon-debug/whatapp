@@ -21,6 +21,7 @@ export interface Branch {
   shabbatMode: 'off' | 'closed' | 'silent';
   phone: string; // número de teléfono para el IVR (Twilio)
   whatsappJid?: string; // JID del número de WhatsApp del bot para esta sucursal
+  themeMode?: 'light' | 'dark'; // tema de la app del peluquero; sin definir = claro
 }
 
 export interface WeeklyHours {
@@ -102,6 +103,24 @@ export interface WaitlistEntry {
   status: 'waiting' | 'offered' | 'booked' | 'expired' | 'cancelled';
   offeredAppointmentSlot?: { startsAt: number; endsAt: number; staffId: string } | null;
   offerExpiresAt?: number | null;
+  createdAt: number;
+}
+
+/**
+ * Horario en el que un peluquero (o toda la sucursal, si staffId es null)
+ * no trabaja: feriado, turno médico, vacaciones, o el día entero cerrado
+ * (allDay: true, ignora startTime/endTime). El motor de disponibilidad
+ * excluye estos huecos al ofrecer horarios por WhatsApp/teléfono/panel.
+ */
+export interface BlockedTime {
+  id: string;
+  branchId: string;
+  staffId: string | null; // null = aplica a todos los peluqueros de la sucursal
+  date: string; // 'YYYY-MM-DD'
+  allDay: boolean;
+  startTime: string | null; // 'HH:mm', null si allDay
+  endTime: string | null; // 'HH:mm', null si allDay
+  reason?: string;
   createdAt: number;
 }
 

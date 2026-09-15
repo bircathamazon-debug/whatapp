@@ -1,6 +1,6 @@
 import { onRequest } from 'firebase-functions/v2/https';
 import { db } from './admin';
-import type { Branch, Service, Staff } from './types';
+import type { Branch, BlockedTime, Service, Staff } from './types';
 import { getAvailableSlots } from './availability';
 import { createAppointment, cancelAppointment, confirmAppointment, SlotTakenError } from './booking';
 import { acceptWaitlistOffer } from './waitlist';
@@ -38,14 +38,14 @@ export const botGetAvailability = onRequest(async (req, res) => {
   const branchSnap = await db.collection('branches').doc(staff.branchId).get();
   const branch = branchSnap.data() as Branch;
 
-  const apptsSnap = await db
-    .collection('appointments')
-    .where('staffId', '==', staffId)
-    .where('status', 'in', ['confirmed', 'pending_deposit'])
-    .get();
+  const [apptsSnap, blockedSnap] = await Promise.all([
+    db.collection('appointments').where('staffId', '==', staffId).where('status', 'in', ['confirmed', 'pending_deposit']).get(),
+    db.collection('blockedTimes').where('branchId', '==', staff.branchId).where('date', '==', dateStr).get(),
+  ]);
   const existing = apptsSnap.docs.map((d) => ({ startsAt: d.data().startsAt, endsAt: d.data().endsAt }));
+  const blockedTimes = blockedSnap.docs.map((d) => d.data() as BlockedTime);
 
-  const slots = getAvailableSlots(staff, service.durationMinutes, dateStr, existing, branch.timezone, Date.now());
+  const slots = getAvailableSlots(staff, service.durationMinutes, dateStr, existing, branch.timezone, Date.now(), blockedTimes);
   res.json({ slots });
 });
 

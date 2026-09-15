@@ -14,13 +14,22 @@ export type WeeklyHours = Record<number, DayHours | null>;
 
 const SLOT_STEP_MINUTES = 15;
 
+export interface BlockedTimeWindow {
+  staffId: string | null;
+  date: string;
+  allDay: boolean;
+  startTime: string | null;
+  endTime: string | null;
+}
+
 export function getAvailableSlots(
-  staff: { hours: WeeklyHours; blockedDates: string[] },
+  staff: { id: string; hours: WeeklyHours; blockedDates: string[] },
   durationMinutes: number,
   dateStr: string,
   existingAppointments: { startsAt: number; endsAt: number }[],
   timezone: string,
-  nowMs: number
+  nowMs: number,
+  blockedTimes: BlockedTimeWindow[] = []
 ): { startsAt: number; endsAt: number }[] {
   if (staff.blockedDates.includes(dateStr)) return [];
 
@@ -29,15 +38,23 @@ export function getAvailableSlots(
   const hours = staff.hours[dayOfWeek];
   if (!hours) return [];
 
+  const relevantBlocks = blockedTimes.filter((b) => b.date === dateStr && (b.staffId === null || b.staffId === staff.id));
+  if (relevantBlocks.some((b) => b.allDay)) return [];
+
   const dayStart = toEpoch(dateStr, hours.start, timezone);
   const dayEnd = toEpoch(dateStr, hours.end, timezone);
+  const blockedWindows = relevantBlocks.map((b) => ({
+    startsAt: toEpoch(dateStr, b.startTime as string, timezone),
+    endsAt: toEpoch(dateStr, b.endTime as string, timezone),
+  }));
 
   const slots: { startsAt: number; endsAt: number }[] = [];
   for (let t = dayStart; t + durationMinutes * 60000 <= dayEnd; t += SLOT_STEP_MINUTES * 60000) {
     const slotEnd = t + durationMinutes * 60000;
     if (t < nowMs) continue;
     const overlaps = existingAppointments.some((a) => t < a.endsAt && slotEnd > a.startsAt);
-    if (!overlaps) slots.push({ startsAt: t, endsAt: slotEnd });
+    const blocked = blockedWindows.some((b) => t < b.endsAt && slotEnd > b.startsAt);
+    if (!overlaps && !blocked) slots.push({ startsAt: t, endsAt: slotEnd });
   }
   return slots;
 }

@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react';
-import { View, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator, Text } from 'react-native';
 import { Tabs, useRouter } from 'expo-router';
-import { Text } from 'react-native';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../../lib/firebase';
+import { useTheme } from '../../lib/theme';
 
 export default function TabsLayout() {
   const router = useRouter();
   const [checking, setChecking] = useState(true);
   const [authed, setAuthed] = useState(false);
+  const { colors } = useTheme();
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (user) => {
@@ -21,8 +22,8 @@ export default function TabsLayout() {
 
   if (checking || !authed) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f8fafc' }}>
-        <ActivityIndicator color="#1a3c5e" size="large" />
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.bg }}>
+        <ActivityIndicator color={colors.accent} size="large" />
       </View>
     );
   }
@@ -30,43 +31,43 @@ export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#1a3c5e',
-        tabBarInactiveTintColor: '#888',
-        tabBarStyle: { backgroundColor: '#fff', borderTopColor: '#e2e8f0' },
-        headerStyle: { backgroundColor: '#1a3c5e' },
-        headerTintColor: '#fff',
+        tabBarActiveTintColor: colors.accent,
+        tabBarInactiveTintColor: colors.textMuted,
+        tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border },
+        headerStyle: { backgroundColor: colors.surface },
+        headerTintColor: colors.text,
         headerTitleStyle: { fontWeight: '700', fontSize: 18 },
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Agenda',
-          tabBarLabel: 'Agenda',
+          title: 'יומן',
+          tabBarLabel: 'יומן',
           tabBarIcon: () => <Text style={{ fontSize: 20 }}>📅</Text>,
         }}
       />
       <Tabs.Screen
         name="waitlist"
         options={{
-          title: 'Lista de espera',
-          tabBarLabel: 'Espera',
+          title: 'רשימת המתנה',
+          tabBarLabel: 'המתנה',
           tabBarIcon: () => <Text style={{ fontSize: 20 }}>⏳</Text>,
         }}
       />
       <Tabs.Screen
         name="clients"
         options={{
-          title: 'Clientes',
-          tabBarLabel: 'Clientes',
+          title: 'לקוחות',
+          tabBarLabel: 'לקוחות',
           tabBarIcon: () => <Text style={{ fontSize: 20 }}>👤</Text>,
         }}
       />
       <Tabs.Screen
         name="campaigns"
         options={{
-          title: 'Campañas',
-          tabBarLabel: 'Campañas',
+          title: 'קמפיינים',
+          tabBarLabel: 'קמפיינים',
           tabBarIcon: () => <Text style={{ fontSize: 20 }}>📣</Text>,
         }}
       />

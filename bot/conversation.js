@@ -228,10 +228,11 @@ async function handleBookDay(phone, text, branch, state) {
   const service = await docById('services', state.data.serviceId);
   const staffList = state.data.staffId === 'any' ? await getActiveStaff(branch.id) : [await docById('staff', state.data.staffId)];
 
+  const blockedTimes = await blockedTimesForDay(branch.id, chosen.dateStr);
   let allSlots = [];
   for (const staff of staffList.filter(Boolean)) {
     const existing = await appointmentsForStaffOnDay(staff.id, chosen.dateStr, branch.timezone);
-    const slots = getAvailableSlots(staff, service.durationMinutes, chosen.dateStr, existing, branch.timezone, Date.now());
+    const slots = getAvailableSlots(staff, service.durationMinutes, chosen.dateStr, existing, branch.timezone, Date.now(), blockedTimes);
     allSlots.push(...slots.map((s) => ({ ...s, staffId: staff.id, staffName: staff.name })));
   }
   allSlots.sort((a, b) => a.startsAt - b.startsAt);
@@ -367,6 +368,11 @@ async function docById(col, id) {
   if (!id) return null;
   const snap = await db.collection(col).doc(id).get();
   return snap.exists ? { id: snap.id, ...snap.data() } : null;
+}
+
+async function blockedTimesForDay(branchId, dateStr) {
+  const snap = await db.collection('blockedTimes').where('branchId', '==', branchId).where('date', '==', dateStr).get();
+  return snap.docs.map((d) => d.data());
 }
 
 async function appointmentsForStaffOnDay(staffId, dateStr, timezone) {
