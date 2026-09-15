@@ -125,6 +125,23 @@ detalle técnico completo de arquitectura y setup.
       hora directamente, y recién después se muestra la lista numerada.
     - Se corrigió el nombre del servicio de prueba en Firestore: estaba
       en español ("Corte de pelo"), ahora dice "תספורת (corte de pelo)".
+  - 🎯 Ronda de pedidos del usuario (probando en vivo), todos implementados
+    y desplegados:
+    - Se sacó el menú principal después de "cita confirmada" (queda solo
+      la confirmación).
+    - Se agregó un recordatorio de "escribí el número" en cada pantalla
+      con opciones numeradas (servicio, peluquero, día, cancelar) — los
+      emojis 1️⃣2️⃣3️⃣ no se entendían como algo para escribir.
+    - Nuevo recordatorio 30 minutos antes de la cita (además de 24h/2h).
+    - Nuevo aviso automático al mes de una cita completada, invitando a
+      reservar de nuevo (`sendComebackReminders`, cron diario 10:00,
+      controla `comebackReminderSentAt` para no repetirse).
+    - Confirmado: el reconocimiento de clientes por teléfono ya existía
+      (colección `clients` en Firestore, indexada por `phone`), no hizo
+      falta tocar nada ahí.
+  - ✅ `functions/src/notify.ts` y el nombre por defecto de `ivr.ts` ya
+    traducidos a hebreo — esa parte del checklist de traducción quedó
+    cerrada.
   - ⬜ **Siguiente paso ofrecido, no confirmado todavía**: conectar Google
     Calendar (ya está construido en `functions/src/googleCalendar.ts` +
     `oauth.ts`) para que las citas confirmadas aparezcan solas en el
@@ -134,21 +151,18 @@ detalle técnico completo de arquitectura y setup.
   - 🔄 **EN CURSO — traducción a hebreo de todo el sistema** (decisión del
     usuario: "todo en hebreo, panel incluido", el código/comentarios quedan
     en español). Estado:
-    - ✅ `bot/conversation.js` — todos los mensajes del bot de WhatsApp ya
-      están en hebreo (verificado: sintaxis OK con `node --check`).
-    - ⬜ `functions/src/notify.ts` — el objeto `templates` (recordatorios,
-      confirmaciones, cumpleaños, fidelidad, etc.) todavía está en español.
-      Falta traducir y volver a desplegar `functions/`.
-    - ⬜ `functions/src/ivr.ts` — el `<Say>` ya estaba en hebreo; falta
-      revisar el nombre por defecto `'Cliente telefónico'` → hebreo.
-    - ⬜ `app/` (toda la app del panel) — falta traducir TODOS los textos
-      (botones, menús, alertas, placeholders) y volver a activar RTL
-      (`I18nManager.forceRTL(true)` en `app/app/_layout.tsx`, como tenía el
-      proyecto original antes de reescribirlo). Es el bloque más grande que
-      falta.
-    - **Próximo paso al retomar**: seguir con `functions/src/notify.ts`,
-      después `app/`, y al final volver a desplegar `functions/` y avisar
-      al usuario para que revise cómo quedó.
+    - ✅ `bot/conversation.js` — todos los mensajes del bot de WhatsApp en
+      hebreo.
+    - ✅ `functions/src/notify.ts` (templates) y `functions/src/ivr.ts`
+      (nombre por defecto) — en hebreo, desplegado.
+    - ⬜ **Único pendiente**: `app/` (toda la app del panel) — falta
+      traducir TODOS los textos (botones, menús, alertas, placeholders) y
+      volver a activar RTL (`I18nManager.forceRTL(true)` en
+      `app/app/_layout.tsx`, como tenía el proyecto original antes de
+      reescribirlo).
+    - **Próximo paso al retomar**: hacer `app/` completo y avisar al
+      usuario para que revise cómo quedó (probablemente conviene correr
+      la app con `npx expo start` para mostrársela).
 - **Ideas para el backlog (feedback del usuario, no bloquean el piloto):**
   - Los servicios hoy son una sola línea plana (nombre+duración+precio). El
     usuario pidió poder tener "variantes" dentro de un mismo servicio (ej.
