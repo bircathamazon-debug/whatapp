@@ -99,11 +99,29 @@ detalle técnico completo de arquitectura y setup.
       así se puede generar la imagen desde afuera sin necesitar acceso a
       archivos del contenedor — `railway service files`/`railway ssh` no
       funcionaron bien en este entorno).
-  - ⬜ **Siguiente paso**: probar una reserva real de punta a punta —
-    escribirle "menu" al número del bot desde otro teléfono y completar
-    todo el flujo (elegir servicio, día, hora) para confirmar que la cita
-    queda creada en Firestore y que Yaakov recibe el aviso en su número
-    personal.
+  - ✅ **Reserva real de punta a punta probada por el usuario** — funcionó.
+  - 🐛 Se encontró y corrigió: WhatsApp está migrando chats personales a
+    direccionamiento por "LID" (`@lid`) en vez de número de teléfono
+    (`@s.whatsapp.net`); el bot ignoraba esos mensajes en silencio. Ahora
+    resuelve el número real vía `msg.key.remoteJidAlt`.
+  - 🎯 Mejora de UX pedida por el usuario, ya implementada: en la pantalla
+    de horarios, el cliente puede escribir la hora directamente (ej.
+    "9:30", "930") en vez de tocar un número — si esa hora está ocupada,
+    el bot ofrece las 3 más cercanas de todo el día (no solo lo último
+    mostrado). También se puede escribir 0️⃣ para volver a elegir otro día
+    en vez de quedar trabado con "opción inválida".
+  - 📌 Aclarado con el usuario: si abre WhatsApp en el teléfono con la
+    línea del bot, va a ver toda la conversación con cada cliente — es el
+    comportamiento normal de WhatsApp (dispositivo vinculado). El número
+    personal del peluquero solo recibe el aviso corto de "nueva cita",
+    salvo que se use el mismo número para probar como cliente y como
+    peluquero a la vez (como en las pruebas).
+  - ⬜ **Siguiente paso ofrecido, no confirmado todavía**: conectar Google
+    Calendar (ya está construido en `functions/src/googleCalendar.ts` +
+    `oauth.ts`) para que las citas confirmadas aparezcan solas en el
+    calendario del peluquero. Requiere crear credenciales OAuth en Google
+    Cloud (`GOOGLE_OAUTH_CLIENT_ID`/`SECRET` en `functions/.env`, hoy
+    vacíos).
   - 🔄 **EN CURSO — traducción a hebreo de todo el sistema** (decisión del
     usuario: "todo en hebreo, panel incluido", el código/comentarios quedan
     en español). Estado:
