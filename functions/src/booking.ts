@@ -65,6 +65,7 @@ export async function createAppointment(input: CreateAppointmentInput): Promise<
       source: input.source,
       recurringBookingId: input.recurringBookingId ?? null,
       remindersSent: [],
+      comebackReminderSentAt: null,
       confirmedAt: needsDeposit ? null : Date.now(),
       depositPaid: false,
       googleCalendarEventId: null,

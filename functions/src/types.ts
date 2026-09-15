@@ -67,7 +67,8 @@ export interface Appointment {
   status: AppointmentStatus;
   source: 'whatsapp' | 'phone' | 'admin' | 'recurring';
   recurringBookingId?: string | null;
-  remindersSent: number[]; // horas-antes ya notificadas, ej. [24, 2]
+  remindersSent: number[]; // horas-antes ya notificadas, ej. [24, 2, 0.5]
+  comebackReminderSentAt?: number | null; // aviso de "volvé a cortarte el pelo" al mes
   confirmedAt?: number | null;
   depositPaid: boolean;
   googleCalendarEventId?: string | null;
@@ -125,4 +126,4 @@ export interface OutboundNotification {
 
 export const LOYALTY_THRESHOLD = 10;
 export const NO_SHOW_DEPOSIT_THRESHOLD = 2;
-export const REMINDER_WINDOWS_HOURS = [24, 2];
+export const REMINDER_WINDOWS_HOURS = [24, 2, 0.5];

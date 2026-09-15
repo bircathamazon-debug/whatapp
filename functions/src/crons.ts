@@ -139,6 +139,42 @@ export const generateRecurringAppointments = onSchedule({ schedule: '0 6 * * *',
   }
 });
 
+/**
+ * Diario 10:00: a quienes se cortaron el pelo hace ~30 días (cita marcada
+ * como completada) se les invita automáticamente a reservar de nuevo.
+ */
+export const sendComebackReminders = onSchedule({ schedule: '0 10 * * *', timeZone: 'Asia/Jerusalem' }, async () => {
+  const THIRTY_DAYS_MS = 30 * 24 * 3600000;
+  const now = Date.now();
+  const windowStart = now - THIRTY_DAYS_MS - 12 * 3600000;
+  const windowEnd = now - THIRTY_DAYS_MS + 12 * 3600000;
+
+  const snap = await db
+    .collection('appointments')
+    .where('status', '==', 'completed')
+    .where('startsAt', '>=', windowStart)
+    .where('startsAt', '<', windowEnd)
+    .get();
+
+  for (const doc of snap.docs) {
+    const appt = doc.data() as Appointment;
+    if (appt.comebackReminderSentAt) continue;
+
+    const branchSnap = await db.collection('branches').doc(appt.branchId).get();
+    if (!branchSnap.exists) continue;
+    const branch = branchSnap.data() as Branch;
+
+    await sendNotification({
+      channel: 'whatsapp',
+      to: appt.clientPhone,
+      branch,
+      template: 'comebackReminder',
+      text: templates.comebackReminder(appt.clientName),
+    });
+    await doc.ref.update({ comebackReminderSentAt: Date.now() });
+  }
+});
+
 function nextOccurrence(fromMs: number, dayOfWeek: number, time: string, timezone: string): number {
   let cursor = fromMs;
   for (let i = 0; i < 8; i++) {

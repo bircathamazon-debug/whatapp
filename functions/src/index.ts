@@ -5,6 +5,7 @@ export {
   flushDelayedTwilio,
   sendBirthdayMessages,
   generateRecurringAppointments,
+  sendComebackReminders,
 } from './crons';
 
 export { onAppointmentCancelledOfferWaitlist } from './waitlist';

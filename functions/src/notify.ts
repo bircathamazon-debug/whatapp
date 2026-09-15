@@ -147,36 +147,39 @@ function escapeXml(s: string): string {
   return s.replace(/[<>&'"]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', "'": '&apos;', '"': '&quot;' }[c] as string));
 }
 
-// --- Plantillas de mensajes (español, con datos en hebreo cuando aplica) ---
+// --- Plantillas de mensajes (todas en hebreo: son lo que ve el cliente) ---
 
 export const templates = {
   bookingConfirmed: (clientName: string, dateStr: string, timeStr: string, serviceName: string, staffName: string) =>
-    `Hola ${clientName}! Tu cita quedó confirmada:\n📅 ${dateStr} a las ${timeStr}\n💈 ${serviceName} con ${staffName}\n\nResponde CANCELAR si necesitas anular.`,
+    `שלום ${clientName}! התור שלך אושר:\n📅 ${dateStr} בשעה ${timeStr}\n✂️ ${serviceName} עם ${staffName}\n\nלביטול, כתבו "menu" ובחרו בביטול תור.`,
 
   staffNewBooking: (clientName: string, dateStr: string, timeStr: string, serviceName: string) =>
-    `Nueva cita: ${clientName} — ${serviceName} el ${dateStr} a las ${timeStr}.`,
+    `תור חדש: ${clientName} — ${serviceName} בתאריך ${dateStr} בשעה ${timeStr}.`,
 
   reminder: (clientName: string, dateStr: string, timeStr: string) =>
-    `Hola ${clientName}, te recordamos tu cita el ${dateStr} a las ${timeStr}.\nResponde 1 para CONFIRMAR o 2 para CANCELAR.`,
+    `שלום ${clientName}, מזכירים לך את התור שלך בתאריך ${dateStr} בשעה ${timeStr}.\nהשיבו 1 לאישור או 2 לביטול.`,
 
   cancelledByClient: (clientName: string, dateStr: string, timeStr: string) =>
-    `${clientName} canceló su cita del ${dateStr} a las ${timeStr}.`,
+    `${clientName} ביטל/ה את התור מתאריך ${dateStr} בשעה ${timeStr}.`,
 
   waitlistOffer: (dateStr: string, timeStr: string, minutesToRespond: number) =>
-    `Se liberó un turno el ${dateStr} a las ${timeStr}. Responde 1 en los próximos ${minutesToRespond} minutos para tomarlo.`,
+    `התפנה תור בתאריך ${dateStr} בשעה ${timeStr}. השיבו 1 בתוך ${minutesToRespond} דקות כדי לתפוס אותו.`,
 
   depositRequired: (amount: number) =>
-    `Para confirmar tu cita necesitamos un depósito de ₪${amount}. Te enviaremos el link de pago. Si no se completa en 30 minutos, se liberará el horario.`,
+    `כדי לאשר את התור צריך מקדמה של ₪${amount}. נשלח לך קישור לתשלום. אם לא ישולם תוך 30 דקות, השעה תשוחרר.`,
 
   birthday: (clientName: string) =>
-    `🎉 ¡Feliz cumpleaños ${clientName}! Como regalo tienes 15% de descuento en tu próximo corte este mes. ¡Te esperamos!`,
+    `🎉 יום הולדת שמח ${clientName}! מתנה בשבילך: 15% הנחה על התספורת הבאה החודש. מחכים לך!`,
 
   loyaltyReward: (clientName: string) =>
-    `🎁 ${clientName}, llegaste a 10 cortes con nosotros. Tu próximo corte tiene 100% de descuento. ¡Gracias por tu confianza!`,
+    `🎁 ${clientName}, הגעת ל-10 תספורות אצלנו. התספורת הבאה שלך ב-100% הנחה. תודה על האמון!`,
 
   emptySlotCampaign: (dateStr: string, timeStr: string) =>
-    `Hoy quedó libre un turno a las ${timeStr} (${dateStr}). Responde RESERVAR si te sirve.`,
+    `התפנה תור היום בשעה ${timeStr} (${dateStr}). כתבו "menu" כדי לקבוע.`,
 
   noShowWarning: (clientName: string) =>
-    `${clientName} no se presentó a su cita. A partir de ahora se le pedirá depósito para reservar.`,
+    `${clientName} לא הגיע/ה לתור. מעכשיו יידרש מקדמה כדי לקבוע תור.`,
+
+  comebackReminder: (clientName: string) =>
+    `שלום ${clientName}! עבר כבר חודש מהתספורת האחרונה שלך ✂️ מוזמנים לקבוע תור חדש — כתבו "menu".`,
 };

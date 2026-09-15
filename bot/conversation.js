@@ -11,6 +11,9 @@ import { getAvailableSlots, toEpoch } from './availability.js';
 import * as api from './botApiClient.js';
 
 const CONV_COL = 'waConversations';
+// Recordatorio explícito de que hay que ESCRIBIR el número como respuesta
+// (no es un botón que se toca) — se repite en cada pantalla con opciones.
+const CHOOSE_NUMBER_HINT = '✍️ כתבו את המספר של האפשרות הרצויה בהודעה.';
 const DAYS_TO_OFFER = 6;
 const WEEKDAY_NAMES = ['יום ראשון', 'יום שני', 'יום שלישי', 'יום רביעי', 'יום חמישי', 'יום שישי', 'שבת'];
 
@@ -153,13 +156,13 @@ async function handleMainMenu(phone, text, branch, state) {
     if (services.length === 0) return ['עדיין לא הוגדרו שירותים. יש להודיע לספר.'];
     await saveConversation(phone, { step: 'BOOK_SERVICE', data: { ...state.data, services: services.map((s) => s.id) } });
     const lines = services.map((s, i) => `${i + 1}️⃣ ✂️ ${s.name} — ₪${s.price}`);
-    return ['איזה שירות תרצו להזמין?', ...lines];
+    return ['איזה שירות תרצו להזמין?', ...lines, CHOOSE_NUMBER_HINT];
   }
   if (text === '2') {
     const appts = await upcomingAppointments(phone);
     if (appts.length === 0) return ['אין לך תורים קרובים.', mainMenuText()];
     await saveConversation(phone, { step: 'CANCEL_SELECT', data: { ...state.data, appointmentIds: appts.map((a) => a.id) } });
-    return ['איזה תור תרצו לבטל?', ...appts.map((a, i) => `${i + 1}️⃣ ${a.label}`)];
+    return ['איזה תור תרצו לבטל?', ...appts.map((a, i) => `${i + 1}️⃣ ${a.label}`), CHOOSE_NUMBER_HINT];
   }
   if (text === '3') {
     const appts = await upcomingAppointments(phone);
@@ -182,7 +185,7 @@ async function handleBookService(phone, text, branch, state) {
     return handleBookStaff(phone, '1', branch, { data: { ...state.data, serviceId: service.id, staffOptions: [staff[0].id] } });
   }
   const lines = staff.map((s, i) => `${i + 1}️⃣ ${s.name}`);
-  return ['עם מי תרצו לקבוע את התור?', '0️⃣ כל מי שפנוי', ...lines];
+  return ['עם מי תרצו לקבוע את התור?', '0️⃣ כל מי שפנוי', ...lines, CHOOSE_NUMBER_HINT];
 }
 
 async function handleBookStaff(phone, text, branch, state) {
@@ -200,7 +203,7 @@ async function handleBookStaff(phone, text, branch, state) {
   const dateOptions = buildDateOptions(branch.timezone);
   await saveConversation(phone, { step: 'BOOK_DAY', data: { ...state.data, staffId, dateOptions } });
   const lines = dateOptions.map((d, i) => `${i + 1}️⃣ ${d.label}`);
-  return ['איזה יום מתאים לך?', ...lines];
+  return ['איזה יום מתאים לך?', ...lines, CHOOSE_NUMBER_HINT];
 }
 
 async function handleBookDay(phone, text, branch, state) {
@@ -297,10 +300,7 @@ async function bookChosenSlot(phone, branch, state, slot) {
       source: 'whatsapp',
     });
     await resetToMainMenu(phone);
-    return [
-      `✅ התור אושר לתאריך ${formatDate(slot.startsAt, branch.timezone)} בשעה ${formatTime(slot.startsAt, branch.timezone)}.`,
-      mainMenuText(),
-    ];
+    return [`✅ התור אושר לתאריך ${formatDate(slot.startsAt, branch.timezone)} בשעה ${formatTime(slot.startsAt, branch.timezone)}.`];
   } catch (err) {
     if (err.code === 'slot_taken') {
       return ['אופס, מישהו אחר תפס את השעה הזו הרגע. כתבו "menu" לבחירת שעה אחרת.'];

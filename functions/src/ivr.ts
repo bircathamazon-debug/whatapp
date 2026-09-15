@@ -129,7 +129,7 @@ async function bookNextAvailableSlot(branch: Branch, clientPhone: string): Promi
             staff,
             service,
             clientPhone,
-            clientName: 'Cliente telefónico',
+            clientName: 'לקוח טלפוני',
             startsAt: slots[0].startsAt,
             endsAt: slots[0].endsAt,
             source: 'phone',

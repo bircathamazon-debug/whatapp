@@ -80,7 +80,8 @@ export interface Appointment {
   status: AppointmentStatus;
   source: 'whatsapp' | 'phone' | 'admin' | 'recurring';
   recurringBookingId?: string | null;
-  remindersSent: number[]; // horas-antes ya notificadas, ej. [24, 2]
+  remindersSent: number[]; // horas-antes ya notificadas, ej. [24, 2, 0.5]
+  comebackReminderSentAt?: number | null; // aviso de "volvé a cortarte el pelo" al mes
   confirmedAt?: number | null;
   depositPaid: boolean;
   googleCalendarEventId?: string | null;
@@ -148,4 +149,4 @@ export interface Campaign {
 
 export const LOYALTY_THRESHOLD = 10; // cortes para desbloquear descuento
 export const NO_SHOW_DEPOSIT_THRESHOLD = 2; // no-shows antes de exigir depósito
-export const REMINDER_WINDOWS_HOURS = [24, 2]; // recordatorios antes de la cita
+export const REMINDER_WINDOWS_HOURS = [24, 2, 0.5]; // recordatorios antes de la cita (horas; 0.5 = 30 min)
