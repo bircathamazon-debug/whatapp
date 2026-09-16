@@ -17,6 +17,12 @@ export interface Branch {
   themeMode?: 'light' | 'dark';
   language?: 'he' | 'en' | 'es';
   maintenanceMode?: boolean;
+  subscription?: {
+    stripeCustomerId?: string;
+    stripeSubscriptionId?: string;
+    status: 'none' | 'active' | 'past_due' | 'canceled';
+    currentPeriodEnd?: number | null;
+  };
 }
 
 export interface WeeklyHours {

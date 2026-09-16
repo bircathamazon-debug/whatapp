@@ -17,6 +17,7 @@ export default function AdminIndexScreen() {
     { icon: '💈', label: t.adminMenu.staff, route: '/admin/staff' as const },
     { icon: '💇', label: t.adminMenu.services, route: '/admin/services' as const },
     { icon: '🗓️', label: t.adminMenu.schedule, route: '/admin/schedule' as const },
+    { icon: '💰', label: t.adminMenu.finance, route: '/admin/finance' as const },
     { icon: '⚙️', label: t.adminMenu.settings, route: '/admin/settings' as const },
   ];
 

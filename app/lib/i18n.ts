@@ -73,6 +73,7 @@ interface Dict {
     services: string;
     schedule: string;
     settings: string;
+    finance: string;
     logout: string;
     logoutTitle: string;
     logoutConfirm: string;
@@ -202,6 +203,41 @@ interface Dict {
     minutesShort: (n: number) => string;
     andSeparator: string;
   };
+  finance: {
+    title: string;
+    needBranch: string;
+    todayRevenueTitle: string;
+    monthRevenueTitle: string;
+    cutsCount: (n: number) => string;
+    expensesTitle: string;
+    expensesHint: string;
+    addExpense: string;
+    category: string;
+    categoryRent: string;
+    categoryUtilities: string;
+    categoryStaff: string;
+    categorySupplies: string;
+    categoryOther: string;
+    descriptionPlaceholder: string;
+    amountPlaceholder: string;
+    dateLabel: string;
+    monthExpensesTitle: string;
+    netTitle: string;
+    deleteTitle: string;
+    deleteConfirm: string;
+    cancel: string;
+    delete: string;
+    subscriptionTitle: string;
+    subscriptionNone: string;
+    subscriptionActive: (date: string) => string;
+    subscriptionPastDue: string;
+    subscriptionCanceled: string;
+    subscribeBtn: string;
+    manageBtn: string;
+    subscriptionError: string;
+    subscriptionErrorMessage: string;
+    subscriptionNotConfigured: string;
+  };
 }
 
 const he: Dict = {
@@ -264,6 +300,7 @@ const he: Dict = {
     services: 'שירותים',
     schedule: 'שעות עבודה וימים חסומים',
     settings: 'הגדרות (מקדמות, שבת, Google Calendar)',
+    finance: 'כספים',
     logout: 'יציאה מהחשבון',
     logoutTitle: 'יציאה מהחשבון',
     logoutConfirm: 'לצאת מהחשבון?',
@@ -393,6 +430,41 @@ const he: Dict = {
     minutesShort: (n) => `${n} דק'`,
     andSeparator: ' ו-',
   },
+  finance: {
+    title: 'כספים',
+    needBranch: 'יש לבחור סניף קודם.',
+    todayRevenueTitle: 'הכנסות היום',
+    monthRevenueTitle: 'הכנסות החודש',
+    cutsCount: (n) => `${n} תספורות`,
+    expensesTitle: 'הוצאות',
+    expensesHint: 'שכר דירה, מים וחשמל, עובדים, ציוד וכו׳.',
+    addExpense: 'הוספת הוצאה',
+    category: 'קטגוריה',
+    categoryRent: 'שכר דירה',
+    categoryUtilities: 'מים וחשמל',
+    categoryStaff: 'עובדים',
+    categorySupplies: 'ציוד/מלאי',
+    categoryOther: 'אחר',
+    descriptionPlaceholder: 'תיאור (אופציונלי)',
+    amountPlaceholder: 'סכום',
+    dateLabel: 'תאריך',
+    monthExpensesTitle: 'הוצאות החודש',
+    netTitle: 'רווח נקי החודש (הכנסות פחות הוצאות)',
+    deleteTitle: 'מחיקת הוצאה',
+    deleteConfirm: 'למחוק את ההוצאה הזו?',
+    cancel: 'ביטול',
+    delete: 'מחיקה',
+    subscriptionTitle: 'מנוי המערכת',
+    subscriptionNone: 'עדיין אין מנוי פעיל.',
+    subscriptionActive: (date) => `✅ מנוי פעיל · החיוב הבא: ${date}`,
+    subscriptionPastDue: '⚠️ החיוב האחרון נכשל. יש לעדכן את אמצעי התשלום.',
+    subscriptionCanceled: 'המנוי בוטל.',
+    subscribeBtn: 'הרשמה למנוי',
+    manageBtn: 'ניהול המנוי',
+    subscriptionError: 'שגיאה',
+    subscriptionErrorMessage: 'לא ניתן היה לפתוח את עמוד התשלום. נסו שוב מאוחר יותר.',
+    subscriptionNotConfigured: 'תשלומים עדיין לא הוגדרו במערכת.',
+  },
 };
 
 const en: Dict = {
@@ -455,6 +527,7 @@ const en: Dict = {
     services: 'Services',
     schedule: 'Hours & blocked days',
     settings: 'Settings (deposits, Shabbat, Google Calendar)',
+    finance: 'Finances',
     logout: 'Log out',
     logoutTitle: 'Log out',
     logoutConfirm: 'Log out of your account?',
@@ -584,6 +657,41 @@ const en: Dict = {
     minutesShort: (n) => `${n} min`,
     andSeparator: ' and ',
   },
+  finance: {
+    title: 'Finances',
+    needBranch: 'First select a branch.',
+    todayRevenueTitle: "Today's revenue",
+    monthRevenueTitle: "This month's revenue",
+    cutsCount: (n) => `${n} haircuts`,
+    expensesTitle: 'Expenses',
+    expensesHint: 'Rent, water/electricity, staff, supplies, etc.',
+    addExpense: 'Add expense',
+    category: 'Category',
+    categoryRent: 'Rent',
+    categoryUtilities: 'Water/electricity',
+    categoryStaff: 'Staff',
+    categorySupplies: 'Supplies',
+    categoryOther: 'Other',
+    descriptionPlaceholder: 'Description (optional)',
+    amountPlaceholder: 'Amount',
+    dateLabel: 'Date',
+    monthExpensesTitle: "This month's expenses",
+    netTitle: 'Net profit this month (revenue minus expenses)',
+    deleteTitle: 'Delete expense',
+    deleteConfirm: 'Delete this expense?',
+    cancel: 'Cancel',
+    delete: 'Delete',
+    subscriptionTitle: 'System subscription',
+    subscriptionNone: 'No active subscription yet.',
+    subscriptionActive: (date) => `✅ Active · next charge: ${date}`,
+    subscriptionPastDue: '⚠️ The last charge failed. Please update your payment method.',
+    subscriptionCanceled: 'Subscription cancelled.',
+    subscribeBtn: 'Subscribe',
+    manageBtn: 'Manage subscription',
+    subscriptionError: 'Error',
+    subscriptionErrorMessage: 'Could not open the payment page. Please try again later.',
+    subscriptionNotConfigured: 'Payments are not set up yet.',
+  },
 };
 
 const es: Dict = {
@@ -646,6 +754,7 @@ const es: Dict = {
     services: 'Servicios',
     schedule: 'Horarios y días bloqueados',
     settings: 'Configuración (depósitos, Shabat, Google Calendar)',
+    finance: 'Finanzas',
     logout: 'Cerrar sesión',
     logoutTitle: 'Cerrar sesión',
     logoutConfirm: '¿Seguro que querés salir?',
@@ -774,6 +883,41 @@ const es: Dict = {
     hoursShort: (n) => `${n}h`,
     minutesShort: (n) => `${n} min`,
     andSeparator: ' y ',
+  },
+  finance: {
+    title: 'Finanzas',
+    needBranch: 'Seleccioná una sucursal primero.',
+    todayRevenueTitle: 'Ingresos de hoy',
+    monthRevenueTitle: 'Ingresos del mes',
+    cutsCount: (n) => `${n} cortes`,
+    expensesTitle: 'Gastos',
+    expensesHint: 'Alquiler, agua/luz, empleados, insumos, etc.',
+    addExpense: 'Agregar gasto',
+    category: 'Categoría',
+    categoryRent: 'Alquiler',
+    categoryUtilities: 'Agua/luz',
+    categoryStaff: 'Empleados',
+    categorySupplies: 'Insumos',
+    categoryOther: 'Otro',
+    descriptionPlaceholder: 'Descripción (opcional)',
+    amountPlaceholder: 'Monto',
+    dateLabel: 'Fecha',
+    monthExpensesTitle: 'Gastos del mes',
+    netTitle: 'Ganancia neta del mes (ingresos menos gastos)',
+    deleteTitle: 'Eliminar gasto',
+    deleteConfirm: '¿Eliminar este gasto?',
+    cancel: 'Cancelar',
+    delete: 'Eliminar',
+    subscriptionTitle: 'Suscripción del sistema',
+    subscriptionNone: 'Todavía no hay una suscripción activa.',
+    subscriptionActive: (date) => `✅ Activa · próximo cobro: ${date}`,
+    subscriptionPastDue: '⚠️ El último cobro falló. Actualizá el método de pago.',
+    subscriptionCanceled: 'La suscripción fue cancelada.',
+    subscribeBtn: 'Suscribirse',
+    manageBtn: 'Gestionar suscripción',
+    subscriptionError: 'Error',
+    subscriptionErrorMessage: 'No se pudo abrir la página de pago. Probá de nuevo más tarde.',
+    subscriptionNotConfigured: 'Los pagos todavía no están configurados en el sistema.',
   },
 };
 

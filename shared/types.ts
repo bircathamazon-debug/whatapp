@@ -26,6 +26,13 @@ export interface Branch {
   /** Interruptor de emergencia: pausa el bot y el IVR (llamadas van directo
    *  al peluquero) ante un problema técnico, hasta que se desactive. */
   maintenanceMode?: boolean;
+  /** Suscripción de pago del sistema (Stripe), cobro mensual recurrente. */
+  subscription?: {
+    stripeCustomerId?: string;
+    stripeSubscriptionId?: string;
+    status: 'none' | 'active' | 'past_due' | 'canceled';
+    currentPeriodEnd?: number | null; // epoch ms del próximo cobro
+  };
 }
 
 export interface WeeklyHours {
@@ -145,6 +152,21 @@ export interface UnansweredMessage {
   text: string;
   step: string; // en qué pantalla de la conversación pasó (ej. 'MAIN_MENU')
   resolved: boolean;
+  createdAt: number;
+}
+
+/**
+ * Gasto del negocio (alquiler, agua/luz, empleados, insumos, otro) cargado
+ * a mano por el peluquero en la pantalla de Finanzas, para poder comparar
+ * ingresos contra gastos.
+ */
+export interface Expense {
+  id: string;
+  branchId: string;
+  category: 'rent' | 'utilities' | 'staff' | 'supplies' | 'other';
+  description?: string;
+  amount: number;
+  date: string; // 'YYYY-MM-DD'
   createdAt: number;
 }
 
