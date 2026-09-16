@@ -5,14 +5,9 @@ import { updateBranch } from '../../lib/branches';
 import { getStaffByBranch } from '../../lib/staff';
 import { getBlockedTimesByBranch, addBlockedTime, deleteBlockedTime } from '../../lib/blockedTimes';
 import { useTheme, type ThemeColors } from '../../lib/theme';
+import { useT, isRtl, LANGUAGE_NAMES, type Lang } from '../../lib/i18n';
 import { LOYALTY_THRESHOLD, NO_SHOW_DEPOSIT_THRESHOLD, REMINDER_WINDOWS_HOURS } from '../../../shared/types';
 import type { Staff, Branch, BlockedTime } from '../../../shared/types';
-
-const SHABBAT_MODES: { value: Branch['shabbatMode']; label: string; hint: string }[] = [
-  { value: 'off', label: 'כבוי', hint: 'אפשר להזמין תור ומודיעים לספר בכל שעה.' },
-  { value: 'silent', label: 'שקט (מומלץ)', hint: 'אפשר להזמין תור בשבת, אבל ההודעה לספר מתעכבת עד מוצאי שבת.' },
-  { value: 'closed', label: 'סגור', hint: 'לא מתקבלות הזמנות חדשות בשבת.' },
-];
 
 function todayStr(): string {
   return new Intl.DateTimeFormat('en-CA').format(Date.now());
@@ -24,6 +19,12 @@ export default function SettingsScreen() {
   const { branchId, branches, reload } = useBranch();
   const branch = branches.find((b) => b.id === branchId);
   const { colors } = useTheme();
+  const t = useT();
+  const SHABBAT_MODES: { value: Branch['shabbatMode']; label: string; hint: string }[] = [
+    { value: 'off', label: t.settings.shabbatOffLabel, hint: t.settings.shabbatOffHint },
+    { value: 'silent', label: t.settings.shabbatSilentLabel, hint: t.settings.shabbatSilentHint },
+    { value: 'closed', label: t.settings.shabbatClosedLabel, hint: t.settings.shabbatClosedHint },
+  ];
   const styles = makeStyles(colors);
   const [staff, setStaff] = useState<Staff[]>([]);
   const [blockedTimes, setBlockedTimes] = useState<BlockedTime[]>([]);
@@ -58,9 +59,19 @@ export default function SettingsScreen() {
     await reload();
   };
 
+  const setLanguage = async (lang: Lang) => {
+    if (!branchId) return;
+    const currentLang: Lang = (branch?.language as Lang) ?? 'he';
+    await updateBranch(branchId, { language: lang });
+    await reload();
+    if (isRtl(lang) !== isRtl(currentLang)) {
+      Alert.alert(t.settings.restartTitle, t.settings.restartMessage);
+    }
+  };
+
   const connectGoogleCalendar = (staffId: string) => {
     if (!FUNCTIONS_BASE_URL) {
-      Alert.alert('חסרה הגדרה', 'יש להגדיר EXPO_PUBLIC_FUNCTIONS_BASE_URL בקובץ app/.env כדי לחבר את Google Calendar.');
+      Alert.alert(t.settings.missingConfigTitle, t.settings.missingConfigMessage);
       return;
     }
     Linking.openURL(`${FUNCTIONS_BASE_URL}/googleCalendarConnect?staffId=${staffId}`);
@@ -69,11 +80,11 @@ export default function SettingsScreen() {
   const submitBlock = async () => {
     if (!branchId) return;
     if (!/^\d{4}-\d{2}-\d{2}$/.test(blockDate)) {
-      Alert.alert('תאריך לא תקין', 'יש להזין תאריך בפורמט YYYY-MM-DD, למשל 2026-09-20.');
+      Alert.alert(t.settings.invalidDateTitle, t.settings.invalidDateMessage);
       return;
     }
     if (!blockAllDay && (!/^\d{2}:\d{2}$/.test(blockStart) || !/^\d{2}:\d{2}$/.test(blockEnd))) {
-      Alert.alert('שעה לא תקינה', 'יש להזין שעה בפורמט HH:mm, למשל 13:00.');
+      Alert.alert(t.settings.invalidTimeTitle, t.settings.invalidTimeMessage);
       return;
     }
     await addBlockedTime({
@@ -90,32 +101,42 @@ export default function SettingsScreen() {
   };
 
   const removeBlock = (b: BlockedTime) => {
-    Alert.alert('מחיקת חסימה', 'למחוק את החסימה הזו?', [
-      { text: 'ביטול', style: 'cancel' },
-      { text: 'מחיקה', style: 'destructive', onPress: async () => { await deleteBlockedTime(b.id); await loadExtras(); } },
+    Alert.alert(t.settings.deleteBlockTitle, t.settings.deleteBlockConfirm, [
+      { text: t.settings.cancel, style: 'cancel' },
+      { text: t.settings.delete, style: 'destructive', onPress: async () => { await deleteBlockedTime(b.id); await loadExtras(); } },
     ]);
   };
 
-  if (!branch) return <View style={styles.container}><Text style={styles.emptyText}>יש לבחור סניף קודם.</Text></View>;
+  if (!branch) return <View style={styles.container}><Text style={styles.emptyText}>{t.settings.needBranch}</Text></View>;
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ padding: 16 }}>
-      <Text style={styles.sectionTitle}>מצב תצוגה</Text>
+      <Text style={styles.sectionTitle}>{t.settings.languageTitle}</Text>
+      <Text style={styles.hint}>{t.settings.languageHint}</Text>
+      <View style={styles.chipsRow}>
+        {(Object.keys(LANGUAGE_NAMES) as Lang[]).map((lang) => (
+          <TouchableOpacity key={lang} style={[styles.staffChip, ((branch.language as Lang) ?? 'he') === lang && styles.staffChipActive]} onPress={() => setLanguage(lang)}>
+            <Text style={[styles.staffChipText, ((branch.language as Lang) ?? 'he') === lang && styles.staffChipTextActive]}>{LANGUAGE_NAMES[lang]}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      <Text style={styles.sectionTitle}>{t.settings.displayMode}</Text>
       <View style={styles.segmented}>
         <TouchableOpacity style={[styles.segment, (branch.themeMode ?? 'light') === 'light' && styles.segmentActive]} onPress={() => setThemeMode('light')}>
-          <Text style={[styles.segmentText, (branch.themeMode ?? 'light') === 'light' && styles.segmentTextActive]}>☀️ בהיר</Text>
+          <Text style={[styles.segmentText, (branch.themeMode ?? 'light') === 'light' && styles.segmentTextActive]}>{t.settings.light}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.segment, branch.themeMode === 'dark' && styles.segmentActive]} onPress={() => setThemeMode('dark')}>
-          <Text style={[styles.segmentText, branch.themeMode === 'dark' && styles.segmentTextActive]}>🌙 כהה</Text>
+          <Text style={[styles.segmentText, branch.themeMode === 'dark' && styles.segmentTextActive]}>{t.settings.dark}</Text>
         </TouchableOpacity>
       </View>
 
-      <Text style={styles.sectionTitle}>חסימת שעות עבודה</Text>
-      <Text style={styles.hint}>לחגים, תורים אישיים או חופשות — השעות החסומות לא יוצעו ללקוחות בוואטסאפ או בטלפון.</Text>
+      <Text style={styles.sectionTitle}>{t.settings.blockHoursTitle}</Text>
+      <Text style={styles.hint}>{t.settings.blockHoursHint}</Text>
 
       <View style={styles.chipsRow}>
         <TouchableOpacity style={[styles.staffChip, blockStaffId === null && styles.staffChipActive]} onPress={() => setBlockStaffId(null)}>
-          <Text style={[styles.staffChipText, blockStaffId === null && styles.staffChipTextActive]}>כל הצוות</Text>
+          <Text style={[styles.staffChipText, blockStaffId === null && styles.staffChipTextActive]}>{t.settings.allStaff}</Text>
         </TouchableOpacity>
         {staff.map((s) => (
           <TouchableOpacity key={s.id} style={[styles.staffChip, blockStaffId === s.id && styles.staffChipActive]} onPress={() => setBlockStaffId(s.id)}>
@@ -125,26 +146,26 @@ export default function SettingsScreen() {
       </View>
 
       <View style={styles.blockCard}>
-        <Text style={styles.fieldLabel}>תאריך (YYYY-MM-DD)</Text>
+        <Text style={styles.fieldLabel}>{t.settings.dateLabel}</Text>
         <TextInput style={styles.input} value={blockDate} onChangeText={setBlockDate} placeholder="2026-09-20" placeholderTextColor={colors.textMuted} />
 
         <TouchableOpacity style={styles.allDayRow} onPress={() => setBlockAllDay((v) => !v)}>
           <View style={[styles.checkbox, blockAllDay && styles.checkboxActive]}>{blockAllDay && <Text style={styles.checkboxMark}>✓</Text>}</View>
-          <Text style={styles.allDayLabel}>לחסום את היום כולו</Text>
+          <Text style={styles.allDayLabel}>{t.settings.blockAllDay}</Text>
         </TouchableOpacity>
 
         {!blockAllDay && (
           <View style={styles.timeRow}>
             <TextInput style={[styles.input, styles.timeInput]} value={blockStart} onChangeText={setBlockStart} placeholder="13:00" placeholderTextColor={colors.textMuted} />
-            <Text style={styles.timeSep}>עד</Text>
+            <Text style={styles.timeSep}>{t.settings.to}</Text>
             <TextInput style={[styles.input, styles.timeInput]} value={blockEnd} onChangeText={setBlockEnd} placeholder="14:00" placeholderTextColor={colors.textMuted} />
           </View>
         )}
 
-        <TextInput style={styles.input} value={blockReason} onChangeText={setBlockReason} placeholder="סיבה (לא חובה) — למשל חופשה" placeholderTextColor={colors.textMuted} />
+        <TextInput style={styles.input} value={blockReason} onChangeText={setBlockReason} placeholder={t.settings.reasonPlaceholder} placeholderTextColor={colors.textMuted} />
 
         <TouchableOpacity style={styles.saveBtn} onPress={submitBlock}>
-          <Text style={styles.saveBtnText}>➕ הוספת חסימה</Text>
+          <Text style={styles.saveBtnText}>{t.settings.addBlock}</Text>
         </TouchableOpacity>
       </View>
 
@@ -154,10 +175,10 @@ export default function SettingsScreen() {
             <View key={b.id} style={styles.blockRow}>
               <View style={{ flex: 1 }}>
                 <Text style={styles.blockRowTitle}>
-                  {b.date} · {b.allDay ? 'יום שלם' : `${b.startTime}–${b.endTime}`}
+                  {b.date} · {b.allDay ? t.settings.fullDay : `${b.startTime}–${b.endTime}`}
                 </Text>
                 <Text style={styles.blockRowSub}>
-                  {b.staffId ? staff.find((s) => s.id === b.staffId)?.name ?? b.staffId : 'כל הצוות'}
+                  {b.staffId ? staff.find((s) => s.id === b.staffId)?.name ?? b.staffId : t.settings.allStaff}
                   {b.reason ? ` · ${b.reason}` : ''}
                 </Text>
               </View>
@@ -169,7 +190,7 @@ export default function SettingsScreen() {
         </View>
       )}
 
-      <Text style={styles.sectionTitle}>מצב שבת — {branch.name}</Text>
+      <Text style={styles.sectionTitle}>{t.settings.shabbatMode(branch.name)}</Text>
       {SHABBAT_MODES.map((m) => (
         <TouchableOpacity key={m.value} style={[styles.option, branch.shabbatMode === m.value && styles.optionActive]} onPress={() => setShabbatMode(m.value)}>
           <Text style={[styles.optionLabel, branch.shabbatMode === m.value && styles.optionLabelActive]}>{m.label}</Text>
@@ -177,19 +198,21 @@ export default function SettingsScreen() {
         </TouchableOpacity>
       ))}
 
-      <Text style={styles.sectionTitle}>Google Calendar (אופציונלי)</Text>
-      <Text style={styles.hint}>כל ספר יכול לחבר את יומן הגוגל האישי שלו — התורים שלו יתווספו אליו אוטומטית.</Text>
+      <Text style={styles.sectionTitle}>{t.settings.googleCalendar}</Text>
+      <Text style={styles.hint}>{t.settings.googleCalendarHint}</Text>
       {staff.map((s) => (
         <TouchableOpacity key={s.id} style={styles.calendarBtn} onPress={() => connectGoogleCalendar(s.id)}>
-          <Text style={styles.calendarBtnText}>חיבור היומן של {s.name}</Text>
+          <Text style={styles.calendarBtnText}>{t.settings.connectCalendar(s.name)}</Text>
         </TouchableOpacity>
       ))}
 
-      <Text style={styles.sectionTitle}>חוקי המערכת</Text>
+      <Text style={styles.sectionTitle}>{t.settings.systemRules}</Text>
       <View style={styles.infoCard}>
-        <Text style={styles.infoLine}>🎁 מועדון לקוחות: הנחה כל {LOYALTY_THRESHOLD} תספורות שהושלמו.</Text>
-        <Text style={styles.infoLine}>⚠️ מקדמה חובה אחרי {NO_SHOW_DEPOSIT_THRESHOLD} אי-הגעות.</Text>
-        <Text style={styles.infoLine}>⏰ תזכורות אוטומטיות: {REMINDER_WINDOWS_HOURS.map((h) => (h < 1 ? `${h * 60} דק'` : `${h} שעות`)).join(' ו-')} לפני התור.</Text>
+        <Text style={styles.infoLine}>{t.settings.loyaltyRule(LOYALTY_THRESHOLD)}</Text>
+        <Text style={styles.infoLine}>{t.settings.depositRule(NO_SHOW_DEPOSIT_THRESHOLD)}</Text>
+        <Text style={styles.infoLine}>
+          {t.settings.reminderRule(REMINDER_WINDOWS_HOURS.map((h) => (h < 1 ? t.settings.minutesShort(h * 60) : t.settings.hoursShort(h))).join(t.settings.andSeparator))}
+        </Text>
       </View>
     </ScrollView>
   );

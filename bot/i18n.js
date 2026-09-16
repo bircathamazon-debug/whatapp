@@ -1,0 +1,193 @@
+/**
+ * Diccionario de idiomas para el bot de WhatsApp. Copia local (igual que
+ * availability.js) porque bot/ se despliega solo, sin acceso a shared/.
+ * Agregar un idioma nuevo = agregar una entrada acá, sin tocar
+ * conversation.js.
+ */
+const STRINGS = {
+  he: {
+    weekdays: ['יום ראשון', 'יום שני', 'יום שלישי', 'יום רביעי', 'יום חמישי', 'יום שישי', 'שבת'],
+    dateLocale: 'he-IL',
+    greetingRegex: /^(menu|תפריט|היי|שלום|hi)$/i,
+    yesRegex: /^כן/,
+    mainMenu: () => [
+      'במה נוכל לעזור?',
+      '1️⃣ לקבוע תור',
+      '2️⃣ לבטל תור',
+      '3️⃣ לצפייה בתורים הקרובים שלי',
+      '4️⃣ לדבר ישירות עם הספר',
+      '',
+      'כתבו את מספר האפשרות הרצויה.',
+    ].join('\n'),
+    chooseNumberHint: '✍️ כתבו את המספר של האפשרות הרצויה בהודעה.',
+    botNotConfigured: 'הבוט לא הוגדר כראוי (חסר מזהה סניף). יש להודיע לספר.',
+    welcome: (branchName) => `שלום! ברוכים הבאים ל${branchName}.`,
+    reminderConfirmed: '✅ התור אושר. מחכים לך!',
+    reminderCancelled: 'התור בוטל. כתבו "menu" כדי לקבוע תור חדש.',
+    waitlistDeclined: 'הבנו, תישארו ברשימת ההמתנה.',
+    waitlistTaken: 'אופס, התור הזה כבר נתפס על ידי מישהו אחר. תישארו ברשימת ההמתנה לתור הבא שיתפנה.',
+    noServices: 'עדיין לא הוגדרו שירותים. יש להודיע לספר.',
+    chooseService: 'איזה שירות תרצו להזמין?',
+    noUpcoming: 'אין לך תורים קרובים.',
+    chooseCancelAppt: 'איזה תור תרצו לבטל?',
+    upcomingListHeader: 'התורים הקרובים שלך:',
+    noStaffConfigured: 'לא הוגדר ספר בסניף כרגע. נסו שוב מאוחר יותר.',
+    talkTo: (name) => `אפשר לדבר ישירות עם ${name}:`,
+    notUnderstood: 'לא הבנתי. כתבו "menu" לצפייה באפשרויות.',
+    invalidChoiceService: 'בחירה לא תקינה. כתבו את מספר השירות.',
+    chooseStaff: 'עם מי תרצו לקבוע את התור?',
+    anyStaff: '0️⃣ כל מי שפנוי',
+    invalidChoice: 'בחירה לא תקינה.',
+    chooseDay: 'איזה יום מתאים לך?',
+    noSlotsThatDay: (dayLabel) => `אין תורים פנויים ב-${dayLabel}.`,
+    askWaitlist: 'נעדכן אותך אוטומטית אם יתפנה תור באותו היום? כתבו כן או לא.',
+    chooseTimePrompt: (dayLabel) => `באיזו שעה נוח לך ב-${dayLabel}? אפשר לכתוב את השעה ישירות (למשל 9:30) — השעות הן בקפיצות של 15 דקות: 9:00, 9:15, 9:30...`,
+    orChooseFromList: 'או לבחור אחת מהשעות הפנויות:',
+    chooseOtherDay: '0️⃣ לבחור יום אחר',
+    noSlotsLeftThatDay: 'לא נשארו תורים פנויים באותו יום. כתבו 0️⃣ לבחור יום אחר.',
+    timeTaken: (time) => `השעה ${time} תפוסה. הכי קרובות פנויות:`,
+    didNotUnderstandTime: 'לא הבנתי את הבחירה.',
+    timeHelp: 'כתבו את מספר השעה מהרשימה, כתבו שעה ישירות (למשל 9:30), או 0️⃣ כדי לבחור יום אחר.',
+    appointmentConfirmed: (date, time) => `✅ התור אושר לתאריך ${date} בשעה ${time}.`,
+    slotTaken: 'אופס, מישהו אחר תפס את השעה הזו הרגע. כתבו "menu" לבחירת שעה אחרת.',
+    bookingError: 'אירעה שגיאה בקביעת התור. נסו שוב בעוד כמה דקות.',
+    waitlistConfirmed: 'נודיע לך כאן ברגע שיתפנה תור באותו היום.',
+    apptCancelled: 'התור בוטל.',
+    defaultClientName: 'לקוח',
+    today: (weekday) => `היום (${weekday})`,
+    tomorrow: (weekday) => `מחר (${weekday})`,
+    otherDay: (weekday, dd, mm) => `${weekday} ${dd}/${mm}`,
+  },
+  en: {
+    weekdays: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+    dateLocale: 'en-GB',
+    greetingRegex: /^(menu|hi|hello|hey)$/i,
+    yesRegex: /^y(es)?$/i,
+    mainMenu: () => [
+      'How can we help?',
+      '1️⃣ Book an appointment',
+      '2️⃣ Cancel an appointment',
+      '3️⃣ View my upcoming appointments',
+      '4️⃣ Talk directly with the stylist',
+      '',
+      'Type the number of the option you want.',
+    ].join('\n'),
+    chooseNumberHint: '✍️ Type the number of the option you want.',
+    botNotConfigured: "The bot isn't set up correctly (missing branch ID). Please contact the salon.",
+    welcome: (branchName) => `Hello! Welcome to ${branchName}.`,
+    reminderConfirmed: '✅ Appointment confirmed. See you then!',
+    reminderCancelled: 'Appointment cancelled. Type "menu" to book a new one.',
+    waitlistDeclined: "Got it, you'll stay on the waitlist.",
+    waitlistTaken: "Oops, someone else already took that slot. You'll stay on the waitlist for the next opening.",
+    noServices: 'No services have been set up yet. Please contact the salon.',
+    chooseService: 'Which service would you like to book?',
+    noUpcoming: 'You have no upcoming appointments.',
+    chooseCancelAppt: 'Which appointment would you like to cancel?',
+    upcomingListHeader: 'Your upcoming appointments:',
+    noStaffConfigured: 'No stylist is set up for this branch right now. Please try again later.',
+    talkTo: (name) => `You can talk directly with ${name}:`,
+    notUnderstood: 'Sorry, I didn\'t get that. Type "menu" to see the options.',
+    invalidChoiceService: 'Invalid choice. Type the service number.',
+    chooseStaff: 'Who would you like to book with?',
+    anyStaff: '0️⃣ Anyone available',
+    invalidChoice: 'Invalid choice.',
+    chooseDay: 'Which day works for you?',
+    noSlotsThatDay: (dayLabel) => `No slots available on ${dayLabel}.`,
+    askWaitlist: 'We can notify you automatically if a slot opens that day. Type yes or no.',
+    chooseTimePrompt: (dayLabel) => `What time works for you on ${dayLabel}? You can type the time directly (e.g. 9:30) — slots are in 15-minute steps: 9:00, 9:15, 9:30...`,
+    orChooseFromList: 'Or pick one of the available times:',
+    chooseOtherDay: '0️⃣ Pick another day',
+    noSlotsLeftThatDay: 'No slots left that day. Type 0️⃣ to pick another day.',
+    timeTaken: (time) => `${time} is taken. Closest available times:`,
+    didNotUnderstandTime: "Sorry, I didn't understand that.",
+    timeHelp: "Type the time's number from the list, type a time directly (e.g. 9:30), or 0️⃣ to pick another day.",
+    appointmentConfirmed: (date, time) => `✅ Appointment confirmed for ${date} at ${time}.`,
+    slotTaken: 'Oops, someone just took that slot. Type "menu" to pick another time.',
+    bookingError: 'Something went wrong booking the appointment. Please try again in a few minutes.',
+    waitlistConfirmed: "We'll message you here as soon as a slot opens that day.",
+    apptCancelled: 'Appointment cancelled.',
+    defaultClientName: 'Client',
+    today: (weekday) => `Today (${weekday})`,
+    tomorrow: (weekday) => `Tomorrow (${weekday})`,
+    otherDay: (weekday, dd, mm) => `${weekday} ${dd}/${mm}`,
+  },
+  es: {
+    weekdays: ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'],
+    dateLocale: 'es-ES',
+    greetingRegex: /^(menu|hola|hi)$/i,
+    yesRegex: /^s[ií]/i,
+    mainMenu: () => [
+      '¿En qué podemos ayudarte?',
+      '1️⃣ Reservar un turno',
+      '2️⃣ Cancelar un turno',
+      '3️⃣ Ver mis próximos turnos',
+      '4️⃣ Hablar directamente con el peluquero',
+      '',
+      'Escribí el número de la opción que querés.',
+    ].join('\n'),
+    chooseNumberHint: '✍️ Escribí el número de la opción que querés en el mensaje.',
+    botNotConfigured: 'El bot no está configurado correctamente (falta el ID de sucursal). Avisá a la peluquería.',
+    welcome: (branchName) => `¡Hola! Bienvenido/a a ${branchName}.`,
+    reminderConfirmed: '✅ Turno confirmado. ¡Te esperamos!',
+    reminderCancelled: 'Turno cancelado. Escribí "menu" para reservar uno nuevo.',
+    waitlistDeclined: 'Entendido, seguís en la lista de espera.',
+    waitlistTaken: 'Uy, ese turno ya lo tomó otra persona. Seguís en la lista de espera para el próximo que se libere.',
+    noServices: 'Todavía no hay servicios configurados. Avisá a la peluquería.',
+    chooseService: '¿Qué servicio querés reservar?',
+    noUpcoming: 'No tenés turnos próximos.',
+    chooseCancelAppt: '¿Qué turno querés cancelar?',
+    upcomingListHeader: 'Tus próximos turnos:',
+    noStaffConfigured: 'No hay ningún peluquero configurado en la sucursal por ahora. Probá de nuevo más tarde.',
+    talkTo: (name) => `Podés hablar directamente con ${name}:`,
+    notUnderstood: 'No entendí. Escribí "menu" para ver las opciones.',
+    invalidChoiceService: 'Opción inválida. Escribí el número del servicio.',
+    chooseStaff: '¿Con quién querés reservar el turno?',
+    anyStaff: '0️⃣ Cualquiera que esté disponible',
+    invalidChoice: 'Opción inválida.',
+    chooseDay: '¿Qué día te queda cómodo?',
+    noSlotsThatDay: (dayLabel) => `No hay turnos disponibles el ${dayLabel}.`,
+    askWaitlist: '¿Querés que te avisemos automáticamente si se libera un turno ese día? Escribí sí o no.',
+    chooseTimePrompt: (dayLabel) => `¿A qué hora te queda cómodo el ${dayLabel}? Podés escribir la hora directamente (por ej. 9:30) — los turnos son cada 15 minutos: 9:00, 9:15, 9:30...`,
+    orChooseFromList: 'O elegí uno de los horarios disponibles:',
+    chooseOtherDay: '0️⃣ Elegir otro día',
+    noSlotsLeftThatDay: 'No quedan turnos libres ese día. Escribí 0️⃣ para elegir otro día.',
+    timeTaken: (time) => `El horario ${time} está ocupado. Los más cercanos disponibles:`,
+    didNotUnderstandTime: 'No entendí la elección.',
+    timeHelp: 'Escribí el número del horario de la lista, la hora directamente (por ej. 9:30), o 0️⃣ para elegir otro día.',
+    appointmentConfirmed: (date, time) => `✅ Turno confirmado para el ${date} a las ${time}.`,
+    slotTaken: 'Uy, alguien acaba de tomar ese horario. Escribí "menu" para elegir otro.',
+    bookingError: 'Ocurrió un error al reservar el turno. Probá de nuevo en unos minutos.',
+    waitlistConfirmed: 'Te avisamos por acá apenas se libere un turno ese día.',
+    apptCancelled: 'Turno cancelado.',
+    defaultClientName: 'Cliente',
+    today: (weekday) => `Hoy (${weekday})`,
+    tomorrow: (weekday) => `Mañana (${weekday})`,
+    otherDay: (weekday, dd, mm) => `${weekday} ${dd}/${mm}`,
+  },
+};
+
+function langOf(branch) {
+  return STRINGS[branch?.language] ? branch.language : 'he';
+}
+
+/** t(branch, 'key') o t(branch, 'key', ...argsParaLaFuncion) */
+export function t(branch, key, ...args) {
+  const entry = STRINGS[langOf(branch)][key];
+  return typeof entry === 'function' ? entry(...args) : entry;
+}
+
+export function weekdayNames(branch) {
+  return STRINGS[langOf(branch)].weekdays;
+}
+
+export function dateLocale(branch) {
+  return STRINGS[langOf(branch)].dateLocale;
+}
+
+export function isGreeting(branch, text) {
+  return STRINGS[langOf(branch)].greetingRegex.test(text);
+}
+
+export function isYes(branch, text) {
+  return STRINGS[langOf(branch)].yesRegex.test(text);
+}

@@ -3,11 +3,13 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, Alert, S
 import { useBranch } from '../../lib/branchContext';
 import { getStaffByBranch, addStaff, deleteStaff, updateStaff, emptyWeeklyHours } from '../../lib/staff';
 import { useTheme, type ThemeColors } from '../../lib/theme';
+import { useT } from '../../lib/i18n';
 import type { Staff } from '../../../shared/types';
 
 export default function StaffScreen() {
   const { branchId } = useBranch();
   const { colors } = useTheme();
+  const t = useT();
   const styles = makeStyles(colors);
   const [staff, setStaff] = useState<Staff[]>([]);
   const [name, setName] = useState('');
@@ -34,13 +36,13 @@ export default function StaffScreen() {
   };
 
   const remove = (s: Staff) => {
-    Alert.alert('מחיקת ספר', `למחוק את ${s.name}?`, [
-      { text: 'ביטול', style: 'cancel' },
-      { text: 'מחיקה', style: 'destructive', onPress: async () => { await deleteStaff(s.id); await load(); } },
+    Alert.alert(t.staff.deleteTitle, t.staff.deleteConfirm(s.name), [
+      { text: t.staff.cancel, style: 'cancel' },
+      { text: t.staff.delete, style: 'destructive', onPress: async () => { await deleteStaff(s.id); await load(); } },
     ]);
   };
 
-  if (!branchId) return <View style={styles.container}><Text style={styles.emptyText}>יש ליצור סניף קודם.</Text></View>;
+  if (!branchId) return <View style={styles.container}><Text style={styles.emptyText}>{t.staff.needBranch}</Text></View>;
 
   return (
     <View style={styles.container}>
@@ -49,12 +51,12 @@ export default function StaffScreen() {
         keyExtractor={(s) => s.id}
         ListHeaderComponent={
           <View style={styles.form}>
-            <Text style={styles.label}>שם</Text>
-            <TextInput style={styles.input} value={name} onChangeText={setName} placeholder="דוד" placeholderTextColor={colors.textMuted} />
-            <Text style={styles.label}>טלפון (יקבל הודעות על תורים חדשים)</Text>
+            <Text style={styles.label}>{t.staff.name}</Text>
+            <TextInput style={styles.input} value={name} onChangeText={setName} placeholder={t.staff.namePlaceholder} placeholderTextColor={colors.textMuted} />
+            <Text style={styles.label}>{t.staff.phone}</Text>
             <TextInput style={styles.input} value={phone} onChangeText={setPhone} placeholder="+972501234567" placeholderTextColor={colors.textMuted} keyboardType="phone-pad" />
             <TouchableOpacity style={styles.btn} onPress={save}>
-              <Text style={styles.btnText}>הוספת ספר</Text>
+              <Text style={styles.btnText}>{t.staff.add}</Text>
             </TouchableOpacity>
           </View>
         }

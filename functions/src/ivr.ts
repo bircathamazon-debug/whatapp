@@ -3,10 +3,11 @@ import { db } from './admin';
 import type { Appointment, Branch, BlockedTime, Client, Service, Staff } from './types';
 import { createAppointment, confirmAppointment, cancelAppointment, formatDate, formatTime } from './booking';
 import { getAvailableSlots } from './availability';
+import { getIvrStrings } from './ivrStrings';
 
 /**
- * IVR telefónico con Twilio (<Gather> + <Say> en hebreo) para clientes con
- * teléfono kasher que no pueden usar WhatsApp. Flujo:
+ * IVR telefónico con Twilio (<Gather> + <Say>, en el idioma de la sucursal)
+ * para clientes con teléfono kasher que no pueden usar WhatsApp. Flujo:
  *  1 = agendar la próxima hora libre con cualquier peluquero
  *  2 = cancelar mi próxima cita
  *  0 = hablar con la peluquería (transferencia a la línea directa)
@@ -18,14 +19,15 @@ export const ivrIncomingCall = onRequest(async (req, res) => {
   const branchId = String(req.query.branchId ?? req.body.branchId ?? '');
   const branchSnap = branchId ? await db.collection('branches').doc(branchId).get() : null;
   const branch = branchSnap?.exists ? (branchSnap.data() as Branch) : null;
+  const s = getIvrStrings(branch?.language);
 
   res.set('Content-Type', 'text/xml');
   res.send(`<?xml version="1.0" encoding="UTF-8"?>
 <Response>
   <Gather numDigits="1" action="/ivrMenu?branchId=${branchId}" method="POST" timeout="8">
-    <Say language="he-IL">שלום, הגעתם למספרה. לתיאום תור הקרוב ביותר הקישו 1. לביטול התור הקרוב שלכם הקישו 2. לשיחה עם המספרה הקישו 0.</Say>
+    <Say language="${s.twilioLang}">${s.greeting}</Say>
   </Gather>
-  <Say language="he-IL">לא התקבלה בחירה. להתראות.</Say>
+  <Say language="${s.twilioLang}">${s.noChoice}</Say>
 </Response>`);
 });
 
@@ -38,8 +40,9 @@ export const ivrMenu = onRequest(async (req, res) => {
 
   const branchSnap = await db.collection('branches').doc(branchId).get();
   const branch = branchSnap.exists ? (branchSnap.data() as Branch) : null;
+  const s = getIvrStrings(branch?.language);
   if (!branch) {
-    res.send(sayAndHangup('he-IL', 'שגיאה בהגדרת המערכת. אנא נסו שוב מאוחר יותר.'));
+    res.send(sayAndHangup(s.twilioLang, s.systemError));
     return;
   }
 
@@ -51,48 +54,49 @@ export const ivrMenu = onRequest(async (req, res) => {
   if (digit === '2') {
     const next = await findNextAppointment(from);
     if (!next) {
-      res.send(sayAndHangup('he-IL', 'לא נמצא תור קרוב על שם המספר הזה.'));
+      res.send(sayAndHangup(s.twilioLang, s.noAppointmentFound));
       return;
     }
     await cancelAppointment(next.id, 'client');
-    res.send(sayAndHangup('he-IL', 'התור בוטל בהצלחה. תודה.'));
+    res.send(sayAndHangup(s.twilioLang, s.appointmentCancelled));
     return;
   }
 
   if (digit === '1') {
     const booked = await bookNextAvailableSlot(branch, from);
     if (!booked) {
-      res.send(sayAndHangup('he-IL', 'מצטערים, אין תורים פנויים בקרוב. נציג יחזור אליכם.'));
+      res.send(sayAndHangup(s.twilioLang, s.noSlotsAvailable));
       return;
     }
     const dateStr = formatDate(booked.startsAt, branch.timezone);
     const timeStr = formatTime(booked.startsAt, branch.timezone);
-    res.send(sayAndHangup('he-IL', `נקבע לכם תור בתאריך ${dateStr} בשעה ${timeStr}. תקבלו אישור בהודעה.`));
+    res.send(sayAndHangup(s.twilioLang, s.appointmentBooked(dateStr, timeStr)));
     return;
   }
 
-  res.send(sayAndHangup('he-IL', 'בחירה לא תקינה. להתראות.'));
+  res.send(sayAndHangup(s.twilioLang, s.invalidChoice));
 });
 
 /** Llamada saliente (reminders.ts la usa a través de notify.dispatchTwilio) al presionar 1/2 en la llamada de recordatorio. */
 export const ivrReminderResponse = onRequest(async (req, res) => {
   const digit = String(req.body.Digits ?? '');
   const appointmentId = String(req.query.appointmentId ?? '');
+  const s = getIvrStrings(req.query.lang as string | undefined);
   res.set('Content-Type', 'text/xml');
 
   if (!appointmentId) {
-    res.send(sayAndHangup('he-IL', 'שגיאה.'));
+    res.send(sayAndHangup(s.twilioLang, s.reminderError));
     return;
   }
 
   if (digit === '1') {
     await confirmAppointment(appointmentId);
-    res.send(sayAndHangup('he-IL', 'התור אושר. תודה.'));
+    res.send(sayAndHangup(s.twilioLang, s.reminderConfirmed));
   } else if (digit === '2') {
     await cancelAppointment(appointmentId, 'client');
-    res.send(sayAndHangup('he-IL', 'התור בוטל. תודה.'));
+    res.send(sayAndHangup(s.twilioLang, s.reminderCancelled));
   } else {
-    res.send(sayAndHangup('he-IL', 'בחירה לא תקינה.'));
+    res.send(sayAndHangup(s.twilioLang, s.invalidChoice));
   }
 });
 
@@ -113,6 +117,7 @@ async function bookNextAvailableSlot(branch: Branch, clientPhone: string): Promi
   const servicesSnap = await db.collection('services').where('branchId', '==', branch.id).limit(1).get();
   if (servicesSnap.empty) return null;
   const service = servicesSnap.docs[0].data() as Service;
+  const s = getIvrStrings(branch.language);
 
   const now = Date.now();
   for (let dayOffset = 0; dayOffset < 7; dayOffset++) {
@@ -132,7 +137,7 @@ async function bookNextAvailableSlot(branch: Branch, clientPhone: string): Promi
             staff,
             service,
             clientPhone,
-            clientName: 'לקוח טלפוני',
+            clientName: s.defaultPhoneClientName,
             startsAt: slots[0].startsAt,
             endsAt: slots[0].endsAt,
             source: 'phone',

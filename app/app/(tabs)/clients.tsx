@@ -3,12 +3,14 @@ import { View, Text, FlatList, StyleSheet, RefreshControl, TextInput } from 'rea
 import { useBranch } from '../../lib/branchContext';
 import { getClientsByBranch } from '../../lib/clients';
 import { useTheme, type ThemeColors } from '../../lib/theme';
+import { useT } from '../../lib/i18n';
 import { LOYALTY_THRESHOLD } from '../../../shared/types';
 import type { Client } from '../../../shared/types';
 
 export default function ClientsScreen() {
   const { branchId } = useBranch();
   const { colors } = useTheme();
+  const t = useT();
   const styles = makeStyles(colors);
   const [clients, setClients] = useState<Client[]>([]);
   const [search, setSearch] = useState('');
@@ -37,23 +39,23 @@ export default function ClientsScreen() {
 
   return (
     <View style={styles.container}>
-      <TextInput style={styles.search} placeholder="חיפוש לפי שם או טלפון" placeholderTextColor={colors.textMuted} value={search} onChangeText={setSearch} />
+      <TextInput style={styles.search} placeholder={t.clients.searchPlaceholder} placeholderTextColor={colors.textMuted} value={search} onChangeText={setSearch} />
       <FlatList
         data={filtered}
         keyExtractor={(c) => c.id}
         contentContainerStyle={styles.list}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-        ListEmptyComponent={!loading ? <Text style={styles.emptyText}>אין עדיין לקוחות.</Text> : null}
+        ListEmptyComponent={!loading ? <Text style={styles.emptyText}>{t.clients.empty}</Text> : null}
         renderItem={({ item }) => (
           <View style={styles.card}>
             <View style={styles.rowBetween}>
               <Text style={styles.name}>{item.name}</Text>
-              {item.blockedForDeposit && <Text style={styles.warnBadge}>דורש מקדמה</Text>}
+              {item.blockedForDeposit && <Text style={styles.warnBadge}>{t.clients.requiresDeposit}</Text>}
             </View>
             <Text style={styles.phone}>{item.phone}</Text>
             <View style={styles.statsRow}>
-              <Text style={styles.stat}>✂️ {item.completedCount} תספורות ({item.completedCount % LOYALTY_THRESHOLD}/{LOYALTY_THRESHOLD} לפרס הבא)</Text>
-              {item.noShowCount > 0 && <Text style={[styles.stat, styles.noShow]}>⚠️ {item.noShowCount} אי-הגעות</Text>}
+              <Text style={styles.stat}>{t.clients.haircuts(item.completedCount, item.completedCount % LOYALTY_THRESHOLD, LOYALTY_THRESHOLD)}</Text>
+              {item.noShowCount > 0 && <Text style={[styles.stat, styles.noShow]}>{t.clients.noShows(item.noShowCount)}</Text>}
             </View>
           </View>
         )}

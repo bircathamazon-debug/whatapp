@@ -22,6 +22,7 @@ export interface Branch {
   phone: string; // número de teléfono para el IVR (Twilio)
   whatsappJid?: string; // JID del número de WhatsApp del bot para esta sucursal
   themeMode?: 'light' | 'dark'; // tema de la app del peluquero; sin definir = claro
+  language?: 'he' | 'en' | 'es'; // idioma del bot, el IVR y la app; sin definir = hebreo
 }
 
 export interface WeeklyHours {

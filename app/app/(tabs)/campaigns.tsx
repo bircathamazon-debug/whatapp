@@ -3,10 +3,12 @@ import { View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } fr
 import { useBranch } from '../../lib/branchContext';
 import { broadcastEmptySlots } from '../../lib/campaigns';
 import { useTheme, type ThemeColors } from '../../lib/theme';
+import { useT } from '../../lib/i18n';
 
 export default function CampaignsScreen() {
   const { branchId } = useBranch();
   const { colors } = useTheme();
+  const t = useT();
   const styles = makeStyles(colors);
   const [sending, setSending] = useState(false);
   const [lastResult, setLastResult] = useState<string | null>(null);
@@ -16,9 +18,9 @@ export default function CampaignsScreen() {
     setSending(true);
     try {
       const { sentTo, message } = await broadcastEmptySlots(branchId);
-      setLastResult(sentTo > 0 ? `נשלח ל-${sentTo} לקוחות: "${message}"` : message);
+      setLastResult(sentTo > 0 ? t.campaigns.sentTo(sentTo, message) : message);
     } catch (err: any) {
-      Alert.alert('שגיאה', err.message ?? 'לא ניתן היה לשלוח את הקמפיין.');
+      Alert.alert(t.campaigns.error, err.message ?? t.campaigns.errorGeneric);
     } finally {
       setSending(false);
     }
@@ -26,12 +28,10 @@ export default function CampaignsScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>שעות פנויות היום</Text>
-      <Text style={styles.subtitle}>
-        מחפש את התור הפנוי הקרוב ביותר היום ושולח הודעת וואטסאפ ל-50 הלקוחות האחרונים של הסניף: "התפנה היום תור בשעה 16:30".
-      </Text>
+      <Text style={styles.title}>{t.campaigns.title}</Text>
+      <Text style={styles.subtitle}>{t.campaigns.subtitle}</Text>
       <TouchableOpacity style={styles.btn} onPress={send} disabled={sending || !branchId}>
-        {sending ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>שליחת קמפיין עכשיו</Text>}
+        {sending ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>{t.campaigns.send}</Text>}
       </TouchableOpacity>
       {lastResult && <Text style={styles.result}>{lastResult}</Text>}
     </View>

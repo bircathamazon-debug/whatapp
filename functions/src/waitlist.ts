@@ -1,7 +1,7 @@
 import { onDocumentUpdated } from 'firebase-functions/v2/firestore';
 import { db } from './admin';
 import type { Appointment, Branch, Service, Staff, WaitlistEntry } from './types';
-import { sendNotification, templates } from './notify';
+import { sendNotification, getTemplates } from './notify';
 import { createAppointment } from './booking';
 import { formatDate, formatTime } from './booking';
 
@@ -63,7 +63,7 @@ export async function offerSlotToWaitlist(freedAppointment: Appointment): Promis
     to: w.clientPhone,
     branch,
     template: 'waitlistOffer',
-    text: templates.waitlistOffer(dateLabel, timeLabel, OFFER_WINDOW_MINUTES),
+    text: getTemplates(branch.language).waitlistOffer(dateLabel, timeLabel, OFFER_WINDOW_MINUTES),
     awaitingReply: 'waitlist_offer',
     data: { waitlistId: candidate.id },
   });

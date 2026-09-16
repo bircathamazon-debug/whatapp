@@ -4,30 +4,32 @@ import { useRouter } from 'expo-router';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../lib/firebase';
 import { useTheme, type ThemeColors } from '../../lib/theme';
-
-const MENU = [
-  { icon: '🏢', label: 'סניפים', route: '/admin/branches' as const },
-  { icon: '💈', label: 'ספרים', route: '/admin/staff' as const },
-  { icon: '💇', label: 'שירותים', route: '/admin/services' as const },
-  { icon: '🗓️', label: 'שעות עבודה וימים חסומים', route: '/admin/schedule' as const },
-  { icon: '⚙️', label: 'הגדרות (מקדמות, שבת, Google Calendar)', route: '/admin/settings' as const },
-];
+import { useT } from '../../lib/i18n';
 
 export default function AdminIndexScreen() {
   const router = useRouter();
   const { colors } = useTheme();
+  const t = useT();
   const styles = makeStyles(colors);
 
+  const MENU = [
+    { icon: '🏢', label: t.adminMenu.branches, route: '/admin/branches' as const },
+    { icon: '💈', label: t.adminMenu.staff, route: '/admin/staff' as const },
+    { icon: '💇', label: t.adminMenu.services, route: '/admin/services' as const },
+    { icon: '🗓️', label: t.adminMenu.schedule, route: '/admin/schedule' as const },
+    { icon: '⚙️', label: t.adminMenu.settings, route: '/admin/settings' as const },
+  ];
+
   const logout = async () => {
-    Alert.alert('יציאה מהחשבון', 'לצאת מהחשבון?', [
-      { text: 'ביטול', style: 'cancel' },
-      { text: 'יציאה', style: 'destructive', onPress: async () => { await signOut(auth); router.replace('/admin/login'); } },
+    Alert.alert(t.adminMenu.logoutTitle, t.adminMenu.logoutConfirm, [
+      { text: t.adminMenu.cancel, style: 'cancel' },
+      { text: t.adminMenu.logout, style: 'destructive', onPress: async () => { await signOut(auth); router.replace('/admin/login'); } },
     ]);
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>הפאנל שלי</Text>
+      <Text style={styles.title}>{t.adminMenu.title}</Text>
 
       {MENU.map((item) => (
         <TouchableOpacity key={item.route} style={styles.menuItem} onPress={() => router.push(item.route)}>
@@ -38,7 +40,7 @@ export default function AdminIndexScreen() {
 
       <TouchableOpacity style={[styles.menuItem, styles.logoutItem]} onPress={logout}>
         <Text style={styles.menuIcon}>🚪</Text>
-        <Text style={[styles.menuText, styles.logoutText]}>יציאה מהחשבון</Text>
+        <Text style={[styles.menuText, styles.logoutText]}>{t.adminMenu.logout}</Text>
       </TouchableOpacity>
     </View>
   );

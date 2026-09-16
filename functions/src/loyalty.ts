@@ -2,7 +2,7 @@ import { onDocumentUpdated } from 'firebase-functions/v2/firestore';
 import { db } from './admin';
 import type { Appointment, Branch, Client } from './types';
 import { LOYALTY_THRESHOLD } from './types';
-import { sendNotification, templates } from './notify';
+import { sendNotification, getTemplates } from './notify';
 
 /** Al completar una cita: suma al contador de fidelidad y premia cada 10 cortes. */
 export const onAppointmentCompletedUpdateLoyalty = onDocumentUpdated('appointments/{appointmentId}', async (event) => {
@@ -39,7 +39,7 @@ export const onAppointmentCompletedUpdateLoyalty = onDocumentUpdated('appointmen
         to: client.phone,
         branch,
         template: 'loyaltyReward',
-        text: templates.loyaltyReward(client.name),
+        text: getTemplates(branch.language).loyaltyReward(client.name),
       });
     }
   }

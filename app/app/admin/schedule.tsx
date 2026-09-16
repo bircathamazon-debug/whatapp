@@ -3,13 +3,13 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Switch
 import { useBranch } from '../../lib/branchContext';
 import { getStaffByBranch, updateStaff } from '../../lib/staff';
 import { useTheme, type ThemeColors } from '../../lib/theme';
+import { useT } from '../../lib/i18n';
 import type { Staff, WeeklyHours } from '../../../shared/types';
-
-const WEEKDAY_NAMES = ['יום ראשון', 'יום שני', 'יום שלישי', 'יום רביעי', 'יום חמישי', 'יום שישי', 'שבת'];
 
 export default function ScheduleScreen() {
   const { branchId } = useBranch();
   const { colors } = useTheme();
+  const t = useT();
   const styles = makeStyles(colors);
   const [staffList, setStaffList] = useState<Staff[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -43,7 +43,7 @@ export default function ScheduleScreen() {
 
   const addBlockedDate = () => {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(newBlockedDate)) {
-      Alert.alert('פורמט לא תקין', 'יש להזין בפורמט YYYY-MM-DD, למשל 2026-04-23');
+      Alert.alert(t.schedule.invalidFormatTitle, t.schedule.invalidFormatMessage);
       return;
     }
     setBlockedDates((d) => [...new Set([...d, newBlockedDate])].sort());
@@ -57,14 +57,14 @@ export default function ScheduleScreen() {
     setSaving(true);
     try {
       await updateStaff(selectedId, { hours, blockedDates });
-      Alert.alert('נשמר', 'שעות העבודה עודכנו.');
+      Alert.alert(t.schedule.savedTitle, t.schedule.savedMessage);
     } finally {
       setSaving(false);
     }
   };
 
-  if (!branchId) return <View style={styles.container}><Text style={styles.emptyText}>יש ליצור סניף קודם.</Text></View>;
-  if (staffList.length === 0) return <View style={styles.container}><Text style={styles.emptyText}>יש להוסיף ספר קודם.</Text></View>;
+  if (!branchId) return <View style={styles.container}><Text style={styles.emptyText}>{t.schedule.needBranch}</Text></View>;
+  if (staffList.length === 0) return <View style={styles.container}><Text style={styles.emptyText}>{t.schedule.needStaff}</Text></View>;
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ padding: 16 }}>
@@ -76,8 +76,8 @@ export default function ScheduleScreen() {
         ))}
       </View>
 
-      <Text style={styles.sectionTitle}>שעות עבודה שבועיות</Text>
-      {WEEKDAY_NAMES.map((name, day) => {
+      <Text style={styles.sectionTitle}>{t.schedule.weeklyHours}</Text>
+      {t.schedule.weekdays.map((name, day) => {
         const dayHours = hours[day];
         return (
           <View key={day} style={styles.dayRow}>
@@ -88,7 +88,7 @@ export default function ScheduleScreen() {
             {dayHours && (
               <View style={styles.timeRow}>
                 <TextInput style={styles.timeInput} value={dayHours.start} onChangeText={(v) => setDayTime(day, 'start', v)} placeholder="09:00" placeholderTextColor={colors.textMuted} />
-                <Text style={styles.timeSep}>עד</Text>
+                <Text style={styles.timeSep}>{t.schedule.until}</Text>
                 <TextInput style={styles.timeInput} value={dayHours.end} onChangeText={(v) => setDayTime(day, 'end', v)} placeholder="19:00" placeholderTextColor={colors.textMuted} />
               </View>
             )}
@@ -96,11 +96,11 @@ export default function ScheduleScreen() {
         );
       })}
 
-      <Text style={styles.sectionTitle}>ימים חסומים (חופשות, חגים)</Text>
+      <Text style={styles.sectionTitle}>{t.schedule.blockedDays}</Text>
       <View style={styles.timeRow}>
         <TextInput style={[styles.timeInput, { flex: 1 }]} value={newBlockedDate} onChangeText={setNewBlockedDate} placeholder="2026-04-23" placeholderTextColor={colors.textMuted} />
         <TouchableOpacity style={styles.addBtn} onPress={addBlockedDate}>
-          <Text style={styles.addBtnText}>הוספה</Text>
+          <Text style={styles.addBtnText}>{t.schedule.addBtn}</Text>
         </TouchableOpacity>
       </View>
       {blockedDates.map((date) => (
@@ -111,7 +111,7 @@ export default function ScheduleScreen() {
       ))}
 
       <TouchableOpacity style={styles.saveBtn} onPress={save} disabled={saving}>
-        <Text style={styles.saveBtnText}>{saving ? 'שומר...' : 'שמירת שעות עבודה'}</Text>
+        <Text style={styles.saveBtnText}>{saving ? t.schedule.saving : t.schedule.save}</Text>
       </TouchableOpacity>
     </ScrollView>
   );

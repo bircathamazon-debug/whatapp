@@ -1,12 +1,14 @@
+import { useEffect } from 'react';
 import { I18nManager } from 'react-native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { BranchProvider } from '../lib/branchContext';
 import { useTheme } from '../lib/theme';
+import { useLang, isRtl } from '../lib/i18n';
 
-// El negocio es en Israel y todo el panel está en hebreo: fuerza RTL
-// (de derecha a izquierda) para toda la app. Requiere reiniciar la app una
-// vez para que tome efecto (limitación de React Native).
+// Por defecto arranca en RTL (hebreo, el mercado actual) hasta que se sepa
+// el idioma real de la sucursal — eso requiere haber iniciado sesión y
+// leído Firestore, así que no se puede saber antes del primer render.
 if (!I18nManager.isRTL) {
   I18nManager.allowRTL(true);
   I18nManager.forceRTL(true);
@@ -14,6 +16,18 @@ if (!I18nManager.isRTL) {
 
 function ThemedStack() {
   const { mode, colors } = useTheme();
+  const lang = useLang();
+
+  // Si la sucursal termina usando un idioma con otra dirección de escritura
+  // (ej. inglés/español, LTR, contra el RTL con el que arrancó la app), se
+  // deja preparado para la próxima vez que se abra — no se puede dar vuelta
+  // el layout en caliente, es una limitación de React Native.
+  useEffect(() => {
+    if (isRtl(lang) !== I18nManager.isRTL) {
+      I18nManager.forceRTL(isRtl(lang));
+    }
+  }, [lang]);
+
   return (
     <>
       <StatusBar style={mode === 'dark' ? 'light' : 'dark'} />

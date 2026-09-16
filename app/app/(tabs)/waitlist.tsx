@@ -3,13 +3,14 @@ import { View, Text, FlatList, StyleSheet, RefreshControl } from 'react-native';
 import { useBranch } from '../../lib/branchContext';
 import { getActiveWaitlist } from '../../lib/waitlist';
 import { useTheme, type ThemeColors } from '../../lib/theme';
+import { useT } from '../../lib/i18n';
 import type { WaitlistEntry } from '../../../shared/types';
-
-const STATUS_LABEL: Record<string, string> = { waiting: 'ממתין', offered: 'הוצע תור' };
 
 export default function WaitlistScreen() {
   const { branchId } = useBranch();
   const { colors } = useTheme();
+  const t = useT();
+  const STATUS_LABEL: Record<string, string> = { waiting: t.waitlist.statusWaiting, offered: t.waitlist.statusOffered };
   const styles = makeStyles(colors);
   const [entries, setEntries] = useState<WaitlistEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,14 +41,14 @@ export default function WaitlistScreen() {
         keyExtractor={(e) => e.id}
         contentContainerStyle={styles.list}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-        ListEmptyComponent={!loading ? <Text style={styles.emptyText}>אין אף אחד ברשימת ההמתנה. כשלקוח לא מוצא תור פנוי בוואטסאפ, הוא יופיע כאן ויקבל הודעה אוטומטית אם יתפנה תור.</Text> : null}
+        ListEmptyComponent={!loading ? <Text style={styles.emptyText}>{t.waitlist.empty}</Text> : null}
         renderItem={({ item }) => (
           <View style={styles.card}>
             <View style={styles.rowBetween}>
               <Text style={styles.name}>{item.clientName}</Text>
               <Text style={styles.badge}>{STATUS_LABEL[item.status] ?? item.status}</Text>
             </View>
-            <Text style={styles.meta}>{item.clientPhone} · רוצה ל-{item.desiredDate}</Text>
+            <Text style={styles.meta}>{t.waitlist.wants(item.clientPhone, item.desiredDate)}</Text>
           </View>
         )}
       />

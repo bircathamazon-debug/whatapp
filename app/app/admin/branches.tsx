@@ -3,16 +3,17 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, Alert } 
 import { useBranch } from '../../lib/branchContext';
 import { addBranch, deleteBranch } from '../../lib/branches';
 import { useTheme, type ThemeColors } from '../../lib/theme';
-
-const SHABBAT_MODE_LABEL: Record<string, string> = { off: 'כבוי', silent: 'שקט', closed: 'סגור' };
+import { useT } from '../../lib/i18n';
 
 export default function BranchesScreen() {
   const { branches, reload } = useBranch();
   const { colors } = useTheme();
+  const t = useT();
+  const SHABBAT_MODE_LABEL: Record<string, string> = { off: t.branches.shabbatOff, silent: t.branches.shabbatSilent, closed: t.branches.shabbatClosed };
   const styles = makeStyles(colors);
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
-  const [geonameId, setGeonameId] = useState('293397'); // ירושלים כברירת מחדל (geonameid של Hebcal)
+  const [geonameId, setGeonameId] = useState('293397'); // Jerusalén por defecto (geonameid de Hebcal)
   const [phone, setPhone] = useState('');
 
   const save = async () => {
@@ -32,9 +33,9 @@ export default function BranchesScreen() {
   };
 
   const remove = (id: string, label: string) => {
-    Alert.alert('מחיקת סניף', `למחוק את "${label}"?`, [
-      { text: 'ביטול', style: 'cancel' },
-      { text: 'מחיקה', style: 'destructive', onPress: async () => { await deleteBranch(id); await reload(); } },
+    Alert.alert(t.branches.deleteTitle, t.branches.deleteConfirm(label), [
+      { text: t.branches.cancel, style: 'cancel' },
+      { text: t.branches.delete, style: 'destructive', onPress: async () => { await deleteBranch(id); await reload(); } },
     ]);
   };
 
@@ -45,18 +46,18 @@ export default function BranchesScreen() {
         keyExtractor={(b) => b.id}
         ListHeaderComponent={
           <View style={styles.form}>
-            <Text style={styles.label}>שם</Text>
-            <TextInput style={styles.input} value={name} onChangeText={setName} placeholder="מספרה מרכזית" placeholderTextColor={colors.textMuted} />
-            <Text style={styles.label}>כתובת</Text>
-            <TextInput style={styles.input} value={address} onChangeText={setAddress} placeholder="רחוב, עיר" placeholderTextColor={colors.textMuted} />
-            <Text style={styles.label}>טלפון (למענה הקולי / להעברת שיחה)</Text>
+            <Text style={styles.label}>{t.branches.name}</Text>
+            <TextInput style={styles.input} value={name} onChangeText={setName} placeholder={t.branches.namePlaceholder} placeholderTextColor={colors.textMuted} />
+            <Text style={styles.label}>{t.branches.address}</Text>
+            <TextInput style={styles.input} value={address} onChangeText={setAddress} placeholder={t.branches.addressPlaceholder} placeholderTextColor={colors.textMuted} />
+            <Text style={styles.label}>{t.branches.phone}</Text>
             <TextInput style={styles.input} value={phone} onChangeText={setPhone} placeholder="+972501234567" placeholderTextColor={colors.textMuted} keyboardType="phone-pad" />
-            <Text style={styles.label}>מזהה Geoname (Hebcal, לשעות שבת)</Text>
+            <Text style={styles.label}>{t.branches.geonameId}</Text>
             <TextInput style={styles.input} value={geonameId} onChangeText={setGeonameId} placeholder="293397" placeholderTextColor={colors.textMuted} />
             <TouchableOpacity style={styles.btn} onPress={save}>
-              <Text style={styles.btnText}>הוספת סניף</Text>
+              <Text style={styles.btnText}>{t.branches.add}</Text>
             </TouchableOpacity>
-            <Text style={styles.sectionTitle}>סניפים קיימים</Text>
+            <Text style={styles.sectionTitle}>{t.branches.existing}</Text>
           </View>
         }
         renderItem={({ item }) => (
@@ -64,7 +65,7 @@ export default function BranchesScreen() {
             <View style={{ flex: 1 }}>
               <Text style={styles.cardName}>{item.name}</Text>
               <Text style={styles.cardMeta}>{item.address}</Text>
-              <Text style={styles.cardMeta}>מצב שבת: {SHABBAT_MODE_LABEL[item.shabbatMode] ?? item.shabbatMode}</Text>
+              <Text style={styles.cardMeta}>{t.branches.shabbatModeLine(SHABBAT_MODE_LABEL[item.shabbatMode] ?? item.shabbatMode)}</Text>
             </View>
             <TouchableOpacity onPress={() => remove(item.id, item.name)}>
               <Text style={styles.delete}>🗑️</Text>

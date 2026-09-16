@@ -15,6 +15,7 @@ export interface Branch {
   phone: string;
   whatsappJid?: string;
   themeMode?: 'light' | 'dark';
+  language?: 'he' | 'en' | 'es';
 }
 
 export interface WeeklyHours {

@@ -13,10 +13,12 @@ import { useRouter } from 'expo-router';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../lib/firebase';
 import { useTheme, type ThemeColors } from '../../lib/theme';
+import { useT } from '../../lib/i18n';
 
 export default function LoginScreen() {
   const router = useRouter();
   const { colors } = useTheme();
+  const t = useT();
   const styles = makeStyles(colors);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -29,7 +31,7 @@ export default function LoginScreen() {
       await signInWithEmailAndPassword(auth, email, password);
       router.replace('/admin');
     } catch {
-      Alert.alert('שגיאה', 'אימייל או סיסמה שגויים');
+      Alert.alert(t.login.error, t.login.errorMessage);
     } finally {
       setLoading(false);
     }
@@ -41,14 +43,14 @@ export default function LoginScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <View style={styles.card}>
-        <Text style={styles.title}>כניסת צוות</Text>
-        <Text style={styles.subtitle}>מערכת התורים של המספרה</Text>
+        <Text style={styles.title}>{t.login.title}</Text>
+        <Text style={styles.subtitle}>{t.login.subtitle}</Text>
 
         <TextInput
           style={styles.input}
           value={email}
           onChangeText={setEmail}
-          placeholder="אימייל"
+          placeholder={t.login.email}
           placeholderTextColor={colors.textMuted}
           keyboardType="email-address"
           autoCapitalize="none"
@@ -58,7 +60,7 @@ export default function LoginScreen() {
           style={styles.input}
           value={password}
           onChangeText={setPassword}
-          placeholder="סיסמה"
+          placeholder={t.login.password}
           placeholderTextColor={colors.textMuted}
           secureTextEntry
         />
@@ -68,7 +70,7 @@ export default function LoginScreen() {
           onPress={login}
           disabled={loading}
         >
-          <Text style={styles.btnText}>{loading ? 'מתחבר...' : 'כניסה'}</Text>
+          <Text style={styles.btnText}>{loading ? t.login.submitting : t.login.submit}</Text>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>

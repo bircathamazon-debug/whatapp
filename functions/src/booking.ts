@@ -1,7 +1,7 @@
 import { db } from './admin';
 import type { Appointment, Branch, Client, Service, Staff } from './types';
 import { NO_SHOW_DEPOSIT_THRESHOLD } from './types';
-import { sendNotification, templates } from './notify';
+import { sendNotification, getTemplates } from './notify';
 import { syncAppointmentToGoogleCalendar, removeAppointmentFromGoogleCalendar } from './googleCalendar';
 
 export class SlotTakenError extends Error {
@@ -78,6 +78,7 @@ export async function createAppointment(input: CreateAppointmentInput): Promise<
 
   const dateStr = formatDate(appointment.startsAt, input.branch.timezone);
   const timeStr = formatTime(appointment.startsAt, input.branch.timezone);
+  const templates = getTemplates(input.branch.language);
 
   if (appointment.status === 'pending_deposit') {
     await sendNotification({
@@ -146,7 +147,7 @@ export async function cancelAppointment(appointmentId: string, cancelledBy: 'cli
         to: staff.phone,
         branch,
         template: 'cancelledByClient',
-        text: templates.cancelledByClient(appt.clientName, dateStr, timeStr),
+        text: getTemplates(branch.language).cancelledByClient(appt.clientName, dateStr, timeStr),
         respectShabbatSilence: true,
       });
     }

@@ -1,7 +1,7 @@
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { db } from './admin';
 import type { Appointment, Branch, Client, Staff } from './types';
-import { sendNotification, templates } from './notify';
+import { sendNotification, getTemplates } from './notify';
 import { getAvailableSlots } from './availability';
 import { formatDate, formatTime } from './booking';
 
@@ -37,11 +37,12 @@ export const broadcastEmptySlots = onCall(async (request) => {
   }
 
   if (freeSlots.length === 0) {
-    return { sentTo: 0, message: 'No quedan huecos libres hoy.' };
+    const noSlotsMessage = { he: 'אין תורים פנויים היום.', en: 'No slots left today.', es: 'No quedan huecos libres hoy.' };
+    return { sentTo: 0, message: noSlotsMessage[branch.language ?? 'he'] ?? noSlotsMessage.he };
   }
 
   const nextFree = freeSlots.sort((a, b) => a.startsAt - b.startsAt)[0];
-  const text = templates.emptySlotCampaign(formatDate(nextFree.startsAt, branch.timezone), formatTime(nextFree.startsAt, branch.timezone));
+  const text = getTemplates(branch.language).emptySlotCampaign(formatDate(nextFree.startsAt, branch.timezone), formatTime(nextFree.startsAt, branch.timezone));
 
   // Últimos 50 clientes de la sucursal (los más recurrentes primero).
   const clientsSnap = await db.collection('clients').where('branchId', '==', branchId).orderBy('createdAt', 'desc').limit(50).get();

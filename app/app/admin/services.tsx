@@ -3,11 +3,13 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, Alert, S
 import { useBranch } from '../../lib/branchContext';
 import { getServicesByBranch, addService, deleteService } from '../../lib/services';
 import { useTheme, type ThemeColors } from '../../lib/theme';
+import { useT } from '../../lib/i18n';
 import type { Service } from '../../../shared/types';
 
 export default function ServicesScreen() {
   const { branchId } = useBranch();
   const { colors } = useTheme();
+  const t = useT();
   const styles = makeStyles(colors);
   const [services, setServices] = useState<Service[]>([]);
   const [name, setName] = useState('');
@@ -39,13 +41,13 @@ export default function ServicesScreen() {
   };
 
   const remove = (s: Service) => {
-    Alert.alert('מחיקת שירות', `למחוק את "${s.name}"?`, [
-      { text: 'ביטול', style: 'cancel' },
-      { text: 'מחיקה', style: 'destructive', onPress: async () => { await deleteService(s.id); await load(); } },
+    Alert.alert(t.services.deleteTitle, t.services.deleteConfirm(s.name), [
+      { text: t.services.cancel, style: 'cancel' },
+      { text: t.services.delete, style: 'destructive', onPress: async () => { await deleteService(s.id); await load(); } },
     ]);
   };
 
-  if (!branchId) return <View style={styles.container}><Text style={styles.emptyText}>יש ליצור סניף קודם.</Text></View>;
+  if (!branchId) return <View style={styles.container}><Text style={styles.emptyText}>{t.services.needBranch}</Text></View>;
 
   return (
     <View style={styles.container}>
@@ -54,24 +56,24 @@ export default function ServicesScreen() {
         keyExtractor={(s) => s.id}
         ListHeaderComponent={
           <View style={styles.form}>
-            <Text style={styles.label}>שם השירות</Text>
-            <TextInput style={styles.input} value={name} onChangeText={setName} placeholder="תספורת" placeholderTextColor={colors.textMuted} />
-            <Text style={styles.label}>משך (דקות)</Text>
+            <Text style={styles.label}>{t.services.name}</Text>
+            <TextInput style={styles.input} value={name} onChangeText={setName} placeholder={t.services.namePlaceholder} placeholderTextColor={colors.textMuted} />
+            <Text style={styles.label}>{t.services.duration}</Text>
             <TextInput style={styles.input} value={duration} onChangeText={setDuration} keyboardType="number-pad" />
-            <Text style={styles.label}>מחיר (₪)</Text>
+            <Text style={styles.label}>{t.services.price}</Text>
             <TextInput style={styles.input} value={price} onChangeText={setPrice} keyboardType="number-pad" placeholder="80" placeholderTextColor={colors.textMuted} />
             <View style={styles.switchRow}>
-              <Text style={styles.label}>דורש מקדמה להזמנה</Text>
+              <Text style={styles.label}>{t.services.requiresDeposit}</Text>
               <Switch value={requiresDeposit} onValueChange={setRequiresDeposit} />
             </View>
             {requiresDeposit && (
               <>
-                <Text style={styles.label}>סכום המקדמה (₪)</Text>
+                <Text style={styles.label}>{t.services.depositAmount}</Text>
                 <TextInput style={styles.input} value={depositAmount} onChangeText={setDepositAmount} keyboardType="number-pad" />
               </>
             )}
             <TouchableOpacity style={styles.btn} onPress={save}>
-              <Text style={styles.btnText}>הוספת שירות</Text>
+              <Text style={styles.btnText}>{t.services.add}</Text>
             </TouchableOpacity>
           </View>
         }
@@ -79,7 +81,7 @@ export default function ServicesScreen() {
           <View style={styles.card}>
             <View style={{ flex: 1 }}>
               <Text style={styles.cardName}>{item.name}</Text>
-              <Text style={styles.cardMeta}>{item.durationMinutes} דק' · ₪{item.price}{item.requiresDeposit ? ` · מקדמה ₪${item.depositAmount}` : ''}</Text>
+              <Text style={styles.cardMeta}>{t.services.meta(item.durationMinutes, item.price, item.requiresDeposit ? item.depositAmount : undefined)}</Text>
             </View>
             <TouchableOpacity onPress={() => remove(item)}>
               <Text style={styles.delete}>🗑️</Text>

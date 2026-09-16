@@ -2,7 +2,7 @@ import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { db } from './admin';
 import type { Appointment, Branch, Client, RecurringBooking, Staff } from './types';
 import { REMINDER_WINDOWS_HOURS } from './types';
-import { sendNotification, templates, flushDueTwilioNotifications } from './notify';
+import { sendNotification, getTemplates, flushDueTwilioNotifications } from './notify';
 import { markNoShow, releaseExpiredDepositHolds, formatDate, formatTime, createAppointment } from './booking';
 import { toEpoch } from './availability';
 
@@ -36,7 +36,7 @@ export const sendReminders = onSchedule({ schedule: 'every 15 minutes', timeZone
         to: client.phone,
         branch,
         template: 'reminder',
-        text: templates.reminder(client.name, formatDate(appt.startsAt, branch.timezone), formatTime(appt.startsAt, branch.timezone)),
+        text: getTemplates(branch.language).reminder(client.name, formatDate(appt.startsAt, branch.timezone), formatTime(appt.startsAt, branch.timezone)),
         relatedAppointmentId: appt.id,
         awaitingReply: 'confirm_cancel',
       });
@@ -76,12 +76,13 @@ export const sendBirthdayMessages = onSchedule({ schedule: '0 9 * * *', timeZone
     const client = doc.data() as Client;
     const branchSnap = await db.collection('branches').doc(client.branchId).get();
     if (!branchSnap.exists) continue;
+    const branch = branchSnap.data() as Branch;
     await sendNotification({
       channel: 'whatsapp',
       to: client.phone,
-      branch: branchSnap.data() as Branch,
+      branch,
       template: 'birthday',
-      text: templates.birthday(client.name),
+      text: getTemplates(branch.language).birthday(client.name),
     });
   }
 });
@@ -169,7 +170,7 @@ export const sendComebackReminders = onSchedule({ schedule: '0 10 * * *', timeZo
       to: appt.clientPhone,
       branch,
       template: 'comebackReminder',
-      text: templates.comebackReminder(appt.clientName),
+      text: getTemplates(branch.language).comebackReminder(appt.clientName),
     });
     await doc.ref.update({ comebackReminderSentAt: Date.now() });
   }

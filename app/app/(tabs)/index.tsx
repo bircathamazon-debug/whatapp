@@ -7,15 +7,8 @@ import { getAppointmentsForDay, adminCancelAppointment, adminConfirmAppointment 
 import { getStaffByBranch } from '../../lib/staff';
 import { getServicesByBranch } from '../../lib/services';
 import { getBlockedTimesByBranch } from '../../lib/blockedTimes';
+import { useT, useDateLocale } from '../../lib/i18n';
 import type { Appointment, Staff, Service, BlockedTime } from '../../../shared/types';
-
-const STATUS_LABEL: Record<Appointment['status'], string> = {
-  confirmed: 'מאושר',
-  pending_deposit: 'ממתין למקדמה',
-  cancelled: 'בוטל',
-  completed: 'הושלם',
-  no_show: 'לא הגיע',
-};
 
 const HOUR_START = 8;
 const HOUR_END = 20;
@@ -35,6 +28,8 @@ export default function AgendaScreen() {
   const router = useRouter();
   const { branchId, branches, setBranchId } = useBranch();
   const { colors } = useTheme();
+  const t = useT();
+  const dateLocale = useDateLocale();
   const styles = makeStyles(colors);
   const [dayOffset, setDayOffset] = useState(0);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -80,12 +75,21 @@ export default function AgendaScreen() {
 
   const staffName = (id: string) => staff.find((s) => s.id === id)?.name ?? id;
   const serviceName = (id: string) => services.find((s) => s.id === id)?.name ?? id;
-  const blockLabel = (staffId: string | null) => (staffId ? `חסום ל${staffName(staffId)}` : 'חסום לכל הצוות');
+  const blockLabel = (staffId: string | null) => (staffId ? t.agenda.blockedForStaff(staffName(staffId)) : t.agenda.blockedForAll);
+  const statusLabel = (status: Appointment['status']): string => {
+    switch (status) {
+      case 'confirmed': return t.agenda.statusConfirmed;
+      case 'pending_deposit': return t.agenda.statusPending;
+      case 'cancelled': return t.agenda.statusCancelled;
+      case 'completed': return t.agenda.statusCompleted;
+      case 'no_show': return t.agenda.statusNoShow;
+    }
+  };
 
   const cancel = (appt: Appointment) => {
-    Alert.alert('ביטול תור', `לבטל את התור של ${appt.clientName}?`, [
-      { text: 'חזרה', style: 'cancel' },
-      { text: 'ביטול התור', style: 'destructive', onPress: async () => { await adminCancelAppointment(appt.id); await load(); } },
+    Alert.alert(t.agenda.cancelTitle, t.agenda.cancelMessage(appt.clientName), [
+      { text: t.agenda.back, style: 'cancel' },
+      { text: t.agenda.cancelAppt, style: 'destructive', onPress: async () => { await adminCancelAppointment(appt.id); await load(); } },
     ]);
   };
 
@@ -97,9 +101,9 @@ export default function AgendaScreen() {
   if (!branchId) {
     return (
       <View style={styles.center}>
-        <Text style={styles.emptyText}>קודם צריך ליצור סניף בפאנל הניהול.</Text>
+        <Text style={styles.emptyText}>{t.agenda.needBranch}</Text>
         <TouchableOpacity style={styles.smallBtn} onPress={() => router.push('/admin')}>
-          <Text style={styles.smallBtnText}>לפאנל הניהול</Text>
+          <Text style={styles.smallBtnText}>{t.agenda.goToAdmin}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -110,7 +114,7 @@ export default function AgendaScreen() {
 
   const dateObj = new Date(dayStart);
   const dayNum = dateObj.getDate();
-  const monthWeekday = new Intl.DateTimeFormat('he-IL', { weekday: 'long', month: 'long' }).format(dateObj);
+  const monthWeekday = new Intl.DateTimeFormat(dateLocale, { weekday: 'long', month: 'long' }).format(dateObj);
 
   const hours: number[] = [];
   for (let h = HOUR_START; h <= HOUR_END; h++) hours.push(h);
@@ -130,7 +134,7 @@ export default function AgendaScreen() {
       <View style={styles.daybar}>
         <TouchableOpacity onPress={() => setDayOffset((d) => d + 1)}><Text style={styles.chev}>›</Text></TouchableOpacity>
         <View style={styles.dateWrap}>
-          <Text style={styles.dayNum}>{dayOffset === 0 ? 'היום' : dayNum}</Text>
+          <Text style={styles.dayNum}>{dayOffset === 0 ? t.agenda.today : dayNum}</Text>
           <Text style={styles.dayText}>{monthWeekday}</Text>
         </View>
         <TouchableOpacity onPress={() => setDayOffset((d) => d - 1)}><Text style={styles.chev}>‹</Text></TouchableOpacity>
@@ -149,7 +153,7 @@ export default function AgendaScreen() {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         {!loading && appointments.length === 0 && allDayBlocks.length === 0 && (
-          <Text style={styles.emptyText}>אין תורים ביום הזה.</Text>
+          <Text style={styles.emptyText}>{t.agenda.noAppointments}</Text>
         )}
         {hours.map((h) => {
           const hourAppts = appointments
@@ -172,18 +176,18 @@ export default function AgendaScreen() {
                   <View key={item.id} style={[styles.chip, { borderRightColor: statusColor(colors, item.status) }]}>
                     <View style={styles.chipRow1}>
                       <Text style={styles.chipName}>{item.clientName}</Text>
-                      <Text style={styles.chipTime}>{new Date(item.startsAt).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit', hour12: false })}</Text>
+                      <Text style={styles.chipTime}>{new Date(item.startsAt).toLocaleTimeString(dateLocale, { hour: '2-digit', minute: '2-digit', hour12: false })}</Text>
                     </View>
-                    <Text style={styles.chipMeta}>{serviceName(item.serviceId)} · {staffName(item.staffId)} · {STATUS_LABEL[item.status]}</Text>
+                    <Text style={styles.chipMeta}>{serviceName(item.serviceId)} · {staffName(item.staffId)} · {statusLabel(item.status)}</Text>
                     {(item.status === 'confirmed' || item.status === 'pending_deposit') && (
                       <View style={styles.chipActions}>
                         {item.status === 'pending_deposit' && (
                           <TouchableOpacity style={styles.confirmBtn} onPress={() => confirm(item)}>
-                            <Text style={styles.confirmBtnText}>✓ קדמה התקבלה</Text>
+                            <Text style={styles.confirmBtnText}>{t.agenda.depositReceived}</Text>
                           </TouchableOpacity>
                         )}
                         <TouchableOpacity style={styles.cancelBtn} onPress={() => cancel(item)}>
-                          <Text style={styles.cancelBtnText}>✕ ביטול</Text>
+                          <Text style={styles.cancelBtnText}>{t.agenda.cancel}</Text>
                         </TouchableOpacity>
                       </View>
                     )}
