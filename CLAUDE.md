@@ -363,15 +363,36 @@ detalle técnico completo de arquitectura y setup.
     Falta cargar las 4 variables de Stripe cuando el usuario tenga su
     cuenta lista, y probar una suscripción de verdad (Stripe tiene modo
     de prueba con tarjetas falsas antes de pasar a cobros reales).
-  - 🚨 **Hallazgo del estudio de mercado (sept. 2026), importante**:
-    confirmado en stripe.com/global que **Stripe no está disponible en
-    Israel** (el país del piloto en vivo) ni en Venezuela — solo en
-    México. Para que la peluquería del piloto pueda cobrar de verdad, va
-    a hacer falta reemplazar Stripe por un procesador israelí (Tranzila o
-    Cardcom son las opciones más mencionadas) en vez de las 4 variables
-    de arriba, o abrir una empresa (LLC) en EE.UU. como workaround para
-    poder usar Stripe igual. Ver el estudio de mercado completo
-    (artifact "Radar Competitivo") para el detalle país por país.
+  - ✅ **Resuelto — Tranzila agregado para Israel.** Confirmado en
+    stripe.com/global que Stripe no está disponible en Israel ni Venezuela
+    (solo México), así que se agregó **Tranzila** (`functions/src/tranzila.ts`)
+    como pasarela alternativa:
+    - `branch.subscription.provider` (`'stripe'` | `'tranzila'`) decide
+      cuál se usa; la pantalla de Finanzas elige sola según el idioma de
+      la sucursal (hebreo → Tranzila, el resto → Stripe).
+    - `tranzilaCreateCheckoutUrl` arma la página de pago alojada por
+      Tranzila (ahí se valida la tarjeta, se cobra el primer mes y se
+      genera un token); `tranzilaNotify` recibe el resultado y guarda el
+      token; `tranzilaCancelSubscription` cancela.
+    - Como Tranzila no gestiona el calendario de cobros solo en la cuenta
+      base (eso es un módulo pago aparte, "My Billing"), se armó un cron
+      propio (`chargeTranzilaSubscriptions`, diario 08:00) que cobra el
+      token guardado cada vez que vence el mes — el "cobro recurrente" lo
+      arma el sistema, no Tranzila.
+    - ✅ **Ya desplegado** en `bot-para-peluqueria` (5 funciones nuevas).
+    - ⚠️ **Se armó con la documentación pública de Tranzila** (algunas
+      páginas de su documentación oficial no estaban indexadas al momento
+      de programarlo) — **hay que probarlo primero en el terminal de
+      pruebas (sandbox) que Tranzila da al crear la cuenta**, antes de
+      confiar en él para cobros reales.
+    - ⬜ **Falta que el usuario cree la cuenta en tranzila.com** y cargue 3
+      variables nuevas en `functions/.env`: `TRANZILA_TERMINAL_NAME`
+      (nombre del terminal), `TRANZILA_PASSWORD` (la "contraseña de
+      transacciones" del panel del terminal, no la contraseña de acceso),
+      y `TRANZILA_SUBSCRIPTION_SUM` (precio mensual en shéquels, sin
+      símbolo). `FUNCTIONS_BASE_URL` es la misma que ya se usa para Stripe.
+    - Ver el estudio de mercado completo (artifact "Radar Competitivo")
+      para el detalle país por país.
 - **Ideas para el backlog (más adelante, el usuario lo aclaró
   explícitamente — no bloquean el piloto):**
   - Página web y video publicitario explicando el ahorro de tiempo/dinero
