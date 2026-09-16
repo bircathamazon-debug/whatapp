@@ -450,6 +450,25 @@ detalle técnico completo de arquitectura y setup.
     WhatsApp del bot (línea de trabajo nueva, la que hablan los clientes) —
     ya soportado por el modelo de datos actual (`staff.phone` vs el número
     conectado al bot), confirmado como el enfoque correcto para el piloto.
+  - ⬜ **CRM — base de datos completa de clientes con sus datos** (pedido
+    explícito del usuario, todavía sin arrancar). Ojo: ya existe una base
+    de esto — la colección `clients` en Firestore (teléfono, nombre,
+    cumpleaños, cortes completados, ausencias) y la pestaña "Clientes" del
+    panel — pero hay que revisar con el usuario qué le falta para que sea
+    un CRM de verdad (¿historial completo de citas por cliente?, ¿notas
+    del peluquero sobre cada cliente?, ¿exportar la lista?, ¿algo más?)
+    antes de construir nada nuevo.
+  - ⬜ **Plan de respuesta ante errores** (pedido explícito del usuario,
+    todavía sin arrancar): tener listas las herramientas para detectar y
+    arreglar un problema lo antes posible si el sistema falla. Ya existe
+    una pieza suelta de esto (el "Modo mantenimiento" en Ajustes, que
+    pausa el bot/IVR a mano y deriva todo al peluquero), pero falta lo
+    importante: **algo que avise automáticamente** cuando algo se cae
+    (ej. el bot se desconecta de WhatsApp, una Cloud Function empieza a
+    fallar) en vez de enterarse porque un cliente se queja. Pensar con el
+    usuario: ¿alertas por mail/WhatsApp al propio peluquero o al
+    desarrollador?, ¿qué tan rápido hay que reaccionar?, ¿alcanza con los
+    logs de Firebase/Railway o conviene un servicio de monitoreo aparte?
 - **Decisiones ya tomadas con el usuario:**
   - El piloto se hace en la peluquería propia o de un familiar.
   - Se arranca con Baileys (gratis) y se migra a la API oficial de WhatsApp
