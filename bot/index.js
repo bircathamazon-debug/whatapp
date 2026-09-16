@@ -13,9 +13,50 @@ import qrcodeTerminal from 'qrcode-terminal';
 import QRCode from 'qrcode';
 import 'dotenv/config';
 import { handleIncomingMessage } from './conversation.js';
+import { transcribeVoiceMessage } from './transcribe.js';
 import { startNotificationsWatcher } from './notificationsWatcher.js';
 
 const BRANCH_ID = process.env.BRANCH_ID;
+
+// Si un cliente escribe su mensaje en varias burbujas seguidas (ej. "Hola" /
+// "quiero reservar" / "un corte para mañana"), esperamos este tiempo desde
+// el último mensaje antes de procesar, y las juntamos en una sola consulta
+// — así no le mandamos 3 respuestas separadas por algo que era un solo
+// pensamiento.
+const MESSAGE_DEBOUNCE_MS = 4000;
+
+/** phone -> { parts: string[], pushName?: string, timer } */
+const pendingByJid = new Map();
+
+function enqueueMessage(sock, jid, text, pushName) {
+  let entry = pendingByJid.get(jid);
+  if (!entry) {
+    entry = { parts: [], pushName, timer: null };
+    pendingByJid.set(jid, entry);
+  }
+  entry.parts.push(text);
+  if (pushName) entry.pushName = pushName;
+  if (entry.timer) clearTimeout(entry.timer);
+  entry.timer = setTimeout(() => flushPending(sock, jid), MESSAGE_DEBOUNCE_MS);
+}
+
+async function flushPending(sock, jid) {
+  const entry = pendingByJid.get(jid);
+  if (!entry) return;
+  pendingByJid.delete(jid);
+  const text = entry.parts.join(' ').trim();
+  if (!text) return;
+
+  try {
+    const replies = await handleIncomingMessage(jid, text, BRANCH_ID, entry.pushName);
+    for (const reply of replies) {
+      await sock.sendMessage(jid, { text: reply });
+    }
+  } catch (err) {
+    console.error('[bot] error procesando mensaje', err);
+    await sock.sendMessage(jid, { text: 'אירעה שגיאה. נסו שוב בכתיבת "menu".' }).catch(() => {});
+  }
+}
 
 if (!BRANCH_ID) {
   console.error('[bot] Falta BRANCH_ID en bot/.env — crea la sucursal en Firestore y copia su id.');
@@ -78,18 +119,18 @@ async function connectToWhatsApp() {
         continue;
       }
 
-      const text = msg.message?.conversation || msg.message?.extendedTextMessage?.text || msg.message?.buttonsResponseMessage?.selectedDisplayText || '';
-      if (!text) continue;
+      let text = msg.message?.conversation || msg.message?.extendedTextMessage?.text || msg.message?.buttonsResponseMessage?.selectedDisplayText || '';
 
-      try {
-        const replies = await handleIncomingMessage(jid, text, BRANCH_ID, msg.pushName);
-        for (const reply of replies) {
-          await sock.sendMessage(jid, { text: reply });
-        }
-      } catch (err) {
-        console.error('[bot] error procesando mensaje', err);
-        await sock.sendMessage(jid, { text: 'אירעה שגיאה. נסו שוב בכתיבת "menu".' }).catch(() => {});
+      if (!text && msg.message?.audioMessage) {
+        // Nota de voz: la transcribimos a texto y seguimos el mismo camino
+        // que un mensaje escrito. Si no se pudo transcribir (sin API key
+        // configurada, o error puntual), dejamos que caiga en el flujo de
+        // "no entendí" ya existente, que ofrece hablar con el peluquero.
+        text = (await transcribeVoiceMessage(msg)) || '[nota de voz — no se pudo transcribir]';
       }
+
+      if (!text) continue;
+      enqueueMessage(sock, jid, text, msg.pushName);
     }
   });
 }
