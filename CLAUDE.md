@@ -155,6 +155,39 @@ detalle técnico completo de arquitectura y setup.
     propio entorno al desplegarse). **Falta**: que cada peluquero apriete
     "Conectar Google Calendar" en Ajustes (ya existe el botón) y probar
     que una cita nueva aparezca sola en su calendario.
+- ✅ **App del panel publicada como página web (Firebase Hosting) —
+  CONFIGURADO, DESPLEGADO Y PROBADO.** El usuario preguntó cómo descarga
+  el peluquero la app (agenda/calendario/ajustes) — hasta ahora nunca se
+  había armado una versión instalable, solo se probó corriendo el
+  proyecto en una computadora. Se explicaron las 2 opciones (página web
+  vs. apps nativas en App Store/Google Play, con sus costos: Apple
+  U$S99/año, Google Play U$S25 una vez, más revisión de cada tienda) y
+  el usuario eligió empezar con la página web.
+  - **URL en producción: https://bot-para-peluqueria.web.app** — el
+    peluquero la abre desde cualquier navegador (celular o compu) y
+    puede "agregar a la pantalla de inicio" para que quede como un
+    ícono, sin pasar por ninguna tienda de aplicaciones.
+  - Técnicamente: `npx expo export --platform web` genera un sitio
+    estático en `app/dist` (una página HTML por pantalla: agenda, login,
+    finanzas, ajustes, etc.), y `firebase.json` ahora tiene un bloque
+    `hosting` que lo sirve con `cleanUrls` (para que las direcciones
+    queden lindas, sin `.html`) y un `predeploy` que corre el export
+    solo, así no hay que acordarse de generarlo a mano antes de cada
+    `firebase deploy --only hosting`.
+  - Se encontró que faltaban los íconos/splash de `app.json`
+    (`./assets/icon.png` y compañía no existían) — el export igual
+    funcionó (son opcionales para la versión web), pero **es un
+    pendiente de diseño** si más adelante se quiere un ícono propio en
+    vez del genérico, y necesario si se pasa a apps nativas.
+  - ✅ **Probado en vivo de punta a punta** (navegador real, con
+    capturas): login con el usuario real (`flow613@gmail.com`) funciona,
+    redirige al panel (Sucursales/Peluqueros/Servicios/Horarios/
+    Finanzas/Ajustes, todo en hebreo), y la agenda en línea de tiempo
+    carga bien con datos reales de Firestore.
+  - Nota para el futuro: cada vez que se cambie algo en `app/`, hay que
+    volver a correr `firebase deploy --only hosting` (o el predeploy lo
+    hace solo) para que la página web se actualice — no se actualiza
+    sola como el bot de Railway.
   - ✅ **Traducción a hebreo de todo el sistema — COMPLETA** (decisión del
     usuario: "todo en hebreo, panel incluido", el código/comentarios quedan
     en español):
