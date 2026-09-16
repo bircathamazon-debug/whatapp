@@ -8,3 +8,4 @@ functions/lib/
 dist/
 .expo/
 bot/whatsapp-qr*.png
+.firebase/

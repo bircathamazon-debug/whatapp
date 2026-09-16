@@ -10,5 +10,14 @@
       "ignore": ["node_modules", ".git", "*.local"],
       "predeploy": ["npm --prefix \"$RESOURCE_DIR\" run build"]
     }
-  ]
+  ],
+  "hosting": {
+    "public": "app/dist",
+    "cleanUrls": true,
+    "trailingSlash": false,
+    "predeploy": ["cd app && npx expo export --platform web"],
+    "rewrites": [
+      { "source": "**", "destination": "/index.html" }
+    ]
+  }
 }
