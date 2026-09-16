@@ -253,11 +253,7 @@ detalle técnico completo de arquitectura y setup.
   - Nota para el futuro: si se agrega otro idioma, solo hace falta sumar
     una entrada más a cada uno de los 3 diccionarios (no hay que tocar
     las pantallas ni la lógica).
-- ⬜ **Ronda de 4 mejoras pedidas por el usuario — CÓDIGO LISTO, VERIFICADO
-  Y SUBIDO A GITHUB, PERO TODAVÍA NO DESPLEGADO** (esta sesión corrió en un
-  entorno remoto sin las sesiones de Firebase CLI / Railway CLI que se
-  habían iniciado antes en el sandbox interactivo — falta el paso de
-  `firebase deploy` y `railway up` desde ahí, o volver a loguearse):
+- ✅ **Ronda de 4 mejoras pedidas por el usuario — PROGRAMADA Y DESPLEGADA.**
   - ✅ **Reintento automático cuando el horario se ocupa**: al elegir una
     hora que resulta ocupada, el primer intento del día solo avisa
     ("esa hora está ocupada, elegí otra") sin más — recién desde el
@@ -310,17 +306,14 @@ detalle técnico completo de arquitectura y setup.
     al cliente hablar directo con el peluquero. **Falta que el usuario
     cree la cuenta/clave en OpenAI y la cargue en Railway** para que la
     transcripción funcione de verdad.
-  - **Siguiente paso pendiente**: desplegar de verdad — `firebase deploy
-    --only firestore:rules,functions` en el proyecto `bot-para-peluqueria`
-    y `railway up` en el servicio `bot-peluqueria` (rama
-    `claude/salon-appointment-app-cg11sw`, ya pusheada a GitHub, último
-    commit `b4aeabf`) — y después probar en vivo con clientes reales,
-    igual que las rondas anteriores. Antes o después de ese despliegue,
-    cargar `OPENAI_API_KEY` en Railway para activar la transcripción de
-    voz (si no se carga, el resto del sistema funciona igual, solo que
-    las notas de voz no se van a entender).
-- ⬜ **Finanzas (ingresos, gastos y suscripción de pago) — CÓDIGO LISTO Y
-  SUBIDO A GITHUB, FALTA CONFIGURAR STRIPE DE VERDAD Y DESPLEGAR.** El
+  - ✅ **Desplegado** (Firebase Functions + Firestore rules, y Railway
+    reconectó a WhatsApp sin pedir QR nuevo, usando la sesión guardada).
+    **Pendiente real**: cargar `OPENAI_API_KEY` en Railway para activar
+    la transcripción de voz (sin eso, el resto funciona igual, solo que
+    las notas de voz no se van a entender) — y probar en vivo con
+    clientes reales.
+- ✅ **Finanzas (ingresos, gastos y suscripción de pago) — PROGRAMADA Y
+  DESPLEGADA, FALTA CONFIGURAR STRIPE DE VERDAD.** El
   usuario pidió explícitamente cobro automático real con tarjeta (no un
   simple recordatorio), sabiendo que implica crear una cuenta de negocio
   en Stripe.
@@ -364,11 +357,21 @@ detalle técnico completo de arquitectura y setup.
     Sin esto configurado, el botón "Suscribirse" de la pantalla de
     Finanzas muestra un aviso claro ("los pagos todavía no están
     configurados") en vez de fallar en silencio.
-  - **Siguiente paso pendiente**: junto con el resto de esta rama —
-    desplegar (`firebase deploy` + `railway up`) y, cuando el usuario
-    tenga lista su cuenta de Stripe, cargar las 4 variables de arriba y
-    probar una suscripción de verdad (Stripe tiene un modo de prueba con
-    tarjetas falsas antes de pasar a cobros reales).
+  - ✅ **Desplegado** (las 4 Cloud Functions de Stripe ya están activas en
+    `bot-para-peluqueria`: `stripeCreateCheckoutSession`,
+    `stripeCustomerPortal`, `stripeCheckoutDone`, `stripeWebhook`).
+    Falta cargar las 4 variables de Stripe cuando el usuario tenga su
+    cuenta lista, y probar una suscripción de verdad (Stripe tiene modo
+    de prueba con tarjetas falsas antes de pasar a cobros reales).
+  - 🚨 **Hallazgo del estudio de mercado (sept. 2026), importante**:
+    confirmado en stripe.com/global que **Stripe no está disponible en
+    Israel** (el país del piloto en vivo) ni en Venezuela — solo en
+    México. Para que la peluquería del piloto pueda cobrar de verdad, va
+    a hacer falta reemplazar Stripe por un procesador israelí (Tranzila o
+    Cardcom son las opciones más mencionadas) en vez de las 4 variables
+    de arriba, o abrir una empresa (LLC) en EE.UU. como workaround para
+    poder usar Stripe igual. Ver el estudio de mercado completo
+    (artifact "Radar Competitivo") para el detalle país por país.
 - **Ideas para el backlog (más adelante, el usuario lo aclaró
   explícitamente — no bloquean el piloto):**
   - Página web y video publicitario explicando el ahorro de tiempo/dinero
