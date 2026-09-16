@@ -26,13 +26,9 @@ function ThemedStack() {
         }}
       >
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="admin/login" options={{ title: 'כניסת צוות', presentation: 'modal' }} />
-        <Stack.Screen name="admin/index" options={{ title: 'הפאנל שלי' }} />
-        <Stack.Screen name="admin/branches" options={{ title: 'סניפים' }} />
-        <Stack.Screen name="admin/staff" options={{ title: 'ספרים' }} />
-        <Stack.Screen name="admin/services" options={{ title: 'שירותים' }} />
-        <Stack.Screen name="admin/schedule" options={{ title: 'שעות עבודה' }} />
-        <Stack.Screen name="admin/settings" options={{ title: 'הגדרות' }} />
+        {/* admin/_layout.tsx ya define su propio Stack con los títulos en
+            hebreo de cada pantalla; acá solo se oculta el header duplicado. */}
+        <Stack.Screen name="admin" options={{ headerShown: false }} />
       </Stack>
     </>
   );

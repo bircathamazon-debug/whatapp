@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from './firebase';
 import { getBranches } from './branches';
 import type { Branch } from '../../shared/types';
 
@@ -32,7 +34,19 @@ export function BranchProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    reload();
+    // Las reglas de Firestore exigen sesión iniciada para leer `branches`;
+    // si se pide antes de que Firebase Auth resuelva, tira "Missing or
+    // insufficient permissions". Se espera a que haya usuario autenticado.
+    const unsub = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        reload();
+      } else {
+        setBranches([]);
+        setBranchId(null);
+        setLoading(false);
+      }
+    });
+    return unsub;
   }, [reload]);
 
   return <BranchContext.Provider value={{ branches, branchId, setBranchId, loading, reload }}>{children}</BranchContext.Provider>;
