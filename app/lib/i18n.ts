@@ -237,6 +237,10 @@ interface Dict {
     subscriptionError: string;
     subscriptionErrorMessage: string;
     subscriptionNotConfigured: string;
+    cancelSubscriptionBtn: string;
+    cancelSubscriptionTitle: string;
+    cancelSubscriptionConfirm: string;
+    cancelSubscriptionConfirmBtn: string;
   };
 }
 
@@ -464,6 +468,10 @@ const he: Dict = {
     subscriptionError: 'שגיאה',
     subscriptionErrorMessage: 'לא ניתן היה לפתוח את עמוד התשלום. נסו שוב מאוחר יותר.',
     subscriptionNotConfigured: 'תשלומים עדיין לא הוגדרו במערכת.',
+    cancelSubscriptionBtn: 'ביטול המנוי',
+    cancelSubscriptionTitle: 'ביטול המנוי',
+    cancelSubscriptionConfirm: 'לבטל את המנוי? החיוב החודשי הבא לא יתבצע.',
+    cancelSubscriptionConfirmBtn: 'ביטול המנוי',
   },
 };
 
@@ -691,6 +699,10 @@ const en: Dict = {
     subscriptionError: 'Error',
     subscriptionErrorMessage: 'Could not open the payment page. Please try again later.',
     subscriptionNotConfigured: 'Payments are not set up yet.',
+    cancelSubscriptionBtn: 'Cancel subscription',
+    cancelSubscriptionTitle: 'Cancel subscription',
+    cancelSubscriptionConfirm: "Cancel the subscription? The next monthly charge won't happen.",
+    cancelSubscriptionConfirmBtn: 'Cancel subscription',
   },
 };
 
@@ -918,6 +930,10 @@ const es: Dict = {
     subscriptionError: 'Error',
     subscriptionErrorMessage: 'No se pudo abrir la página de pago. Probá de nuevo más tarde.',
     subscriptionNotConfigured: 'Los pagos todavía no están configurados en el sistema.',
+    cancelSubscriptionBtn: 'Cancelar suscripción',
+    cancelSubscriptionTitle: 'Cancelar suscripción',
+    cancelSubscriptionConfirm: '¿Cancelar la suscripción? El próximo cobro mensual no se va a hacer.',
+    cancelSubscriptionConfirmBtn: 'Cancelar suscripción',
   },
 };
 

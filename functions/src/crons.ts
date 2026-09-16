@@ -5,6 +5,7 @@ import { REMINDER_WINDOWS_HOURS } from './types';
 import { sendNotification, getTemplates, flushDueTwilioNotifications } from './notify';
 import { markNoShow, releaseExpiredDepositHolds, formatDate, formatTime, createAppointment } from './booking';
 import { toEpoch, getStaffServiceDuration } from './availability';
+import { chargeTranzilaToken } from './tranzila';
 
 /** Cada 15 minutos: recordatorios 24h y 2h antes, por el canal preferido del cliente. */
 export const sendReminders = onSchedule({ schedule: 'every 15 minutes', timeZone: 'Asia/Jerusalem' }, async () => {
@@ -173,6 +174,34 @@ export const sendComebackReminders = onSchedule({ schedule: '0 10 * * *', timeZo
       text: getTemplates(branch.language).comebackReminder(appt.clientName),
     });
     await doc.ref.update({ comebackReminderSentAt: Date.now() });
+  }
+});
+
+/**
+ * Diario 08:00: cobra de nuevo el token de Tranzila de las sucursales con
+ * suscripción activa cuyo período ya venció — así armamos el "cobro
+ * mensual recurrente" nosotros mismos, ya que Tranzila no lo gestiona
+ * solo (eso es un módulo pago aparte). Las sucursales con Stripe no
+ * pasan por acá: Stripe ya cobra solo y avisa por su propio webhook.
+ */
+export const chargeTranzilaSubscriptions = onSchedule({ schedule: '0 8 * * *', timeZone: 'Asia/Jerusalem' }, async () => {
+  const now = Date.now();
+  const snap = await db
+    .collection('branches')
+    .where('subscription.provider', '==', 'tranzila')
+    .where('subscription.status', '==', 'active')
+    .get();
+
+  for (const doc of snap.docs) {
+    const branch = { id: doc.id, ...(doc.data() as Omit<Branch, 'id'>) };
+    if (!branch.subscription?.currentPeriodEnd || branch.subscription.currentPeriodEnd > now) continue;
+
+    const success = await chargeTranzilaToken(branch);
+    if (success) {
+      await doc.ref.update({ 'subscription.currentPeriodEnd': now + 30 * 24 * 3600000 });
+    } else {
+      await doc.ref.update({ 'subscription.status': 'past_due' });
+    }
   }
 });
 

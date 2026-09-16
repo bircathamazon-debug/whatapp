@@ -5,6 +5,7 @@ import { getAppointmentsForDay } from '../../lib/appointments';
 import { getServicesByBranch } from '../../lib/services';
 import { getExpensesByBranch, addExpense, deleteExpense } from '../../lib/expenses';
 import { createSubscriptionCheckout, openBillingPortal } from '../../lib/stripe';
+import { createTranzilaCheckoutUrl, cancelTranzilaSubscription } from '../../lib/tranzila';
 import { useTheme, type ThemeColors } from '../../lib/theme';
 import { useT, useDateLocale } from '../../lib/i18n';
 import type { Appointment, Service, Expense } from '../../../shared/types';
@@ -116,7 +117,11 @@ export default function FinanceScreen() {
     ]);
   };
 
-  const handleStripeError = (err: unknown) => {
+  // Stripe no está disponible en Israel ni Venezuela (solo México) — las
+  // sucursales en hebreo usan Tranzila en su lugar.
+  const paymentProvider: 'stripe' | 'tranzila' = branch?.language === 'he' ? 'tranzila' : 'stripe';
+
+  const handlePaymentError = (err: unknown) => {
     const code = (err as { code?: string } | null)?.code;
     const message = code === 'functions/failed-precondition' ? t.finance.subscriptionNotConfigured : t.finance.subscriptionErrorMessage;
     Alert.alert(t.finance.subscriptionError, message);
@@ -126,10 +131,10 @@ export default function FinanceScreen() {
     if (!branchId) return;
     setSubscribing(true);
     try {
-      const url = await createSubscriptionCheckout(branchId);
+      const url = paymentProvider === 'tranzila' ? await createTranzilaCheckoutUrl(branchId) : await createSubscriptionCheckout(branchId);
       await Linking.openURL(url);
     } catch (err) {
-      handleStripeError(err);
+      handlePaymentError(err);
     } finally {
       setSubscribing(false);
     }
@@ -142,10 +147,31 @@ export default function FinanceScreen() {
       const url = await openBillingPortal(branchId);
       await Linking.openURL(url);
     } catch (err) {
-      handleStripeError(err);
+      handlePaymentError(err);
     } finally {
       setSubscribing(false);
     }
+  };
+
+  const cancelSubscription = () => {
+    if (!branchId) return;
+    Alert.alert(t.finance.cancelSubscriptionTitle, t.finance.cancelSubscriptionConfirm, [
+      { text: t.finance.cancel, style: 'cancel' },
+      {
+        text: t.finance.cancelSubscriptionConfirmBtn,
+        style: 'destructive',
+        onPress: async () => {
+          setSubscribing(true);
+          try {
+            await cancelTranzilaSubscription(branchId);
+          } catch (err) {
+            handlePaymentError(err);
+          } finally {
+            setSubscribing(false);
+          }
+        },
+      },
+    ]);
   };
 
   if (!branch) return <View style={styles.container}><Text style={styles.emptyText}>{t.finance.needBranch}</Text></View>;
@@ -185,9 +211,21 @@ export default function FinanceScreen() {
         <TouchableOpacity
           style={styles.saveBtn}
           disabled={subscribing}
-          onPress={subscription?.status === 'active' ? manageSubscription : subscribe}
+          onPress={
+            subscription?.status === 'active'
+              ? paymentProvider === 'tranzila'
+                ? cancelSubscription
+                : manageSubscription
+              : subscribe
+          }
         >
-          <Text style={styles.saveBtnText}>{subscription?.status === 'active' ? t.finance.manageBtn : t.finance.subscribeBtn}</Text>
+          <Text style={styles.saveBtnText}>
+            {subscription?.status === 'active'
+              ? paymentProvider === 'tranzila'
+                ? t.finance.cancelSubscriptionBtn
+                : t.finance.manageBtn
+              : t.finance.subscribeBtn}
+          </Text>
         </TouchableOpacity>
       </View>
 

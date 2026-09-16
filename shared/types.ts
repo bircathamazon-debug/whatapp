@@ -26,12 +26,25 @@ export interface Branch {
   /** Interruptor de emergencia: pausa el bot y el IVR (llamadas van directo
    *  al peluquero) ante un problema técnico, hasta que se desactive. */
   maintenanceMode?: boolean;
-  /** Suscripción de pago del sistema (Stripe), cobro mensual recurrente. */
+  /**
+   * Suscripción de pago del sistema, cobro mensual recurrente.
+   * `provider` decide qué pasarela procesa el cobro: Stripe no está
+   * disponible en Israel ni Venezuela (solo México), así que las
+   * sucursales en hebreo usan Tranzila en su lugar. Con Tranzila, el
+   * cobro mensual lo dispara nuestro propio cron (`chargeTranzilaSubscriptions`
+   * en functions/src/crons.ts) usando el token guardado — Tranzila no
+   * gestiona el calendario de cobros como sí hace Stripe.
+   */
   subscription?: {
-    stripeCustomerId?: string;
-    stripeSubscriptionId?: string;
+    provider?: 'stripe' | 'tranzila';
     status: 'none' | 'active' | 'past_due' | 'canceled';
     currentPeriodEnd?: number | null; // epoch ms del próximo cobro
+    // Stripe
+    stripeCustomerId?: string;
+    stripeSubscriptionId?: string;
+    // Tranzila
+    tranzilaToken?: string;
+    tranzilaExpDate?: string; // 'MMYY'
   };
 }
 

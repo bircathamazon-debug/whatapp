@@ -6,6 +6,7 @@ export {
   sendBirthdayMessages,
   generateRecurringAppointments,
   sendComebackReminders,
+  chargeTranzilaSubscriptions,
 } from './crons';
 
 export { onAppointmentCancelledOfferWaitlist } from './waitlist';
@@ -24,3 +25,4 @@ export {
   botCreateRecurringBooking,
 } from './botApi';
 export { stripeCreateCheckoutSession, stripeCustomerPortal, stripeCheckoutDone, stripeWebhook } from './stripe';
+export { tranzilaCreateCheckoutUrl, tranzilaCancelSubscription, tranzilaCheckoutDone, tranzilaNotify } from './tranzila';

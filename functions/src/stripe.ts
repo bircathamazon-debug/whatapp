@@ -32,6 +32,7 @@ async function getOrCreateCustomer(stripe: Stripe, branch: Branch): Promise<stri
     metadata: { branchId: branch.id },
   });
   await db.collection('branches').doc(branch.id).update({
+    'subscription.provider': 'stripe',
     'subscription.stripeCustomerId': customer.id,
     'subscription.status': 'none',
   });

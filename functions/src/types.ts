@@ -18,10 +18,13 @@ export interface Branch {
   language?: 'he' | 'en' | 'es';
   maintenanceMode?: boolean;
   subscription?: {
-    stripeCustomerId?: string;
-    stripeSubscriptionId?: string;
+    provider?: 'stripe' | 'tranzila';
     status: 'none' | 'active' | 'past_due' | 'canceled';
     currentPeriodEnd?: number | null;
+    stripeCustomerId?: string;
+    stripeSubscriptionId?: string;
+    tranzilaToken?: string;
+    tranzilaExpDate?: string;
   };
 }
 
