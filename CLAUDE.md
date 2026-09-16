@@ -197,21 +197,37 @@ detalle técnico completo de arquitectura y setup.
     OpenAI) que cambiaría el presupuesto mensual (hoy ~$50-150/mes) —
     explicar costo y opciones antes de programarlo, como se hizo con
     Firebase/Railway/Twilio.
-- 🚧 **Pendiente de esta sesión: falta el paso de despliegue.** Todo lo de
-  arriba (rediseño, tema, bloqueo de horarios, hablar con una persona,
-  traducción del panel) está programado y compila limpio (`tsc --noEmit`
-  en `app/` y `functions/`, `node --check` en `bot/`), pero esta sesión de
-  Claude Code (entorno remoto) **no tenía las sesiones de Firebase CLI ni
-  Railway CLI iniciadas** (son logins aparte, por dispositivo). Falta, al
-  retomar con el usuario:
-  1. `firebase deploy --only firestore:rules,functions --project
-     bot-para-peluqueria` (nuevas reglas para `blockedTimes` + las
-     funciones actualizadas con el chequeo de horarios bloqueados).
-  2. `railway up` para el bot (opción de hablar con el peluquero + que
-     respete los bloqueos de horario al ofrecer turnos).
-  3. Mostrarle al usuario la app del panel actualizada — probablemente
-     con `npx expo start` — para que la revise antes de darla por
-     terminada (regla de "verificar antes de seguir" del proyecto).
+- ✅ **Despliegue de esta ronda de cambios — COMPLETO.**
+  1. ✅ Firebase: reglas de Firestore (`blockedTimes`) y las 26 funciones
+     actualizadas, publicadas en `bot-para-peluqueria` sin errores.
+  2. ✅ Railway: bot redesplegado (`railway up`), reconectado a WhatsApp
+     limpio, con la opción de hablar con el peluquero y el respeto a
+     horarios bloqueados ya en producción.
+  3. ✅ App del panel: se corrió de verdad con `npx expo start --web` (la
+     primera vez que se llega a ejecutar, no solo compilar) y se probó
+     con el login real (`flow613@gmail.com`) — capturas de pantalla
+     enviadas al usuario (agenda en línea de tiempo, clientes, ajustes
+     con el interruptor claro/oscuro y el bloqueo de horarios), todo
+     andando con datos reales de Firestore.
+  - 🐛 **Se encontraron y corrigieron 2 bugs reales al hacer esto**, que
+    existían desde antes de esta sesión y nunca se habían detectado
+    porque nadie había llegado a correr `expo start` (solo se verificaba
+    con `tsc`, que no los detecta):
+    1. Metro (el empaquetador de la app) no dejaba importar
+       `../../../shared/types` por estar fuera de la carpeta `app/` —
+       se agregó `app/metro.config.js` con `watchFolders` apuntando al
+       monorepo.
+    2. `app/lib/branchContext.tsx` pedía las sucursales a Firestore antes
+       de que Firebase Auth confirmara la sesión, y como las reglas
+       exigen usuario autenticado tiraba "Missing or insufficient
+       permissions" en cualquier pantalla — ahora espera a que haya
+       sesión iniciada.
+  - Para previsualizar en navegador se agregaron `react-native-web` y
+    `react-dom` (dependencias que pide Expo para el modo web); no afectan
+    la app real en el celular.
+  - Nota: la tipografía Manrope/Assistant de las maquetas no se cargó
+    (usa la fuente del sistema por ahora) — pendiente si se quiere ese
+    detalle más adelante, requiere empaquetar fuentes con `expo-font`.
 - **Ideas para el backlog (más adelante, el usuario lo aclaró
   explícitamente — no bloquean el piloto):**
   - Página web y video publicitario explicando el ahorro de tiempo/dinero
