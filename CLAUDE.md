@@ -228,6 +228,31 @@ detalle técnico completo de arquitectura y setup.
   - Nota: la tipografía Manrope/Assistant de las maquetas no se cargó
     (usa la fuente del sistema por ahora) — pendiente si se quiere ese
     detalle más adelante, requiere empaquetar fuentes con `expo-font`.
+- ✅ **Soporte multi-idioma (hebreo/inglés/español) — PROGRAMADO Y
+  DESPLEGADO.** Pedido del usuario pensando en vender a otros países más
+  adelante. Se armó ahora, aprovechando que el código estaba fresco.
+  - Nuevo campo `branch.language` (`'he'` por defecto, también `'en'` y
+    `'es'`) controla el idioma del bot de WhatsApp, el IVR de Twilio, las
+    notificaciones y toda la app del panel — un solo interruptor para
+    todo el sistema.
+  - Diccionarios por idioma, uno por carpeta desplegable (mismo patrón
+    que `availability.js`): `bot/i18n.js`, `functions/src/notify.ts`
+    (plantillas) + `functions/src/ivrStrings.ts` (IVR), y
+    `app/lib/i18n.ts` (toda la app, con hook `useT()`).
+  - Nueva opción en Ajustes (`app/app/admin/settings.tsx`): selector
+    עברית / English / Español. Cambia el texto al instante; si cambia
+    el sentido de lectura (hebreo RTL ↔ inglés/español LTR) avisa que
+    hay que reabrir la app para que el diseño se acomode bien —
+    limitación de React Native, no de la implementación.
+  - De paso se corrigió un bug real preexistente: `functions/src/campaigns.ts`
+    tenía un mensaje de error que había quedado en español sin traducir
+    nunca (aunque el resto del sistema ya estaba en hebreo).
+  - Probado en vivo con capturas reales cambiando el idioma desde la app
+    (agenda, clientes y ajustes en los tres idiomas) — ya desplegado en
+    Firebase Functions y Railway.
+  - Nota para el futuro: si se agrega otro idioma, solo hace falta sumar
+    una entrada más a cada uno de los 3 diccionarios (no hay que tocar
+    las pantallas ni la lógica).
 - **Ideas para el backlog (más adelante, el usuario lo aclaró
   explícitamente — no bloquean el piloto):**
   - Página web y video publicitario explicando el ahorro de tiempo/dinero
