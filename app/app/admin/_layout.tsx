@@ -38,15 +38,17 @@ export default function AdminLayout() {
       screenOptions={{
         headerStyle: { backgroundColor: colors.surface },
         headerTintColor: colors.text,
-        headerTitleStyle: { fontWeight: '700' },
+        headerTitleStyle: { fontWeight: '800', fontSize: 18 },
+        headerShadowVisible: false,
       }}
     >
-      <Stack.Screen name="index" options={{ title: t.adminMenu.title }} />
-      <Stack.Screen name="login" options={{ title: t.login.title }} />
+      <Stack.Screen name="index" options={{ title: t.adminMenu.title, headerShown: false }} />
+      <Stack.Screen name="login" options={{ title: t.login.title, headerShown: false }} />
       <Stack.Screen name="branches" options={{ title: t.adminMenu.branches }} />
       <Stack.Screen name="staff" options={{ title: t.adminMenu.staff }} />
       <Stack.Screen name="services" options={{ title: t.adminMenu.services }} />
       <Stack.Screen name="schedule" options={{ title: t.schedule.weeklyHours }} />
+      <Stack.Screen name="finance" options={{ title: t.adminMenu.finance }} />
       <Stack.Screen name="settings" options={{ title: t.settings.title }} />
     </Stack>
   );

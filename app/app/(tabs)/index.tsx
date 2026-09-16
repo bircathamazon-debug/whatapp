@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, RefreshControl, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useBranch } from '../../lib/branchContext';
-import { useTheme, type ThemeColors } from '../../lib/theme';
+import { useTheme, type ThemeColors, RADIUS, cardShadow } from '../../lib/theme';
 import { getAppointmentsForDay, adminCancelAppointment, adminConfirmAppointment } from '../../lib/appointments';
 import { getStaffByBranch } from '../../lib/staff';
 import { getServicesByBranch } from '../../lib/services';
@@ -27,10 +27,10 @@ function dateStrOf(ms: number): string {
 export default function AgendaScreen() {
   const router = useRouter();
   const { branchId, branches, setBranchId } = useBranch();
-  const { colors } = useTheme();
+  const { colors, mode } = useTheme();
   const t = useT();
   const dateLocale = useDateLocale();
-  const styles = makeStyles(colors);
+  const styles = makeStyles(colors, mode);
   const [dayOffset, setDayOffset] = useState(0);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [staff, setStaff] = useState<Staff[]>([]);
@@ -212,42 +212,42 @@ function statusColor(colors: ThemeColors, status: Appointment['status']): string
   }
 }
 
-function makeStyles(colors: ThemeColors) {
+function makeStyles(colors: ThemeColors, mode: 'light' | 'dark') {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.bg },
     center: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24, gap: 12, backgroundColor: colors.bg },
     branchRow: { flexDirection: 'row', gap: 8, padding: 12, flexWrap: 'wrap' },
-    branchChip: { backgroundColor: colors.surface, borderRadius: 16, paddingHorizontal: 12, paddingVertical: 6, borderWidth: 1, borderColor: colors.border },
-    branchChipActive: { backgroundColor: colors.accent, borderColor: colors.accent },
-    branchChipText: { fontSize: 12, color: colors.textMuted },
+    branchChip: { backgroundColor: colors.surface, borderRadius: RADIUS.pill, paddingHorizontal: 14, paddingVertical: 7, ...cardShadow(mode, 'sm') },
+    branchChipActive: { backgroundColor: colors.accent },
+    branchChipText: { fontSize: 12, color: colors.textMuted, fontWeight: '600' },
     branchChipTextActive: { color: '#fff' },
-    daybar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 18, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colors.border },
-    chev: { fontSize: 20, fontWeight: '700', color: colors.accent, paddingHorizontal: 8 },
+    daybar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 18, paddingVertical: 14, backgroundColor: colors.surface, ...cardShadow(mode, 'sm') },
+    chev: { fontSize: 20, fontWeight: '700', color: colors.accent, paddingHorizontal: 10 },
     dateWrap: { alignItems: 'center' },
-    dayNum: { fontSize: 19, fontWeight: '800', color: colors.text },
+    dayNum: { fontSize: 20, fontWeight: '800', color: colors.text, letterSpacing: -0.2 },
     dayText: { fontSize: 12, color: colors.textMuted, marginTop: 1 },
-    allDayBanner: { marginHorizontal: 16, marginTop: 10, backgroundColor: colors.dangerSoft, borderRadius: 10, padding: 10 },
+    allDayBanner: { marginHorizontal: 16, marginTop: 12, backgroundColor: colors.dangerSoft, borderRadius: RADIUS.md, padding: 12 },
     allDayBannerText: { fontSize: 12.5, fontWeight: '700', color: colors.danger },
-    list: { padding: 16, paddingTop: 8 },
+    list: { padding: 16, paddingTop: 12 },
     emptyList: { flex: 1, justifyContent: 'center', alignItems: 'center' },
     emptyText: { color: colors.textMuted, textAlign: 'center', marginTop: 24 },
-    smallBtn: { backgroundColor: colors.accent, borderRadius: 10, paddingHorizontal: 16, paddingVertical: 10 },
-    smallBtnText: { color: '#fff', fontWeight: '600' },
-    hourRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, minHeight: 34 },
-    hourLabel: { width: 42, fontSize: 11, color: colors.textMuted, paddingTop: 3, textAlign: 'right', fontVariant: ['tabular-nums'] },
+    smallBtn: { backgroundColor: colors.accent, borderRadius: RADIUS.pill, paddingHorizontal: 18, paddingVertical: 11 },
+    smallBtnText: { color: '#fff', fontWeight: '700' },
+    hourRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, minHeight: 36 },
+    hourLabel: { width: 42, fontSize: 11, color: colors.textMuted, paddingTop: 3, textAlign: 'right', fontVariant: ['tabular-nums'], fontWeight: '600' },
     hourLine: { width: 1, backgroundColor: colors.border, alignSelf: 'stretch' },
-    hourContent: { flex: 1, paddingBottom: 10, gap: 6 },
-    blockedChip: { backgroundColor: colors.surfaceMuted, borderRadius: 8, borderWidth: 1, borderColor: colors.border, borderStyle: 'dashed', padding: 8 },
+    hourContent: { flex: 1, paddingBottom: 12, gap: 8 },
+    blockedChip: { backgroundColor: colors.surfaceMuted, borderRadius: RADIUS.sm, borderWidth: 1, borderColor: colors.border, borderStyle: 'dashed', padding: 10 },
     blockedChipText: { fontSize: 11, color: colors.textMuted, fontWeight: '600' },
-    chip: { backgroundColor: colors.surface, borderRadius: 10, padding: 10, borderRightWidth: 3 },
+    chip: { backgroundColor: colors.surface, borderRadius: RADIUS.md, padding: 12, borderRightWidth: 4, ...cardShadow(mode, 'sm') },
     chipRow1: { flexDirection: 'row', justifyContent: 'space-between' },
-    chipName: { fontSize: 13, fontWeight: '700', color: colors.text },
-    chipTime: { fontSize: 13, fontWeight: '800', color: colors.text, fontVariant: ['tabular-nums'] },
-    chipMeta: { fontSize: 11.5, color: colors.textMuted, marginTop: 2 },
-    chipActions: { flexDirection: 'row', gap: 7, marginTop: 8 },
-    confirmBtn: { backgroundColor: colors.successSoft, borderRadius: 7, paddingHorizontal: 10, paddingVertical: 6 },
+    chipName: { fontSize: 13.5, fontWeight: '700', color: colors.text },
+    chipTime: { fontSize: 13.5, fontWeight: '800', color: colors.text, fontVariant: ['tabular-nums'] },
+    chipMeta: { fontSize: 11.5, color: colors.textMuted, marginTop: 3 },
+    chipActions: { flexDirection: 'row', gap: 8, marginTop: 10 },
+    confirmBtn: { backgroundColor: colors.successSoft, borderRadius: RADIUS.pill, paddingHorizontal: 12, paddingVertical: 7 },
     confirmBtnText: { color: colors.success, fontWeight: '700', fontSize: 11 },
-    cancelBtn: { backgroundColor: colors.dangerSoft, borderRadius: 7, paddingHorizontal: 10, paddingVertical: 6 },
+    cancelBtn: { backgroundColor: colors.dangerSoft, borderRadius: RADIUS.pill, paddingHorizontal: 12, paddingVertical: 7 },
     cancelBtnText: { color: colors.danger, fontWeight: '700', fontSize: 11 },
   });
 }

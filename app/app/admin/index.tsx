@@ -1,24 +1,27 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Alert, ScrollView, I18nManager } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../lib/firebase';
-import { useTheme, type ThemeColors } from '../../lib/theme';
+import { useTheme, type ThemeColors, RADIUS, cardShadow } from '../../lib/theme';
 import { useT } from '../../lib/i18n';
+
+type IconName = React.ComponentProps<typeof Ionicons>['name'];
 
 export default function AdminIndexScreen() {
   const router = useRouter();
-  const { colors } = useTheme();
+  const { colors, mode } = useTheme();
   const t = useT();
-  const styles = makeStyles(colors);
+  const styles = makeStyles(colors, mode);
 
-  const MENU = [
-    { icon: '🏢', label: t.adminMenu.branches, route: '/admin/branches' as const },
-    { icon: '💈', label: t.adminMenu.staff, route: '/admin/staff' as const },
-    { icon: '💇', label: t.adminMenu.services, route: '/admin/services' as const },
-    { icon: '🗓️', label: t.adminMenu.schedule, route: '/admin/schedule' as const },
-    { icon: '💰', label: t.adminMenu.finance, route: '/admin/finance' as const },
-    { icon: '⚙️', label: t.adminMenu.settings, route: '/admin/settings' as const },
+  const MENU: { icon: IconName; label: string; route: '/admin/branches' | '/admin/staff' | '/admin/services' | '/admin/schedule' | '/admin/finance' | '/admin/settings' }[] = [
+    { icon: 'business', label: t.adminMenu.branches, route: '/admin/branches' },
+    { icon: 'cut', label: t.adminMenu.staff, route: '/admin/staff' },
+    { icon: 'sparkles', label: t.adminMenu.services, route: '/admin/services' },
+    { icon: 'calendar', label: t.adminMenu.schedule, route: '/admin/schedule' },
+    { icon: 'wallet', label: t.adminMenu.finance, route: '/admin/finance' },
+    { icon: 'settings', label: t.adminMenu.settings, route: '/admin/settings' },
   ];
 
   const logout = async () => {
@@ -29,45 +32,75 @@ export default function AdminIndexScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container} contentContainerStyle={{ padding: 18, paddingBottom: 32 }}>
       <Text style={styles.title}>{t.adminMenu.title}</Text>
 
-      {MENU.map((item) => (
-        <TouchableOpacity key={item.route} style={styles.menuItem} onPress={() => router.push(item.route)}>
-          <Text style={styles.menuIcon}>{item.icon}</Text>
-          <Text style={styles.menuText}>{item.label}</Text>
-        </TouchableOpacity>
-      ))}
+      <View style={styles.menuCard}>
+        {MENU.map((item, i) => (
+          <TouchableOpacity
+            key={item.route}
+            style={[styles.menuItem, i < MENU.length - 1 && styles.menuItemDivider]}
+            onPress={() => router.push(item.route)}
+            activeOpacity={0.7}
+          >
+            <View style={styles.iconBadge}>
+              <Ionicons name={item.icon} size={20} color={colors.accent} />
+            </View>
+            <Text style={styles.menuText}>{item.label}</Text>
+            <Ionicons name="chevron-forward" size={18} color={colors.textMuted} style={styles.chevron} />
+          </TouchableOpacity>
+        ))}
+      </View>
 
-      <TouchableOpacity style={[styles.menuItem, styles.logoutItem]} onPress={logout}>
-        <Text style={styles.menuIcon}>🚪</Text>
+      <TouchableOpacity style={styles.logoutItem} onPress={logout} activeOpacity={0.7}>
+        <View style={[styles.iconBadge, styles.iconBadgeDanger]}>
+          <Ionicons name="log-out" size={20} color={colors.danger} />
+        </View>
         <Text style={[styles.menuText, styles.logoutText]}>{t.adminMenu.logout}</Text>
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 }
 
-function makeStyles(colors: ThemeColors) {
+function makeStyles(colors: ThemeColors, mode: 'light' | 'dark') {
   return StyleSheet.create({
-    container: { flex: 1, backgroundColor: colors.bg, padding: 16 },
-    title: { fontSize: 22, fontWeight: '800', color: colors.text, marginBottom: 20, marginTop: 8 },
+    container: { flex: 1, backgroundColor: colors.bg },
+    title: { fontSize: 26, fontWeight: '800', color: colors.text, marginBottom: 18, marginTop: 4, letterSpacing: -0.3 },
+    menuCard: {
+      backgroundColor: colors.surface,
+      borderRadius: RADIUS.lg,
+      overflow: 'hidden',
+      ...cardShadow(mode, 'md'),
+    },
     menuItem: {
       flexDirection: 'row',
       alignItems: 'center',
-      backgroundColor: colors.surface,
-      borderRadius: 12,
-      padding: 18,
-      marginBottom: 12,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.06,
-      shadowRadius: 4,
-      elevation: 2,
-      gap: 12,
+      paddingVertical: 16,
+      paddingHorizontal: 16,
+      gap: 14,
     },
-    logoutItem: { backgroundColor: colors.dangerSoft },
-    menuIcon: { fontSize: 22 },
-    menuText: { fontSize: 15, color: colors.text, fontWeight: '600', flex: 1 },
+    menuItemDivider: { borderBottomWidth: 1, borderBottomColor: colors.border },
+    iconBadge: {
+      width: 38,
+      height: 38,
+      borderRadius: RADIUS.md,
+      backgroundColor: colors.accentSoft,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    iconBadgeDanger: { backgroundColor: colors.dangerSoft },
+    menuText: { fontSize: 15.5, color: colors.text, fontWeight: '600', flex: 1 },
+    chevron: { transform: [{ scaleX: I18nManager.isRTL ? -1 : 1 }] },
+    logoutItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.surface,
+      borderRadius: RADIUS.lg,
+      padding: 16,
+      marginTop: 16,
+      gap: 14,
+      ...cardShadow(mode, 'sm'),
+    },
     logoutText: { color: colors.danger },
   });
 }

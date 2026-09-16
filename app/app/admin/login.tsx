@@ -9,17 +9,18 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../lib/firebase';
-import { useTheme, type ThemeColors } from '../../lib/theme';
+import { useTheme, type ThemeColors, RADIUS, cardShadow, accentGlow } from '../../lib/theme';
 import { useT } from '../../lib/i18n';
 
 export default function LoginScreen() {
   const router = useRouter();
-  const { colors } = useTheme();
+  const { colors, mode } = useTheme();
   const t = useT();
-  const styles = makeStyles(colors);
+  const styles = makeStyles(colors, mode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -42,33 +43,43 @@ export default function LoginScreen() {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <View style={styles.card}>
-        <Text style={styles.title}>{t.login.title}</Text>
-        <Text style={styles.subtitle}>{t.login.subtitle}</Text>
+      <View style={styles.badge}>
+        <Ionicons name="cut" size={32} color="#fff" />
+      </View>
+      <Text style={styles.brand}>{t.login.title}</Text>
+      <Text style={styles.subtitle}>{t.login.subtitle}</Text>
 
-        <TextInput
-          style={styles.input}
-          value={email}
-          onChangeText={setEmail}
-          placeholder={t.login.email}
-          placeholderTextColor={colors.textMuted}
-          keyboardType="email-address"
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
-        <TextInput
-          style={styles.input}
-          value={password}
-          onChangeText={setPassword}
-          placeholder={t.login.password}
-          placeholderTextColor={colors.textMuted}
-          secureTextEntry
-        />
+      <View style={styles.card}>
+        <View style={styles.inputRow}>
+          <Ionicons name="mail-outline" size={18} color={colors.textMuted} style={styles.inputIcon} />
+          <TextInput
+            style={styles.input}
+            value={email}
+            onChangeText={setEmail}
+            placeholder={t.login.email}
+            placeholderTextColor={colors.textMuted}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+        </View>
+        <View style={styles.inputRow}>
+          <Ionicons name="lock-closed-outline" size={18} color={colors.textMuted} style={styles.inputIcon} />
+          <TextInput
+            style={styles.input}
+            value={password}
+            onChangeText={setPassword}
+            placeholder={t.login.password}
+            placeholderTextColor={colors.textMuted}
+            secureTextEntry
+          />
+        </View>
 
         <TouchableOpacity
           style={[styles.btn, loading && styles.btnDisabled]}
           onPress={login}
           disabled={loading}
+          activeOpacity={0.85}
         >
           <Text style={styles.btnText}>{loading ? t.login.submitting : t.login.submit}</Text>
         </TouchableOpacity>
@@ -77,47 +88,65 @@ export default function LoginScreen() {
   );
 }
 
-function makeStyles(colors: ThemeColors) {
+function makeStyles(colors: ThemeColors, mode: 'light' | 'dark') {
   return StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: colors.bg,
       justifyContent: 'center',
+      alignItems: 'center',
       padding: 24,
     },
-    card: {
-      backgroundColor: colors.surface,
-      borderRadius: 16,
-      padding: 28,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 8,
-      elevation: 4,
+    badge: {
+      width: 72,
+      height: 72,
+      borderRadius: RADIUS.xl,
+      backgroundColor: colors.accent,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: 16,
+      ...accentGlow(colors, mode),
     },
-    title: {
+    brand: {
       fontSize: 24,
       fontWeight: '800',
       color: colors.text,
       textAlign: 'center',
-      marginBottom: 4,
+      letterSpacing: -0.3,
     },
-    subtitle: { fontSize: 14, color: colors.textMuted, textAlign: 'center', marginBottom: 24 },
-    input: {
+    subtitle: { fontSize: 14, color: colors.textMuted, textAlign: 'center', marginTop: 4, marginBottom: 28 },
+    card: {
+      width: '100%',
+      maxWidth: 360,
+      backgroundColor: colors.surface,
+      borderRadius: RADIUS.xl,
+      padding: 24,
+      ...cardShadow(mode, 'lg'),
+    },
+    inputRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
       backgroundColor: colors.surfaceMuted,
-      borderRadius: 10,
-      padding: 14,
+      borderRadius: RADIUS.md,
+      paddingHorizontal: 14,
+      marginBottom: 12,
+      gap: 10,
+    },
+    inputIcon: { marginTop: 1 },
+    input: {
+      flex: 1,
+      paddingVertical: 14,
       fontSize: 15,
       color: colors.text,
-      marginBottom: 12,
       textAlign: 'right',
     },
     btn: {
       backgroundColor: colors.accent,
-      borderRadius: 10,
+      borderRadius: RADIUS.pill,
       padding: 16,
       alignItems: 'center',
-      marginTop: 8,
+      marginTop: 12,
+      ...accentGlow(colors, mode),
     },
     btnDisabled: { opacity: 0.6 },
     btnText: { color: '#fff', fontSize: 16, fontWeight: '700' },

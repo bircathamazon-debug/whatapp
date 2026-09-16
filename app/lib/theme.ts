@@ -73,3 +73,37 @@ export function useTheme(): { mode: 'light' | 'dark'; colors: ThemeColors } {
   const mode = branch?.themeMode === 'dark' ? 'dark' : 'light';
   return { mode, colors: mode === 'dark' ? dark : light };
 }
+
+/** Radios consistentes en toda la app — look de app nativa, no de web plana. */
+export const RADIUS = { sm: 10, md: 14, lg: 20, xl: 28, pill: 999 };
+
+/**
+ * Sombra "flotante" consistente para tarjetas/botones (más marcada que el
+ * borde plano anterior) — el detalle que hace que se sienta como una app
+ * de celular top y no como una página web con recuadros.
+ */
+export function cardShadow(mode: 'light' | 'dark', level: 'sm' | 'md' | 'lg' = 'md') {
+  const levels = {
+    sm: { shadowOffset: { width: 0, height: 2 }, shadowRadius: 6, elevation: 2 },
+    md: { shadowOffset: { width: 0, height: 4 }, shadowRadius: 14, elevation: 5 },
+    lg: { shadowOffset: { width: 0, height: 10 }, shadowRadius: 24, elevation: 9 },
+  } as const;
+  return {
+    shadowColor: '#000',
+    shadowOpacity: mode === 'dark' ? 0.4 : 0.1,
+    ...levels[level],
+  };
+}
+
+/** Sombra de color debajo de botones primarios (efecto "glow") — un truco
+ * típico de apps top para que el botón principal resalte más que un botón
+ * plano gris/blanco. */
+export function accentGlow(colors: ThemeColors, mode: 'light' | 'dark') {
+  return {
+    shadowColor: colors.accent,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: mode === 'dark' ? 0.45 : 0.3,
+    shadowRadius: 14,
+    elevation: 6,
+  };
+}
