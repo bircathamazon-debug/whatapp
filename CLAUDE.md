@@ -142,12 +142,19 @@ detalle técnico completo de arquitectura y setup.
   - ✅ `functions/src/notify.ts` y el nombre por defecto de `ivr.ts` ya
     traducidos a hebreo — esa parte del checklist de traducción quedó
     cerrada.
-  - ⬜ **Siguiente paso ofrecido, no confirmado todavía**: conectar Google
-    Calendar (ya está construido en `functions/src/googleCalendar.ts` +
-    `oauth.ts`) para que las citas confirmadas aparezcan solas en el
-    calendario del peluquero. Requiere crear credenciales OAuth en Google
-    Cloud (`GOOGLE_OAUTH_CLIENT_ID`/`SECRET` en `functions/.env`, hoy
-    vacíos).
+  - ✅ **Google Calendar conectado — CONFIGURADO Y DESPLEGADO.** El código
+    ya estaba construido desde antes (`functions/src/googleCalendar.ts` +
+    `oauth.ts`); esta sesión el usuario creó las credenciales OAuth en
+    Google Cloud (proyecto "BOT PARA PELUQUERIA", mismo proyecto de
+    Firebase) y las pasó — cargadas en `functions/.env`
+    (`GOOGLE_OAUTH_CLIENT_ID`/`SECRET`) y **las 29 funciones redesplegadas**
+    (no solo `googleCalendarConnect`/`Callback`: también hacía falta
+    redesplegar las que crean citas —`botCreateAppointment`,
+    `adminCreateAppointment`, `generateRecurringAppointments`, etc.— para
+    que tomen la variable nueva, porque cada función de 2ª gen. congela su
+    propio entorno al desplegarse). **Falta**: que cada peluquero apriete
+    "Conectar Google Calendar" en Ajustes (ya existe el botón) y probar
+    que una cita nueva aparezca sola en su calendario.
   - ✅ **Traducción a hebreo de todo el sistema — COMPLETA** (decisión del
     usuario: "todo en hebreo, panel incluido", el código/comentarios quedan
     en español):
