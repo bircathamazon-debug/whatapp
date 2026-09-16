@@ -292,12 +292,33 @@ detalle técnico completo de arquitectura y setup.
     el usuario en el mismo pedido **ya existía** (el campo "Nombre" en la
     pantalla de Peluqueros, ya usado en todos los mensajes) — no hizo
     falta construir nada nuevo ahí.
+  - ✅ **Agrupar mensajes seguidos (pedido antes de desplegar)**: si el
+    cliente escribe su mensaje dividido en varias burbujas seguidas (ej.
+    "Hola" / "quiero reservar" / "un corte para mañana"), el bot
+    (`bot/index.js`) ahora espera 4 segundos de silencio desde el último
+    mensaje y las junta en una sola consulta, en vez de procesar y
+    responder cada una por separado.
+  - ✅ **Entender notas de voz (pedido antes de desplegar)**: si el cliente
+    manda un audio por WhatsApp, el bot lo descarga y lo transcribe a
+    texto con la API de Whisper de OpenAI (`bot/transcribe.js`), y lo
+    procesa igual que si lo hubiera escrito. **Requiere una clave nueva,
+    `OPENAI_API_KEY`, en `bot/.env` (hoy vacía en Railway)** — se genera en
+    platform.openai.com/api-keys, es pago por uso y muy barato (~$0.006 por
+    minuto de audio, centavos por mes para el volumen de una peluquería).
+    Sin esa clave configurada, el audio no se pierde en silencio: el bot
+    simplemente cae en el flujo de "no entendí" que ya existe y le ofrece
+    al cliente hablar directo con el peluquero. **Falta que el usuario
+    cree la cuenta/clave en OpenAI y la cargue en Railway** para que la
+    transcripción funcione de verdad.
   - **Siguiente paso pendiente**: desplegar de verdad — `firebase deploy
     --only firestore:rules,functions` en el proyecto `bot-para-peluqueria`
     y `railway up` en el servicio `bot-peluqueria` (rama
-    `claude/salon-appointment-app-cg11sw`, ya pusheada a GitHub) — y
-    después probar en vivo con clientes reales, igual que las rondas
-    anteriores.
+    `claude/salon-appointment-app-cg11sw`, ya pusheada a GitHub, último
+    commit `b4aeabf`) — y después probar en vivo con clientes reales,
+    igual que las rondas anteriores. Antes o después de ese despliegue,
+    cargar `OPENAI_API_KEY` en Railway para activar la transcripción de
+    voz (si no se carga, el resto del sistema funciona igual, solo que
+    las notas de voz no se van a entender).
 - **Ideas para el backlog (más adelante, el usuario lo aclaró
   explícitamente — no bloquean el piloto):**
   - Página web y video publicitario explicando el ahorro de tiempo/dinero
