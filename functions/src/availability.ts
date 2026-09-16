@@ -74,6 +74,15 @@ export function toEpoch(dateStr: string, timeStr: string, timezone: string): num
   return naive.getTime() - offsetMinutes * 60000;
 }
 
+/** Minutos que le toma a este peluquero este servicio (usa su propio
+ * override si lo configuró; si no, la duración por defecto del servicio). */
+export function getStaffServiceDuration(
+  staff: { serviceDurations?: Record<string, number> },
+  service: { id: string; durationMinutes: number }
+): number {
+  return staff.serviceDurations?.[service.id] ?? service.durationMinutes;
+}
+
 export function getTimezoneOffsetMinutes(timezone: string, date: Date): number {
   const dtf = new Intl.DateTimeFormat('en-US', {
     timeZone: timezone,

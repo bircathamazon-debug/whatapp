@@ -14,7 +14,7 @@ export type Lang = 'he' | 'en' | 'es';
 export const RTL_LANGS: Lang[] = ['he'];
 
 interface Dict {
-  tabs: { agenda: string; waitlist: string; waitlistShort: string; clients: string; campaigns: string };
+  tabs: { agenda: string; waitlist: string; waitlistShort: string; clients: string; campaigns: string; questions: string };
   agenda: {
     statusConfirmed: string;
     statusPending: string;
@@ -54,6 +54,17 @@ interface Dict {
     sentTo: (count: number, message: string) => string;
     error: string;
     errorGeneric: string;
+  };
+  questions: {
+    empty: string;
+    from: (phone: string) => string;
+    stepLabel: (step: string) => string;
+    resolve: string;
+    resolved: string;
+    delete: string;
+    deleteTitle: string;
+    deleteConfirm: string;
+    cancel: string;
   };
   adminMenu: {
     title: string;
@@ -120,6 +131,11 @@ interface Dict {
     deleteConfirm: (name: string) => string;
     cancel: string;
     delete: string;
+    durationsBtn: string;
+    durationsTitle: string;
+    durationsHint: string;
+    durationDefaultPlaceholder: (minutes: number) => string;
+    save: string;
   };
   schedule: {
     needBranch: string;
@@ -139,6 +155,9 @@ interface Dict {
   settings: {
     title: string;
     needBranch: string;
+    maintenanceTitle: string;
+    maintenanceHint: string;
+    maintenanceActiveHint: string;
     languageTitle: string;
     languageHint: string;
     displayMode: string;
@@ -186,7 +205,7 @@ interface Dict {
 }
 
 const he: Dict = {
-  tabs: { agenda: 'יומן', waitlist: 'רשימת המתנה', waitlistShort: 'המתנה', clients: 'לקוחות', campaigns: 'קמפיינים' },
+  tabs: { agenda: 'יומן', waitlist: 'רשימת המתנה', waitlistShort: 'המתנה', clients: 'לקוחות', campaigns: 'קמפיינים', questions: 'שאלות' },
   agenda: {
     statusConfirmed: 'מאושר',
     statusPending: 'ממתין למקדמה',
@@ -226,6 +245,17 @@ const he: Dict = {
     sentTo: (count, message) => `נשלח ל-${count} לקוחות: "${message}"`,
     error: 'שגיאה',
     errorGeneric: 'לא ניתן היה לשלוח את הקמפיין.',
+  },
+  questions: {
+    empty: 'אין שאלות שהבוט לא ידע לענות עליהן. מעולה!',
+    from: (phone) => `מאת ${phone}`,
+    stepLabel: (step) => `בשלב: ${step}`,
+    resolve: '✓ סימון כטופל',
+    resolved: 'טופל',
+    delete: '🗑️',
+    deleteTitle: 'מחיקת שאלה',
+    deleteConfirm: 'למחוק את השאלה הזו?',
+    cancel: 'ביטול',
   },
   adminMenu: {
     title: 'הפאנל שלי',
@@ -292,6 +322,11 @@ const he: Dict = {
     deleteConfirm: (name) => `למחוק את ${name}?`,
     cancel: 'ביטול',
     delete: 'מחיקה',
+    durationsBtn: '⏱️ זמן לפי שירות',
+    durationsTitle: 'זמן תספורת לכל שירות',
+    durationsHint: 'אם משאירים ריק, ייעשה שימוש בזמן ברירת המחדל של השירות.',
+    durationDefaultPlaceholder: (minutes) => `ברירת מחדל: ${minutes} דק׳`,
+    save: 'שמירה',
   },
   schedule: {
     needBranch: 'יש ליצור סניף קודם.',
@@ -311,6 +346,9 @@ const he: Dict = {
   settings: {
     title: 'הגדרות',
     needBranch: 'יש לבחור סניף קודם.',
+    maintenanceTitle: '🚨 מצב תחזוקה (השבתת המערכת האוטומטית)',
+    maintenanceHint: 'להפעיל רק אם יש תקלה טכנית. הבוט בוואטסאפ והמענה הטלפוני יופסקו זמנית, והלקוחות יופנו ישירות לספר, עד שהמתג הזה יכובה.',
+    maintenanceActiveHint: '🔴 פעיל כרגע: הבוט בוואטסאפ והמענה הטלפוני מושבתים, לקוחות מופנים ישירות לספר. לכבות ברגע שהתקלה נפתרה.',
     languageTitle: 'שפת המערכת',
     languageHint: 'קובעת את השפה של הבוט בוואטסאפ, השיחות הקוליות וגם את הפאנל הזה.',
     displayMode: 'מצב תצוגה',
@@ -358,7 +396,7 @@ const he: Dict = {
 };
 
 const en: Dict = {
-  tabs: { agenda: 'Agenda', waitlist: 'Waitlist', waitlistShort: 'Waitlist', clients: 'Clients', campaigns: 'Campaigns' },
+  tabs: { agenda: 'Agenda', waitlist: 'Waitlist', waitlistShort: 'Waitlist', clients: 'Clients', campaigns: 'Campaigns', questions: 'Questions' },
   agenda: {
     statusConfirmed: 'Confirmed',
     statusPending: 'Awaiting deposit',
@@ -398,6 +436,17 @@ const en: Dict = {
     sentTo: (count, message) => `Sent to ${count} clients: "${message}"`,
     error: 'Error',
     errorGeneric: 'Could not send the campaign.',
+  },
+  questions: {
+    empty: "No unanswered questions right now. Great!",
+    from: (phone) => `From ${phone}`,
+    stepLabel: (step) => `At step: ${step}`,
+    resolve: '✓ Mark as handled',
+    resolved: 'Handled',
+    delete: '🗑️',
+    deleteTitle: 'Delete question',
+    deleteConfirm: 'Delete this question?',
+    cancel: 'Cancel',
   },
   adminMenu: {
     title: 'My panel',
@@ -464,6 +513,11 @@ const en: Dict = {
     deleteConfirm: (name) => `Delete ${name}?`,
     cancel: 'Cancel',
     delete: 'Delete',
+    durationsBtn: '⏱️ Time per service',
+    durationsTitle: 'Haircut time per service',
+    durationsHint: "Leave blank to use the service's default duration.",
+    durationDefaultPlaceholder: (minutes) => `Default: ${minutes} min`,
+    save: 'Save',
   },
   schedule: {
     needBranch: 'First create a branch.',
@@ -483,6 +537,9 @@ const en: Dict = {
   settings: {
     title: 'Settings',
     needBranch: 'First select a branch.',
+    maintenanceTitle: '🚨 Maintenance mode (pause the automated system)',
+    maintenanceHint: 'Turn this on only if there is a technical problem. The WhatsApp bot and phone system will be paused, and clients will be sent straight to the stylist, until you turn this off again.',
+    maintenanceActiveHint: '🔴 Currently on: the WhatsApp bot and phone system are paused, clients are routed directly to the stylist. Turn off as soon as the problem is fixed.',
     languageTitle: 'System language',
     languageHint: 'Sets the language of the WhatsApp bot, phone calls, and this panel.',
     displayMode: 'Display mode',
@@ -530,7 +587,7 @@ const en: Dict = {
 };
 
 const es: Dict = {
-  tabs: { agenda: 'Agenda', waitlist: 'Lista de espera', waitlistShort: 'Espera', clients: 'Clientes', campaigns: 'Campañas' },
+  tabs: { agenda: 'Agenda', waitlist: 'Lista de espera', waitlistShort: 'Espera', clients: 'Clientes', campaigns: 'Campañas', questions: 'Preguntas' },
   agenda: {
     statusConfirmed: 'Confirmada',
     statusPending: 'Espera depósito',
@@ -570,6 +627,17 @@ const es: Dict = {
     sentTo: (count, message) => `Enviado a ${count} clientes: "${message}"`,
     error: 'Error',
     errorGeneric: 'No se pudo enviar la campaña.',
+  },
+  questions: {
+    empty: '¡No hay preguntas sin responder por ahora!',
+    from: (phone) => `De ${phone}`,
+    stepLabel: (step) => `En el paso: ${step}`,
+    resolve: '✓ Marcar como resuelta',
+    resolved: 'Resuelta',
+    delete: '🗑️',
+    deleteTitle: 'Eliminar pregunta',
+    deleteConfirm: '¿Eliminar esta pregunta?',
+    cancel: 'Cancelar',
   },
   adminMenu: {
     title: 'Panel del peluquero',
@@ -636,6 +704,11 @@ const es: Dict = {
     deleteConfirm: (name) => `¿Eliminar a ${name}?`,
     cancel: 'Cancelar',
     delete: 'Eliminar',
+    durationsBtn: '⏱️ Duración por servicio',
+    durationsTitle: 'Duración de corte por servicio',
+    durationsHint: 'Si lo dejás vacío, se usa la duración por defecto del servicio.',
+    durationDefaultPlaceholder: (minutes) => `Por defecto: ${minutes} min`,
+    save: 'Guardar',
   },
   schedule: {
     needBranch: 'Creá primero una sucursal.',
@@ -655,6 +728,9 @@ const es: Dict = {
   settings: {
     title: 'Configuración',
     needBranch: 'Seleccioná una sucursal primero.',
+    maintenanceTitle: '🚨 Modo mantenimiento (pausar el sistema automático)',
+    maintenanceHint: 'Activalo solo si hay un problema técnico. El bot de WhatsApp y el sistema telefónico se pausan, y los clientes son derivados directo al peluquero, hasta que lo desactives.',
+    maintenanceActiveHint: '🔴 Activo ahora: el bot de WhatsApp y el sistema telefónico están pausados, los clientes son derivados directo al peluquero. Desactivalo apenas se resuelva el problema.',
     languageTitle: 'Idioma del sistema',
     languageHint: 'Define el idioma del bot de WhatsApp, las llamadas telefónicas y este panel.',
     displayMode: 'Modo de visualización',

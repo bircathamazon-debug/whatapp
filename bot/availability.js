@@ -11,7 +11,7 @@
 const SLOT_STEP_MINUTES = 15;
 
 /**
- * @param {{hours: Record<number, {start:string,end:string}|null>, blockedDates: string[]}} staff
+ * @param {{id: string, hours: Record<number, {start:string,end:string}|null>, blockedDates: string[]}} staff
  * @param {number} durationMinutes duración del servicio
  * @param {string} dateStr 'YYYY-MM-DD'
  * @param {{startsAt:number, endsAt:number}[]} existingAppointments citas ya confirmadas ese día para ese staff
@@ -93,6 +93,12 @@ export function getTimezoneOffsetMinutes(timezone, date) {
     Number(parts.second)
   );
   return (asUTC - date.getTime()) / 60000;
+}
+
+/** Minutos que le toma a este peluquero este servicio (usa su propio
+ * override si lo configuró; si no, la duración por defecto del servicio). */
+export function getStaffServiceDuration(staff, service) {
+  return staff.serviceDurations?.[service.id] ?? service.durationMinutes;
 }
 
 export { SLOT_STEP_MINUTES };

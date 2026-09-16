@@ -1,7 +1,7 @@
 import { onRequest } from 'firebase-functions/v2/https';
 import { db } from './admin';
 import type { Branch, BlockedTime, Service, Staff } from './types';
-import { getAvailableSlots } from './availability';
+import { getAvailableSlots, getStaffServiceDuration } from './availability';
 import { createAppointment, cancelAppointment, confirmAppointment, SlotTakenError } from './booking';
 import { acceptWaitlistOffer } from './waitlist';
 
@@ -45,7 +45,8 @@ export const botGetAvailability = onRequest(async (req, res) => {
   const existing = apptsSnap.docs.map((d) => ({ startsAt: d.data().startsAt, endsAt: d.data().endsAt }));
   const blockedTimes = blockedSnap.docs.map((d) => d.data() as BlockedTime);
 
-  const slots = getAvailableSlots(staff, service.durationMinutes, dateStr, existing, branch.timezone, Date.now(), blockedTimes);
+  const duration = getStaffServiceDuration(staff, service);
+  const slots = getAvailableSlots(staff, duration, dateStr, existing, branch.timezone, Date.now(), blockedTimes);
   res.json({ slots });
 });
 
@@ -85,7 +86,7 @@ export const botCreateAppointment = onRequest(async (req, res) => {
       clientPhone,
       clientName,
       startsAt,
-      endsAt: startsAt + service.durationMinutes * 60000,
+      endsAt: startsAt + getStaffServiceDuration(staff, service) * 60000,
       source: source ?? 'whatsapp',
     });
     res.json({ appointment: appt });

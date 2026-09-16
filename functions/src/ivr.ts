@@ -2,7 +2,7 @@ import { onRequest } from 'firebase-functions/v2/https';
 import { db } from './admin';
 import type { Appointment, Branch, BlockedTime, Client, Service, Staff } from './types';
 import { createAppointment, confirmAppointment, cancelAppointment, formatDate, formatTime } from './booking';
-import { getAvailableSlots } from './availability';
+import { getAvailableSlots, getStaffServiceDuration } from './availability';
 import { getIvrStrings } from './ivrStrings';
 
 /**
@@ -22,6 +22,18 @@ export const ivrIncomingCall = onRequest(async (req, res) => {
   const s = getIvrStrings(branch?.language);
 
   res.set('Content-Type', 'text/xml');
+
+  // Interruptor de emergencia: si el peluquero activó "modo mantenimiento"
+  // en Ajustes, no se ofrece el menú automático — se transfiere directo.
+  if (branch?.maintenanceMode) {
+    res.send(`<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Say language="${s.twilioLang}">${s.maintenanceMessage}</Say>
+  <Dial>${branch.phone}</Dial>
+</Response>`);
+    return;
+  }
+
   res.send(`<?xml version="1.0" encoding="UTF-8"?>
 <Response>
   <Gather numDigits="1" action="/ivrMenu?branchId=${branchId}" method="POST" timeout="8">
@@ -129,7 +141,8 @@ async function bookNextAvailableSlot(branch: Branch, clientPhone: string): Promi
       const staff = staffDoc.data() as Staff;
       const apptsSnap = await db.collection('appointments').where('staffId', '==', staff.id).where('status', 'in', ['confirmed', 'pending_deposit']).get();
       const existing = apptsSnap.docs.map((d) => d.data() as Appointment).map((a) => ({ startsAt: a.startsAt, endsAt: a.endsAt }));
-      const slots = getAvailableSlots(staff, service.durationMinutes, dateStr, existing, branch.timezone, now, blockedTimes);
+      const duration = getStaffServiceDuration(staff, service);
+      const slots = getAvailableSlots(staff, duration, dateStr, existing, branch.timezone, now, blockedTimes);
       if (slots.length > 0) {
         try {
           return await createAppointment({

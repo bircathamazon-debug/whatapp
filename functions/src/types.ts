@@ -16,6 +16,7 @@ export interface Branch {
   whatsappJid?: string;
   themeMode?: 'light' | 'dark';
   language?: 'he' | 'en' | 'es';
+  maintenanceMode?: boolean;
 }
 
 export interface WeeklyHours {
@@ -30,6 +31,7 @@ export interface Staff {
   hours: WeeklyHours;
   blockedDates: string[];
   active: boolean;
+  serviceDurations?: Record<string, number>;
 }
 
 export interface Service {

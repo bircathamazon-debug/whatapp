@@ -14,6 +14,7 @@ export interface IvrStrings {
   reminderConfirmed: string;
   reminderCancelled: string;
   defaultPhoneClientName: string;
+  maintenanceMessage: string;
 }
 
 const he: IvrStrings = {
@@ -30,6 +31,7 @@ const he: IvrStrings = {
   reminderConfirmed: 'התור אושר. תודה.',
   reminderCancelled: 'התור בוטל. תודה.',
   defaultPhoneClientName: 'לקוח טלפוני',
+  maintenanceMessage: 'המערכת האוטומטית מושבתת זמנית לתחזוקה. מעבירים אתכם ישירות למספרה.',
 };
 
 const en: IvrStrings = {
@@ -46,6 +48,7 @@ const en: IvrStrings = {
   reminderConfirmed: 'Your appointment is confirmed. Thank you.',
   reminderCancelled: 'Your appointment was cancelled. Thank you.',
   defaultPhoneClientName: 'Phone client',
+  maintenanceMessage: 'The automated system is temporarily paused for maintenance. Transferring you directly to the salon.',
 };
 
 const es: IvrStrings = {
@@ -62,6 +65,7 @@ const es: IvrStrings = {
   reminderConfirmed: 'El turno fue confirmado. Gracias.',
   reminderCancelled: 'El turno fue cancelado. Gracias.',
   defaultPhoneClientName: 'Cliente telefónico',
+  maintenanceMessage: 'El sistema automático está pausado temporalmente por mantenimiento. Lo transferimos directo a la peluquería.',
 };
 
 const IVR_SETS: Record<string, IvrStrings> = { he, en, es };

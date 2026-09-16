@@ -23,6 +23,9 @@ export interface Branch {
   whatsappJid?: string; // JID del número de WhatsApp del bot para esta sucursal
   themeMode?: 'light' | 'dark'; // tema de la app del peluquero; sin definir = claro
   language?: 'he' | 'en' | 'es'; // idioma del bot, el IVR y la app; sin definir = hebreo
+  /** Interruptor de emergencia: pausa el bot y el IVR (llamadas van directo
+   *  al peluquero) ante un problema técnico, hasta que se desactive. */
+  maintenanceMode?: boolean;
 }
 
 export interface WeeklyHours {
@@ -38,6 +41,9 @@ export interface Staff {
   hours: WeeklyHours;
   blockedDates: string[]; // 'YYYY-MM-DD', vacaciones/días sueltos bloqueados
   active: boolean;
+  /** Minutos que le toma a ESTE peluquero cada servicio, si difiere del
+   *  durationMinutes por defecto del servicio (serviceId -> minutos). */
+  serviceDurations?: Record<string, number>;
   googleCalendarTokens?: {
     accessToken: string;
     refreshToken: string;
@@ -122,6 +128,23 @@ export interface BlockedTime {
   startTime: string | null; // 'HH:mm', null si allDay
   endTime: string | null; // 'HH:mm', null si allDay
   reason?: string;
+  createdAt: number;
+}
+
+/**
+ * Pregunta o mensaje libre del cliente que el bot no supo interpretar
+ * (no coincidía con ninguna opción esperada). Queda guardado para que el
+ * peluquero lo revise en la app y, si hace falta, se le enseñe al bot a
+ * responderlo — retroalimentación para no quedarse nunca sin respuesta.
+ */
+export interface UnansweredMessage {
+  id: string;
+  branchId: string;
+  phone: string;
+  clientName?: string;
+  text: string;
+  step: string; // en qué pantalla de la conversación pasó (ej. 'MAIN_MENU')
+  resolved: boolean;
   createdAt: number;
 }
 

@@ -73,6 +73,14 @@ export default function TabsLayout() {
           tabBarIcon: () => <Text style={{ fontSize: 20 }}>📣</Text>,
         }}
       />
+      <Tabs.Screen
+        name="questions"
+        options={{
+          title: t.tabs.questions,
+          tabBarLabel: t.tabs.questions,
+          tabBarIcon: () => <Text style={{ fontSize: 20 }}>❓</Text>,
+        }}
+      />
     </Tabs>
   );
 }

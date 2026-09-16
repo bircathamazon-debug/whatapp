@@ -4,7 +4,7 @@ import type { Appointment, Branch, Client, RecurringBooking, Staff } from './typ
 import { REMINDER_WINDOWS_HOURS } from './types';
 import { sendNotification, getTemplates, flushDueTwilioNotifications } from './notify';
 import { markNoShow, releaseExpiredDepositHolds, formatDate, formatTime, createAppointment } from './booking';
-import { toEpoch } from './availability';
+import { toEpoch, getStaffServiceDuration } from './availability';
 
 /** Cada 15 minutos: recordatorios 24h y 2h antes, por el canal preferido del cliente. */
 export const sendReminders = onSchedule({ schedule: 'every 15 minutes', timeZone: 'Asia/Jerusalem' }, async () => {
@@ -123,7 +123,7 @@ export const generateRecurringAppointments = onSchedule({ schedule: '0 6 * * *',
           clientPhone: rb.clientPhone,
           clientName: rb.clientName,
           startsAt: next,
-          endsAt: next + service.durationMinutes * 60000,
+          endsAt: next + getStaffServiceDuration(staff, service) * 60000,
           source: 'recurring',
           recurringBookingId: rb.id,
         });

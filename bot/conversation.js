@@ -8,7 +8,7 @@
  * quien mantiene el proyecto.
  */
 import { db } from './firebaseClient.js';
-import { getAvailableSlots, toEpoch } from './availability.js';
+import { getAvailableSlots, getStaffServiceDuration, toEpoch } from './availability.js';
 import * as api from './botApiClient.js';
 import { t, weekdayNames, dateLocale, isGreeting, isYes } from './i18n.js';
 
@@ -48,6 +48,36 @@ async function getActiveStaff(branchId) {
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 }
 
+/** Líneas para hablar directo con el peluquero — reutilizadas en la opción
+ * 4️⃣ del menú y también cuando el bot no sabe qué responder. */
+async function buildTalkToStaffLines(branch) {
+  const staff = await getActiveStaff(branch.id);
+  if (staff.length === 0) return null;
+  const primary = staff[0];
+  const waLink = `https://wa.me/${primary.phone.replace(/\D/g, '')}`;
+  return [t(branch, 'talkTo', primary.name), `📞 ${primary.phone}`, waLink];
+}
+
+/** Guarda una pregunta/mensaje que el bot no supo interpretar, para que el
+ * peluquero la revise en la app (pantalla "Preguntas") y, si hace falta,
+ * se le enseñe al bot a responderla — así no se pierde ninguna. */
+async function logUnansweredMessage(branch, phone, text, step) {
+  try {
+    const ref = db.collection('unansweredMessages').doc();
+    await ref.set({
+      id: ref.id,
+      branchId: branch.id,
+      phone,
+      text,
+      step,
+      resolved: false,
+      createdAt: Date.now(),
+    });
+  } catch (err) {
+    console.error('[conversation] error guardando pregunta sin responder', err);
+  }
+}
+
 /**
  * Punto de entrada: procesa un mensaje entrante y devuelve el/los textos
  * de respuesta a enviar (el bot los envía en orden).
@@ -57,6 +87,14 @@ export async function handleIncomingMessage(jid, rawText, branchId, pushName) {
   const text = (rawText || '').trim();
   const branch = await getBranch(branchId);
   if (!branch) return [t(null, 'botNotConfigured')];
+
+  // Interruptor de emergencia: si el peluquero activó "modo mantenimiento"
+  // en Ajustes, no se procesa ningún flujo — se avisa y se da el contacto
+  // directo, hasta que se desactive desde la app.
+  if (branch.maintenanceMode) {
+    const lines = await buildTalkToStaffLines(branch);
+    return [t(branch, 'maintenanceMessage'), ...(lines || [])];
+  }
 
   // Comandos globales, funcionan en cualquier paso.
   if (isGreeting(branch, text)) {
@@ -157,19 +195,17 @@ async function handleMainMenu(phone, text, branch, state) {
     return [t(branch, 'upcomingListHeader'), ...appts.map((a) => `• ${a.label}`), '', t(branch, 'mainMenu')];
   }
   if (text === '4') {
-    const staff = await getActiveStaff(branch.id);
-    if (staff.length === 0) return [t(branch, 'noStaffConfigured'), t(branch, 'mainMenu')];
-    const primary = staff[0];
-    const waLink = `https://wa.me/${primary.phone.replace(/\D/g, '')}`;
-    return [
-      t(branch, 'talkTo', primary.name),
-      `📞 ${primary.phone}`,
-      waLink,
-      '',
-      t(branch, 'mainMenu'),
-    ];
+    const lines = await buildTalkToStaffLines(branch);
+    if (!lines) return [t(branch, 'noStaffConfigured'), t(branch, 'mainMenu')];
+    return [...lines, '', t(branch, 'mainMenu')];
   }
-  return [t(branch, 'notUnderstood'), t(branch, 'mainMenu')];
+
+  // No coincide con ninguna opción esperada: probablemente el cliente
+  // escribió una pregunta libre. Se guarda para revisión y se ofrece
+  // automáticamente el contacto directo, para no dejarlo sin respuesta.
+  await logUnansweredMessage(branch, phone, text, 'MAIN_MENU');
+  const talkLines = await buildTalkToStaffLines(branch);
+  return [t(branch, 'notUnderstood'), ...(talkLines ? [t(branch, 'askTalkToStaff'), ...talkLines] : []), '', t(branch, 'mainMenu')];
 }
 
 async function handleBookService(phone, text, branch, state) {
@@ -206,6 +242,21 @@ async function handleBookStaff(phone, text, branch, state) {
   return [t(branch, 'chooseDay'), ...lines, t(branch, 'chooseNumberHint')];
 }
 
+/** Calcula los huecos libres de ese día para la lista de peluqueros dada,
+ * respetando el tiempo de corte propio de cada uno si lo configuró. */
+async function availableSlotsForDay(branch, staffList, service, dateStr) {
+  const blockedTimes = await blockedTimesForDay(branch.id, dateStr);
+  let allSlots = [];
+  for (const staff of staffList.filter(Boolean)) {
+    const existing = await appointmentsForStaffOnDay(staff.id, dateStr, branch.timezone);
+    const duration = getStaffServiceDuration(staff, service);
+    const slots = getAvailableSlots(staff, duration, dateStr, existing, branch.timezone, Date.now(), blockedTimes);
+    allSlots.push(...slots.map((s) => ({ ...s, staffId: staff.id, staffName: staff.name })));
+  }
+  allSlots.sort((a, b) => a.startsAt - b.startsAt);
+  return allSlots;
+}
+
 async function handleBookDay(phone, text, branch, state) {
   const idx = Number(text) - 1;
   const chosen = state.data.dateOptions?.[idx];
@@ -213,15 +264,7 @@ async function handleBookDay(phone, text, branch, state) {
 
   const service = await docById('services', state.data.serviceId);
   const staffList = state.data.staffId === 'any' ? await getActiveStaff(branch.id) : [await docById('staff', state.data.staffId)];
-
-  const blockedTimes = await blockedTimesForDay(branch.id, chosen.dateStr);
-  let allSlots = [];
-  for (const staff of staffList.filter(Boolean)) {
-    const existing = await appointmentsForStaffOnDay(staff.id, chosen.dateStr, branch.timezone);
-    const slots = getAvailableSlots(staff, service.durationMinutes, chosen.dateStr, existing, branch.timezone, Date.now(), blockedTimes);
-    allSlots.push(...slots.map((s) => ({ ...s, staffId: staff.id, staffName: staff.name })));
-  }
-  allSlots.sort((a, b) => a.startsAt - b.startsAt);
+  const allSlots = await availableSlotsForDay(branch, staffList, service, chosen.dateStr);
 
   if (allSlots.length === 0) {
     await saveConversation(phone, { step: 'BOOK_WAITLIST_ASK', data: { ...state.data, dateStr: chosen.dateStr, dateLabel: chosen.label } });
@@ -231,9 +274,9 @@ async function handleBookDay(phone, text, branch, state) {
   // allSlotsForDay: lista completa del día (para buscar "la hora más cercana"
   // si el cliente escribe una hora directamente). slots: solo lo que se
   // muestra numerado ahora mismo (máx. 8, o menos si venimos de una
-  // búsqueda por hora).
+  // búsqueda por hora). occupiedAttempts arranca en 0 en cada día nuevo.
   const displaySlots = allSlots.slice(0, 8);
-  await saveConversation(phone, { step: 'BOOK_TIME', data: { ...state.data, dateStr: chosen.dateStr, slots: displaySlots, allSlotsForDay: allSlots } });
+  await saveConversation(phone, { step: 'BOOK_TIME', data: { ...state.data, dateStr: chosen.dateStr, dateLabel: chosen.label, slots: displaySlots, allSlotsForDay: allSlots, occupiedAttempts: 0 } });
   const lines = displaySlots.map((s, i) => `${i + 1}️⃣ ${formatTime(s.startsAt, branch)}${staffList.length > 1 ? ` — ${s.staffName}` : ''}`);
   return [
     t(branch, 'chooseTimePrompt', chosen.label),
@@ -266,22 +309,47 @@ async function handleBookTime(phone, text, branch, state) {
     if (exactMatch) {
       return bookChosenSlot(phone, branch, state, exactMatch);
     }
-
-    const nearest = [...daySlots]
-      .sort((a, b) => Math.abs(a.startsAt - desiredEpoch) - Math.abs(b.startsAt - desiredEpoch))
-      .slice(0, 3)
-      .sort((a, b) => a.startsAt - b.startsAt);
-
-    if (nearest.length === 0) {
-      return [t(branch, 'noSlotsLeftThatDay')];
-    }
-
-    await saveConversation(phone, { step: 'BOOK_TIME', data: { ...state.data, slots: nearest } });
-    const lines = nearest.map((s, i) => `${i + 1}️⃣ ${formatTime(s.startsAt, branch)}${(state.data.staffId === 'any' && nearest.some((n) => n.staffId !== s.staffId)) ? ` — ${s.staffName}` : ''}`);
-    return [t(branch, 'timeTaken', `${String(typed.h).padStart(2, '0')}:${String(typed.m).padStart(2, '0')}`), ...lines, t(branch, 'chooseOtherDay')];
+    return handleOccupiedSlot(phone, branch, state, { startsAt: desiredEpoch });
   }
 
-  return [t(branch, 'didNotUnderstandTime'), t(branch, 'timeHelp')];
+  await logUnansweredMessage(branch, phone, text, 'BOOK_TIME');
+  const talkLines = await buildTalkToStaffLines(branch);
+  return [t(branch, 'didNotUnderstandTime'), t(branch, 'timeHelp'), ...(talkLines ? [t(branch, 'askTalkToStaff'), ...talkLines] : [])];
+}
+
+/**
+ * Se llama cuando un horario elegido/escrito resulta ocupado (alguien se
+ * adelantó, o ya estaba ocupado desde el vamos). El primer intento del día
+ * solo avisa y deja que el cliente elija de nuevo por su cuenta; recién
+ * desde el segundo intento seguido el bot busca automáticamente y ofrece
+ * las horas libres más cercanas a lo que pidió (o lista de espera si ese
+ * día ya no queda nada) — así no lo satura de mensajes a la primera.
+ */
+async function handleOccupiedSlot(phone, branch, state, attemptedSlot) {
+  const attempts = (state.data.occupiedAttempts || 0) + 1;
+
+  if (attempts === 1) {
+    await saveConversation(phone, { step: 'BOOK_TIME', data: { ...state.data, occupiedAttempts: attempts } });
+    return [t(branch, 'slotTakenFirstTry')];
+  }
+
+  const service = await docById('services', state.data.serviceId);
+  const staffList = state.data.staffId === 'any' ? await getActiveStaff(branch.id) : [await docById('staff', state.data.staffId)];
+  const freshSlots = await availableSlotsForDay(branch, staffList, service, state.data.dateStr);
+
+  if (freshSlots.length === 0) {
+    await saveConversation(phone, { step: 'BOOK_WAITLIST_ASK', data: { ...state.data, occupiedAttempts: attempts } });
+    return [t(branch, 'slotTakenNoneLeft'), t(branch, 'askWaitlist')];
+  }
+
+  const nearest = [...freshSlots]
+    .sort((a, b) => Math.abs(a.startsAt - attemptedSlot.startsAt) - Math.abs(b.startsAt - attemptedSlot.startsAt))
+    .slice(0, 3)
+    .sort((a, b) => a.startsAt - b.startsAt);
+
+  await saveConversation(phone, { step: 'BOOK_TIME', data: { ...state.data, occupiedAttempts: attempts, slots: nearest, allSlotsForDay: freshSlots } });
+  const lines = nearest.map((s, i) => `${i + 1}️⃣ ${formatTime(s.startsAt, branch)}${(state.data.staffId === 'any' && nearest.some((n) => n.staffId !== s.staffId)) ? ` — ${s.staffName}` : ''}`);
+  return [t(branch, 'slotTakenRetry'), ...lines, t(branch, 'chooseOtherDay')];
 }
 
 async function bookChosenSlot(phone, branch, state, slot) {
@@ -301,10 +369,11 @@ async function bookChosenSlot(phone, branch, state, slot) {
     return [t(branch, 'appointmentConfirmed', formatDate(slot.startsAt, branch), formatTime(slot.startsAt, branch))];
   } catch (err) {
     if (err.code === 'slot_taken') {
-      return [t(branch, 'slotTaken')];
+      return handleOccupiedSlot(phone, branch, state, slot);
     }
     console.error('[conversation] error creando cita', err);
-    return [t(branch, 'bookingError')];
+    const talkLines = await buildTalkToStaffLines(branch);
+    return [t(branch, 'bookingError'), ...(talkLines ? [t(branch, 'askTalkToStaff'), ...talkLines] : [])];
   }
 }
 

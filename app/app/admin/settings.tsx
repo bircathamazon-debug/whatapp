@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, TextInput, Linking, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, TextInput, Linking, Alert, Switch } from 'react-native';
 import { useBranch } from '../../lib/branchContext';
 import { updateBranch } from '../../lib/branches';
 import { getStaffByBranch } from '../../lib/staff';
@@ -59,6 +59,12 @@ export default function SettingsScreen() {
     await reload();
   };
 
+  const toggleMaintenance = async (value: boolean) => {
+    if (!branchId) return;
+    await updateBranch(branchId, { maintenanceMode: value });
+    await reload();
+  };
+
   const setLanguage = async (lang: Lang) => {
     if (!branchId) return;
     const currentLang: Lang = (branch?.language as Lang) ?? 'he';
@@ -111,6 +117,16 @@ export default function SettingsScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={{ padding: 16 }}>
+      <View style={[styles.maintenanceCard, branch.maintenanceMode && styles.maintenanceCardActive]}>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.maintenanceTitle}>{t.settings.maintenanceTitle}</Text>
+          <Text style={styles.maintenanceHint}>
+            {branch.maintenanceMode ? t.settings.maintenanceActiveHint : t.settings.maintenanceHint}
+          </Text>
+        </View>
+        <Switch value={!!branch.maintenanceMode} onValueChange={toggleMaintenance} />
+      </View>
+
       <Text style={styles.sectionTitle}>{t.settings.languageTitle}</Text>
       <Text style={styles.hint}>{t.settings.languageHint}</Text>
       <View style={styles.chipsRow}>
@@ -260,5 +276,9 @@ function makeStyles(colors: ThemeColors) {
     calendarBtnText: { color: colors.accent, fontWeight: '600', fontSize: 13 },
     infoCard: { backgroundColor: colors.surface, borderRadius: 10, padding: 14 },
     infoLine: { fontSize: 13, color: colors.text, marginBottom: 6 },
+    maintenanceCard: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.surface, borderRadius: 12, padding: 14, marginBottom: 8, borderWidth: 2, borderColor: 'transparent' },
+    maintenanceCardActive: { borderColor: colors.danger, backgroundColor: colors.dangerSoft },
+    maintenanceTitle: { fontSize: 14, fontWeight: '700', color: colors.text },
+    maintenanceHint: { fontSize: 12, color: colors.textMuted, marginTop: 4, lineHeight: 17 },
   });
 }

@@ -1,7 +1,7 @@
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { db } from './admin';
 import type { Appointment, Branch, BlockedTime, Service, Staff } from './types';
-import { getAvailableSlots } from './availability';
+import { getAvailableSlots, getStaffServiceDuration } from './availability';
 import { createAppointment, cancelAppointment, confirmAppointment } from './booking';
 
 /** Callable: huecos libres de un peluquero en un día dado (usado por bot e IVR vía import directo, y por la app admin vía HTTPS). */
@@ -27,7 +27,8 @@ export const getAvailability = onCall(async (request) => {
   const existing = apptsSnap.docs.map((d) => d.data() as Appointment).map((a) => ({ startsAt: a.startsAt, endsAt: a.endsAt }));
   const blockedTimes = blockedSnap.docs.map((d) => d.data() as BlockedTime);
 
-  return { slots: getAvailableSlots(staff, service.durationMinutes, dateStr, existing, branch.timezone, Date.now(), blockedTimes) };
+  const duration = getStaffServiceDuration(staff, service);
+  return { slots: getAvailableSlots(staff, duration, dateStr, existing, branch.timezone, Date.now(), blockedTimes) };
 });
 
 /** Callable: la app admin crea una cita manualmente (walk-in, teléfono anotado a mano, etc). */
@@ -62,7 +63,7 @@ export const adminCreateAppointment = onCall(async (request) => {
       clientPhone,
       clientName,
       startsAt,
-      endsAt: startsAt + service.durationMinutes * 60000,
+      endsAt: startsAt + getStaffServiceDuration(staff, service) * 60000,
       source: 'admin',
     });
     return { appointment: appt };

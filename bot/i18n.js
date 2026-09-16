@@ -57,6 +57,11 @@ const STRINGS = {
     today: (weekday) => `היום (${weekday})`,
     tomorrow: (weekday) => `מחר (${weekday})`,
     otherDay: (weekday, dd, mm) => `${weekday} ${dd}/${mm}`,
+    slotTakenFirstTry: 'השעה הזו תפוסה. בחרו שעה אחרת מהרשימה או כתבו שעה אחרת.',
+    slotTakenRetry: 'אופס, נראה שהשעות מתמלאות מהר. הנה השעות הפנויות הכי קרובות לשעה שביקשתם:',
+    slotTakenNoneLeft: 'נראה שהיום כבר מלא לגמרי.',
+    askTalkToStaff: 'אפשר גם לדבר ישירות עם הספר:',
+    maintenanceMessage: 'המערכת האוטומטית מושבתת זמנית לתחזוקה. אפשר לדבר ישירות עם הספר:',
   },
   en: {
     weekdays: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
@@ -110,6 +115,11 @@ const STRINGS = {
     today: (weekday) => `Today (${weekday})`,
     tomorrow: (weekday) => `Tomorrow (${weekday})`,
     otherDay: (weekday, dd, mm) => `${weekday} ${dd}/${mm}`,
+    slotTakenFirstTry: 'That time is taken. Pick another time from the list, or type a different time.',
+    slotTakenRetry: "Oops, looks like times are filling up fast. Here are the closest available times to what you asked for:",
+    slotTakenNoneLeft: 'Looks like today is completely full.',
+    askTalkToStaff: 'You can also talk directly with the stylist:',
+    maintenanceMessage: 'The automated system is temporarily paused for maintenance. You can reach the stylist directly:',
   },
   es: {
     weekdays: ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'],
@@ -163,6 +173,11 @@ const STRINGS = {
     today: (weekday) => `Hoy (${weekday})`,
     tomorrow: (weekday) => `Mañana (${weekday})`,
     otherDay: (weekday, dd, mm) => `${weekday} ${dd}/${mm}`,
+    slotTakenFirstTry: 'Ese horario está ocupado. Elegí otro de la lista, o escribí otra hora.',
+    slotTakenRetry: 'Uy, parece que los horarios se están llenando rápido. Estos son los más cercanos disponibles a lo que pediste:',
+    slotTakenNoneLeft: 'Parece que hoy ya está completo.',
+    askTalkToStaff: 'También podés hablar directamente con el peluquero:',
+    maintenanceMessage: 'El sistema automático está pausado temporalmente por mantenimiento. Podés hablar directo con el peluquero:',
   },
 };
 
