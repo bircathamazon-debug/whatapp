@@ -253,6 +253,51 @@ detalle técnico completo de arquitectura y setup.
   - Nota para el futuro: si se agrega otro idioma, solo hace falta sumar
     una entrada más a cada uno de los 3 diccionarios (no hay que tocar
     las pantallas ni la lógica).
+- ⬜ **Ronda de 4 mejoras pedidas por el usuario — CÓDIGO LISTO, VERIFICADO
+  Y SUBIDO A GITHUB, PERO TODAVÍA NO DESPLEGADO** (esta sesión corrió en un
+  entorno remoto sin las sesiones de Firebase CLI / Railway CLI que se
+  habían iniciado antes en el sandbox interactivo — falta el paso de
+  `firebase deploy` y `railway up` desde ahí, o volver a loguearse):
+  - ✅ **Reintento automático cuando el horario se ocupa**: al elegir una
+    hora que resulta ocupada, el primer intento del día solo avisa
+    ("esa hora está ocupada, elegí otra") sin más — recién desde el
+    **segundo** intento seguido el bot busca automáticamente y ofrece las
+    3 horas libres más cercanas a lo que pidió (o pasa a lista de espera
+    si ese día ya no queda nada). Pensado para el estrés de fin de día
+    cuando casi todo está lleno, pero sin saturar de mensajes al primer
+    intento (el usuario pidió específicamente este matiz).
+  - ✅ **Preguntas que el bot no entiende**: si el cliente escribe algo que
+    no coincide con ninguna opción esperada, el bot le ofrece hablar
+    directo con el peluquero (mismo mecanismo que la opción 4️⃣ del menú)
+    y además guarda el mensaje en una colección nueva de Firestore
+    (`unansweredMessages`) para que el peluquero la revise — así el
+    sistema se va "retroalimentando" con el tiempo. Nueva pestaña
+    **"Preguntas"** en la app del panel para verlas y marcarlas como
+    resueltas.
+  - ✅ **Duración de corte configurable por peluquero**: cada peluquero
+    puede tener un tiempo distinto para el mismo servicio (ej. un corte
+    le toma 20 min a uno y 30 a otro). Se configura en la pantalla de
+    Peluqueros (botón "⏱️ Duración por servicio" en cada tarjeta); si se
+    deja vacío, usa la duración por defecto del servicio. El motor de
+    disponibilidad ya lo respeta en los 4 lugares que ofrecen horarios:
+    bot de WhatsApp, IVR, panel (`getAvailability`/`adminCreateAppointment`)
+    y citas recurrentes.
+  - ✅ **Modo mantenimiento (botón de emergencia)**: nuevo interruptor en
+    Ajustes ("🚨 Modo mantenimiento") que, ante un problema técnico, pausa
+    todo el sistema automático — el bot de WhatsApp responde con un aviso
+    y pasa el contacto directo del peluquero, y las llamadas por teléfono
+    (IVR) se transfieren directo sin pasar por el menú — hasta que se
+    desactive el interruptor a mano.
+  - Nota: la idea de "nombre del peluquero configurable" que también pidió
+    el usuario en el mismo pedido **ya existía** (el campo "Nombre" en la
+    pantalla de Peluqueros, ya usado en todos los mensajes) — no hizo
+    falta construir nada nuevo ahí.
+  - **Siguiente paso pendiente**: desplegar de verdad — `firebase deploy
+    --only firestore:rules,functions` en el proyecto `bot-para-peluqueria`
+    y `railway up` en el servicio `bot-peluqueria` (rama
+    `claude/salon-appointment-app-cg11sw`, ya pusheada a GitHub) — y
+    después probar en vivo con clientes reales, igual que las rondas
+    anteriores.
 - **Ideas para el backlog (más adelante, el usuario lo aclaró
   explícitamente — no bloquean el piloto):**
   - Página web y video publicitario explicando el ahorro de tiempo/dinero
