@@ -188,6 +188,45 @@ detalle técnico completo de arquitectura y setup.
     volver a correr `firebase deploy --only hosting` (o el predeploy lo
     hace solo) para que la página web se actualice — no se actualiza
     sola como el bot de Railway.
+- ✅ **Rediseño "look de app nativa" — PROGRAMADO, DESPLEGADO Y PROBADO.**
+  Al ver la página recién publicada, el usuario dijo que no le gustó cómo
+  se veía y pidió que se sienta como una app de celular top (referencia:
+  Booksy/Fresha, ya investigadas en el estudio de mercado). Cambios:
+  - Íconos reales (`@expo/vector-icons`/Ionicons) en vez de emoji: la
+    barra de pestañas de abajo (con versión rellena cuando la pestaña
+    está activa) y el menú del panel (círculo de color + ícono, estilo
+    Ajustes de iOS, con flecha que respeta la dirección RTL).
+  - Pantalla de login nueva: insignia circular de marca (tijera), campos
+    con ícono, botón redondeado tipo píldora con sombra de color ("efecto
+    glow") en vez del botón plano de antes.
+  - Nuevos tokens compartidos en `app/lib/theme.ts`: `RADIUS` (radios
+    consistentes: sm/md/lg/xl/pill) y `cardShadow()`/`accentGlow()`
+    (sombras "flotantes" reutilizables) — todas las tarjetas pasaron de
+    borde plano a sombra real, que es lo que hace que se sienta como app
+    y no como página web.
+  - Se aplicó ya a: barra de pestañas, menú del panel, login, agenda
+    (línea de tiempo). **Pendiente**: pasar el mismo tratamiento visual a
+    las pantallas más chicas (Sucursales, Peluqueros, Servicios,
+    Horarios, Ajustes, Finanzas, Clientes, Lista de espera, Campañas,
+    Preguntas) — hoy funcionan bien pero todavía con el estilo de tarjeta
+    plana anterior.
+  - 🐛 **Bug real encontrado y corregido de paso**: la pantalla de
+    Finanzas no tenía título registrado en el Stack de navegación de
+    `admin/_layout.tsx` (se agregó).
+  - 🐛 **Bug de dependencias encontrado y corregido**: al agregar
+    `@expo/vector-icons`, npm instaló la versión 14.1.0, que trae una
+    versión de `expo-font` (55.x) incompatible con este Expo SDK 51 —
+    rompía el export a la página web con un error de módulos. Se fijó
+    `@expo/vector-icons` en la versión exacta `14.0.4` (compatible) y se
+    agregó `expo-font ~12.0.10` como dependencia directa del proyecto
+    (antes quedaba como dependencia indirecta sin resolver bien para el
+    export estático) — con eso volvió a funcionar.
+  - ✅ **Probado en vivo con capturas reales** (login, menú del panel,
+    agenda) — se ve y funciona como se pidió.
+  - **Pendiente de diseño futuro** (no bloquea nada): sigue faltando un
+    ícono/logo propio de la app (`app/assets/icon.png` y compañía no
+    existen, se usa el genérico) — hace falta si más adelante se pasa a
+    apps nativas de verdad en las tiendas.
   - ✅ **Traducción a hebreo de todo el sistema — COMPLETA** (decisión del
     usuario: "todo en hebreo, panel incluido", el código/comentarios quedan
     en español):
