@@ -308,10 +308,12 @@ detalle técnico completo de arquitectura y setup.
     transcripción funcione de verdad.
   - ✅ **Desplegado** (Firebase Functions + Firestore rules, y Railway
     reconectó a WhatsApp sin pedir QR nuevo, usando la sesión guardada).
-    **Pendiente real**: cargar `OPENAI_API_KEY` en Railway para activar
-    la transcripción de voz (sin eso, el resto funciona igual, solo que
-    las notas de voz no se van a entender) — y probar en vivo con
-    clientes reales.
+  - ✅ **`OPENAI_API_KEY` cargada en Railway y bot redesplegado** (el
+    usuario creó la clave en platform.openai.com y la pasó; se cargó con
+    `railway variable set --stdin` para no dejarla en el historial de
+    comandos, y el bot se reconectó a WhatsApp sin problemas). La
+    transcripción de notas de voz ya está activa de verdad — falta
+    probarla en vivo mandándole un audio real al bot.
 - ✅ **Finanzas (ingresos, gastos y suscripción de pago) — PROGRAMADA Y
   DESPLEGADA, FALTA CONFIGURAR STRIPE DE VERDAD.** El
   usuario pidió explícitamente cobro automático real con tarjeta (no un
