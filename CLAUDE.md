@@ -319,6 +319,56 @@ detalle técnico completo de arquitectura y setup.
     cargar `OPENAI_API_KEY` en Railway para activar la transcripción de
     voz (si no se carga, el resto del sistema funciona igual, solo que
     las notas de voz no se van a entender).
+- ⬜ **Finanzas (ingresos, gastos y suscripción de pago) — CÓDIGO LISTO Y
+  SUBIDO A GITHUB, FALTA CONFIGURAR STRIPE DE VERDAD Y DESPLEGAR.** El
+  usuario pidió explícitamente cobro automático real con tarjeta (no un
+  simple recordatorio), sabiendo que implica crear una cuenta de negocio
+  en Stripe.
+  - ✅ **Resumen de ingresos**: nueva pantalla "Finanzas" (menú del panel,
+    ícono 💰) muestra los ingresos de hoy y del mes, calculados como
+    citas completadas × precio del servicio — ya funciona con los datos
+    reales de Firestore, no depende de Stripe.
+  - ✅ **Gastos**: se pueden cargar gastos (alquiler, agua/luz, empleados,
+    insumos, otro) con fecha y descripción; la pantalla muestra el total
+    del mes y la ganancia neta (ingresos menos gastos) — nueva colección
+    `expenses` en Firestore.
+  - ✅ **Suscripción de pago (Stripe) — código construido, NO configurado
+    todavía**: `functions/src/stripe.ts` crea una sesión de pago
+    hospedada por Stripe (Checkout) para suscribirse, y un portal de
+    Stripe para gestionar o cancelar la tarjeta; un webhook
+    (`stripeWebhook`) mantiene actualizado el estado en Firestore
+    (activa / vencida / cancelada, próximo cobro) cada vez que Stripe
+    cobra, falla un cobro, o se cancela. Por seguridad, el campo
+    `branch.subscription` ahora solo lo puede escribir el webhook (SDK de
+    administrador) — ningún usuario del panel puede marcarse a sí mismo
+    como "pagado" sin pagar de verdad.
+  - ⬜ **Falta que el usuario cree la cuenta de Stripe y configure 3
+    cosas** (no lo puedo hacer yo, requiere datos reales del negocio):
+    1. Crear la cuenta en stripe.com (datos del negocio + cuenta bancaria
+       para recibir los pagos).
+    2. En el Dashboard: Developers → API keys → copiar la "Secret key" →
+       pegarla en `STRIPE_SECRET_KEY` (functions/.env).
+    3. Crear el producto de la suscripción (Product catalog → Add
+       product), con un precio recurrente mensual (ej. ₪X/mes) → copiar
+       el "API ID" del precio (empieza con `price_...`) → pegarlo en
+       `STRIPE_PRICE_ID`.
+    4. Developers → Webhooks → Add endpoint, apuntando a
+       `https://us-central1-bot-para-peluqueria.cloudfunctions.net/stripeWebhook`,
+       con los eventos `checkout.session.completed`, `invoice.paid`,
+       `invoice.payment_failed`, `customer.subscription.deleted` → copiar
+       el "Signing secret" (empieza con `whsec_...`) → pegarlo en
+       `STRIPE_WEBHOOK_SECRET`.
+    5. Cargar también `FUNCTIONS_BASE_URL` (la misma URL base de siempre,
+       sin slash final) en `functions/.env` — la usa Stripe para volver a
+       una página de "listo" después de pagar.
+    Sin esto configurado, el botón "Suscribirse" de la pantalla de
+    Finanzas muestra un aviso claro ("los pagos todavía no están
+    configurados") en vez de fallar en silencio.
+  - **Siguiente paso pendiente**: junto con el resto de esta rama —
+    desplegar (`firebase deploy` + `railway up`) y, cuando el usuario
+    tenga lista su cuenta de Stripe, cargar las 4 variables de arriba y
+    probar una suscripción de verdad (Stripe tiene un modo de prueba con
+    tarjetas falsas antes de pasar a cobros reales).
 - **Ideas para el backlog (más adelante, el usuario lo aclaró
   explícitamente — no bloquean el piloto):**
   - Página web y video publicitario explicando el ahorro de tiempo/dinero
