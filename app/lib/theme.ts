@@ -1,9 +1,10 @@
 /**
  * Tema visual de la app (claro/oscuro), acordado con el usuario: línea de
- * tiempo compacta, fondo "gris niebla" en claro / "oscuro premium" en
- * oscuro, azul zafiro como acento y colores de estado vivos (no pasteles).
- * El modo se guarda en branch.themeMode (Firestore) y se controla desde
- * Ajustes con un switch — así el peluquero elige, no queda fijo.
+ * tiempo compacta, fondo "gris niebla"/marfil en claro, "oscuro premium" en
+ * oscuro, turquesa eléctrico como acento y colores de estado vivos (no
+ * pasteles). El modo se guarda en branch.themeMode (Firestore) y se
+ * controla desde Ajustes con un switch — así el peluquero elige, no queda
+ * fijo.
  */
 import { useBranch } from './branchContext';
 
@@ -34,8 +35,8 @@ const light: ThemeColors = {
   border: '#e7e1d6',
   text: '#211d19',
   textMuted: '#8a8276',
-  accent: '#1d4ed8',
-  accentSoft: '#e8edfb',
+  accent: '#00b4d8',
+  accentSoft: '#dcf4f8',
   statusConfirmed: '#0fa568',
   statusPending: '#e08e0b',
   statusCompleted: '#8a8276',
@@ -54,8 +55,8 @@ const dark: ThemeColors = {
   border: '#2a2e35',
   text: '#eceef1',
   textMuted: '#8a8f98',
-  accent: '#5b9dff',
-  accentSoft: '#1c2c42',
+  accent: '#22d3ee',
+  accentSoft: '#123640',
   statusConfirmed: '#1fb673',
   statusPending: '#f0a63a',
   statusCompleted: '#9aa0a8',
@@ -106,4 +107,12 @@ export function accentGlow(colors: ThemeColors, mode: 'light' | 'dark') {
     shadowRadius: 14,
     elevation: 6,
   };
+}
+
+/** Borde sutil de color de acento alrededor de una tarjeta — además de la
+ * sombra, le da a las tarjetas blancas un contorno de color en vez de
+ * quedar "flotando" sin marco, que es lo que se pidió para que se sientan
+ * más diseñadas. */
+export function accentBorder(colors: ThemeColors) {
+  return { borderWidth: 1.5, borderColor: colors.accentSoft };
 }

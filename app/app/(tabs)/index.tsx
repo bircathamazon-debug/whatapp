@@ -3,7 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet, RefreshControl } 
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useBranch } from '../../lib/branchContext';
-import { useTheme, type ThemeColors, RADIUS, cardShadow, accentGlow } from '../../lib/theme';
+import { useTheme, type ThemeColors, RADIUS, cardShadow, accentGlow, accentBorder } from '../../lib/theme';
 import { getAppointmentsForDay } from '../../lib/appointments';
 import { getServicesByBranch } from '../../lib/services';
 import { getStaffByBranch } from '../../lib/staff';
@@ -156,7 +156,7 @@ export default function HomeScreen() {
         {QUICK_ACTIONS.map((qa) => (
           <TouchableOpacity key={qa.label} style={styles.quickTile} onPress={qa.onPress} activeOpacity={0.8}>
             <View style={[styles.quickIconWrap, { backgroundColor: qa.color }]}>
-              <Ionicons name={qa.icon} size={19} color="#fff" />
+              <Ionicons name={qa.icon} size={23} color="#fff" />
             </View>
             <Text style={styles.quickLabel}>{qa.label}</Text>
           </TouchableOpacity>
@@ -218,6 +218,7 @@ function makeStyles(colors: ThemeColors, mode: 'light' | 'dark') {
       padding: 22,
       marginBottom: 12,
       ...cardShadow(mode, 'md'),
+      ...accentBorder(colors),
     },
     heroIconWrap: {
       width: 40,
@@ -241,6 +242,7 @@ function makeStyles(colors: ThemeColors, mode: 'light' | 'dark') {
       paddingHorizontal: 14,
       paddingVertical: 10,
       ...cardShadow(mode, 'sm'),
+      ...accentBorder(colors),
     },
     secondaryChipText: { fontSize: 12.5, color: colors.text, fontWeight: '600' },
     sectionTitle: { fontSize: 13.5, fontWeight: '700', color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 0.4, marginTop: 24, marginBottom: 10 },
@@ -265,13 +267,15 @@ function makeStyles(colors: ThemeColors, mode: 'light' | 'dark') {
       width: '47%',
       backgroundColor: colors.surface,
       borderRadius: RADIUS.lg,
-      padding: 16,
+      paddingVertical: 20,
+      paddingHorizontal: 14,
       alignItems: 'center',
-      gap: 10,
+      gap: 12,
       ...cardShadow(mode, 'sm'),
+      ...accentBorder(colors),
     },
-    quickIconWrap: { width: 42, height: 42, borderRadius: RADIUS.md, alignItems: 'center', justifyContent: 'center' },
-    quickLabel: { fontSize: 13, fontWeight: '700', color: colors.text, textAlign: 'center' },
+    quickIconWrap: { width: 50, height: 50, borderRadius: RADIUS.md, alignItems: 'center', justifyContent: 'center' },
+    quickLabel: { fontSize: 14, fontWeight: '800', color: colors.text, textAlign: 'center', letterSpacing: -0.1 },
     upcomingRow: {
       flexDirection: 'row',
       alignItems: 'center',

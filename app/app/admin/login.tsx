@@ -13,7 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../lib/firebase';
-import { useTheme, type ThemeColors, RADIUS, cardShadow, accentGlow } from '../../lib/theme';
+import { useTheme, type ThemeColors, RADIUS, cardShadow, accentGlow, accentBorder } from '../../lib/theme';
 import { useT } from '../../lib/i18n';
 
 export default function LoginScreen() {
@@ -122,6 +122,7 @@ function makeStyles(colors: ThemeColors, mode: 'light' | 'dark') {
       borderRadius: RADIUS.xl,
       padding: 24,
       ...cardShadow(mode, 'lg'),
+      ...accentBorder(colors),
     },
     inputRow: {
       flexDirection: 'row',
