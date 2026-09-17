@@ -458,9 +458,28 @@ detalle técnico completo de arquitectura y setup.
     en varios globos), que es el caso para el que se había pensado.
   - ✅ **Desplegado** en Railway (`railway up`), el bot se reconectó a
     WhatsApp sin pedir QR nuevo.
-  - ⬜ **Falta que el usuario lo pruebe de nuevo en vivo** pidiendo una
-    cita real, para confirmar que ahora responde rápido y que se ven
-    claramente las preguntas de día y hora antes de confirmar.
+- 🐛 **Segundo bug real encontrado y corregido, relacionado con el
+  anterior: el bot siempre volvía al menú principal, sin importar lo que
+  el cliente escribiera.** El usuario lo notó apenas se probó el arreglo
+  de la demora. Causa: al hacer que los números sueltos se procesen al
+  instante (sin esperar los 4 segundos), quedó abierta la posibilidad de
+  que **dos mensajes seguidos del mismo cliente se procesaran al mismo
+  tiempo** (por ejemplo, dos números tocados muy rápido uno después del
+  otro). Cuando eso pasa, los dos leen el mismo estado guardado de la
+  conversación en Firestore (por ejemplo "esperando que elija un día"),
+  cada uno lo procesa por su cuenta, y el que termina de guardar último
+  pisa el avance del otro — el cliente ve que el bot "se pierde" y
+  siempre termina mostrando el menú principal de nuevo, sin importar qué
+  haya escrito.
+  - ✅ **Corregido**: ahora los mensajes de un mismo cliente (sea la vía
+    rápida de un solo número o el agrupado de texto libre) se encadenan
+    y se procesan siempre **uno por vez, en el orden en que llegaron**
+    (`runSerialized` en `bot/index.js`) — nunca dos al mismo tiempo para
+    el mismo número de teléfono.
+  - ✅ **Desplegado** en Railway.
+  - ⬜ **Falta que el usuario pruebe de nuevo en vivo** una reserva
+    completa (varios números seguidos, rápido) para confirmar que ahora
+    el bot no pierde el hilo y responde rápido.
 - ✅ **Finanzas (ingresos, gastos y suscripción de pago) — PROGRAMADA Y
   DESPLEGADA, FALTA CONFIGURAR STRIPE DE VERDAD.** El
   usuario pidió explícitamente cobro automático real con tarjeta (no un

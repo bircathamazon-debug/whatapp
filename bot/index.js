@@ -31,6 +31,24 @@ const MESSAGE_DEBOUNCE_MS = 4000;
 /** phone -> { parts: string[], pushName?: string, timer } */
 const pendingByJid = new Map();
 
+/** phone -> promesa del último mensaje en proceso para ese cliente. Todo
+ * mensaje de un mismo cliente (rápido o por debounce) se encadena acá, para
+ * que nunca se procesen dos mensajes suyos al mismo tiempo: si eso pasara,
+ * los dos leerían el mismo estado de conversación desde Firestore, y el que
+ * termina de escribir último pisaría el avance del otro — el cliente vería
+ * que el bot "se pierde" y siempre vuelve al menú principal. */
+const inFlightByJid = new Map();
+
+function runSerialized(jid, task) {
+  const previous = inFlightByJid.get(jid) || Promise.resolve();
+  const current = previous.then(task, task);
+  inFlightByJid.set(jid, current);
+  current.finally(() => {
+    if (inFlightByJid.get(jid) === current) inFlightByJid.delete(jid);
+  });
+  return current;
+}
+
 /** Un solo dígito (0-9): respuesta directa a un menú numerado, no hace
  * falta agruparla con nada más. */
 function isQuickMenuReply(text) {
@@ -43,7 +61,7 @@ function enqueueMessage(sock, jid, text, pushName) {
   // se procesa al instante en vez de esperar los 4 segundos del debounce.
   if ((!entry || entry.parts.length === 0) && isQuickMenuReply(text)) {
     pendingByJid.delete(jid);
-    processMessage(sock, jid, text, pushName);
+    runSerialized(jid, () => processMessage(sock, jid, text, pushName));
     return;
   }
 
@@ -64,7 +82,7 @@ async function flushPending(sock, jid) {
   pendingByJid.delete(jid);
   const text = entry.parts.join(' ').trim();
   if (!text) return;
-  await processMessage(sock, jid, text, entry.pushName);
+  await runSerialized(jid, () => processMessage(sock, jid, text, entry.pushName));
 }
 
 async function processMessage(sock, jid, text, pushName) {
