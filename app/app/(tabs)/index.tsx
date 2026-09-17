@@ -3,7 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet, RefreshControl } 
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useBranch } from '../../lib/branchContext';
-import { useTheme, type ThemeColors, RADIUS, cardShadow } from '../../lib/theme';
+import { useTheme, type ThemeColors, RADIUS, cardShadow, accentGlow } from '../../lib/theme';
 import { getAppointmentsForDay } from '../../lib/appointments';
 import { getServicesByBranch } from '../../lib/services';
 import { getStaffByBranch } from '../../lib/staff';
@@ -83,11 +83,11 @@ export default function HomeScreen() {
 
   const dateHeader = new Intl.DateTimeFormat(dateLocale, { weekday: 'long', day: 'numeric', month: 'long' }).format(Date.now());
 
-  const QUICK_ACTIONS: { icon: IconName; label: string; color: string; bg: string; onPress: () => void }[] = [
-    { icon: 'calendar-outline', label: t.tabs.agenda, color: colors.accent, bg: colors.accentSoft, onPress: () => router.push('/agenda') },
-    { icon: 'wallet-outline', label: t.finance.title, color: colors.success, bg: colors.successSoft, onPress: () => router.push('/finance') },
-    { icon: 'megaphone-outline', label: t.tabs.campaigns, color: colors.statusPending, bg: `${colors.statusPending}1f`, onPress: () => router.push('/more/campaigns') },
-    { icon: 'settings-outline', label: t.settings.title, color: colors.accent, bg: colors.accentSoft, onPress: () => router.push('/settings') },
+  const QUICK_ACTIONS: { icon: IconName; label: string; color: string; onPress: () => void }[] = [
+    { icon: 'calendar', label: t.tabs.agenda, color: colors.accent, onPress: () => router.push('/agenda') },
+    { icon: 'wallet', label: t.finance.title, color: colors.success, onPress: () => router.push('/finance') },
+    { icon: 'megaphone', label: t.tabs.campaigns, color: colors.statusPending, onPress: () => router.push('/more/campaigns') },
+    { icon: 'settings', label: t.settings.title, color: colors.accent, onPress: () => router.push('/settings') },
   ];
 
   return (
@@ -111,8 +111,8 @@ export default function HomeScreen() {
 
       {questionsCount > 0 && (
         <TouchableOpacity style={styles.alertCard} onPress={() => router.push('/more/questions')} activeOpacity={0.85}>
-          <View style={[styles.alertIconWrap, { backgroundColor: `${colors.statusPending}1f` }]}>
-            <Ionicons name="help-circle-outline" size={18} color={colors.statusPending} />
+          <View style={[styles.alertIconWrap, { backgroundColor: colors.statusPending }]}>
+            <Ionicons name="help-circle" size={18} color="#fff" />
           </View>
           <Text style={styles.alertText}>{t.home.questionsAlert(questionsCount)}</Text>
           <Text style={styles.alertLink}>{t.home.viewQuestions}</Text>
@@ -121,7 +121,7 @@ export default function HomeScreen() {
 
       <View style={styles.heroCard}>
         <View style={styles.heroIconWrap}>
-          <Ionicons name="cash-outline" size={20} color={colors.accent} />
+          <Ionicons name="cash" size={20} color="#fff" />
         </View>
         <Text style={styles.heroLabel}>{t.finance.todayRevenueTitle}</Text>
         <Text style={styles.heroAmount}>₪{todayRevenue}</Text>
@@ -129,7 +129,7 @@ export default function HomeScreen() {
 
       <View style={styles.secondaryRow}>
         <View style={styles.secondaryChip}>
-          <Ionicons name="calendar-outline" size={15} color={colors.textMuted} />
+          <Ionicons name="calendar" size={15} color={colors.accent} />
           <Text style={styles.secondaryChipText}>{t.home.todayApptsLabel(active.length)}</Text>
         </View>
       </View>
@@ -155,8 +155,8 @@ export default function HomeScreen() {
       <View style={styles.quickGrid}>
         {QUICK_ACTIONS.map((qa) => (
           <TouchableOpacity key={qa.label} style={styles.quickTile} onPress={qa.onPress} activeOpacity={0.8}>
-            <View style={[styles.quickIconWrap, { backgroundColor: qa.bg }]}>
-              <Ionicons name={qa.icon} size={19} color={qa.color} />
+            <View style={[styles.quickIconWrap, { backgroundColor: qa.color }]}>
+              <Ionicons name={qa.icon} size={19} color="#fff" />
             </View>
             <Text style={styles.quickLabel}>{qa.label}</Text>
           </TouchableOpacity>
@@ -219,9 +219,18 @@ function makeStyles(colors: ThemeColors, mode: 'light' | 'dark') {
       marginBottom: 12,
       ...cardShadow(mode, 'md'),
     },
-    heroIconWrap: { width: 40, height: 40, borderRadius: RADIUS.md, backgroundColor: colors.accentSoft, alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
+    heroIconWrap: {
+      width: 40,
+      height: 40,
+      borderRadius: RADIUS.md,
+      backgroundColor: colors.accent,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: 16,
+      ...accentGlow(colors, mode),
+    },
     heroLabel: { fontSize: 12, color: colors.textMuted, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
-    heroAmount: { fontSize: 38, fontWeight: '700', color: colors.text, letterSpacing: -0.6, marginTop: 6 },
+    heroAmount: { fontSize: 38, fontWeight: '800', color: colors.accent, letterSpacing: -0.6, marginTop: 6 },
     secondaryRow: { flexDirection: 'row', gap: 10, marginBottom: 6 },
     secondaryChip: {
       flexDirection: 'row',
@@ -242,11 +251,11 @@ function makeStyles(colors: ThemeColors, mode: 'light' | 'dark') {
       backgroundColor: colors.surface,
       borderRadius: RADIUS.lg,
       padding: 16,
-      borderRightWidth: 3,
+      borderRightWidth: 4,
       borderRightColor: colors.accent,
       ...cardShadow(mode, 'md'),
     },
-    nextTime: { fontSize: 18, fontWeight: '700', color: colors.text, fontVariant: ['tabular-nums'] },
+    nextTime: { fontSize: 18, fontWeight: '800', color: colors.accent, fontVariant: ['tabular-nums'] },
     nextName: { fontSize: 15, fontWeight: '700', color: colors.text },
     nextMeta: { fontSize: 12.5, color: colors.textMuted, marginTop: 2 },
     nextCardEmpty: { backgroundColor: colors.surface, borderRadius: RADIUS.lg, padding: 16, ...cardShadow(mode, 'sm') },
@@ -270,12 +279,12 @@ function makeStyles(colors: ThemeColors, mode: 'light' | 'dark') {
       backgroundColor: colors.surface,
       borderRadius: RADIUS.md,
       padding: 12,
-      borderRightWidth: 2,
+      borderRightWidth: 3,
       borderRightColor: colors.accent,
       marginBottom: 8,
       ...cardShadow(mode, 'sm'),
     },
-    upcomingTime: { fontSize: 13, fontWeight: '800', color: colors.text, fontVariant: ['tabular-nums'] },
+    upcomingTime: { fontSize: 13, fontWeight: '800', color: colors.accent, fontVariant: ['tabular-nums'] },
     upcomingName: { fontSize: 13.5, fontWeight: '700', color: colors.text },
     upcomingMeta: { fontSize: 11.5, color: colors.textMuted, marginTop: 2 },
   });
