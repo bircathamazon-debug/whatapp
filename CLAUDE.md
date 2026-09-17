@@ -260,6 +260,51 @@ detalle técnico completo de arquitectura y setup.
     (`bot/availability.js` + `functions/src/availability.ts`, y los 4
     puntos que ofrecen horarios: `getAvailability`, `botGetAvailability`,
     el IVR y el bot de WhatsApp) ya respeta esos bloqueos.
+- ✅ **Reestructuración de navegación (5 pestañas) — PROGRAMADA, DESPLEGADA
+  Y VERIFICADA.** El usuario reportó un bug real: al entrar a la app desde
+  el celular veía el calendario, pero no había forma de llegar a Ajustes
+  (los grupos de navegación `(tabs)` y `admin` no estaban enlazados entre
+  sí una vez que ya existía una sucursal). Antes de tocar código se le
+  presentaron 3 opciones de rediseño; eligió la más completa (un nuevo
+  dashboard "Inicio") y especificó él mismo la barra de abajo que quería:
+  **Inicio / Calendario / Ajustes / Finanzas / Más**.
+  - **Inicio** (`app/app/(tabs)/index.tsx`, pantalla nueva): dashboard con
+    ingresos y cantidad de citas de hoy, alerta si hay preguntas sin
+    responder (con acceso directo), próxima cita, accesos rápidos
+    (Calendario/Finanzas/Campañas/Ajustes) y vista previa de las próximas
+    citas del día. Pedido explícito del usuario: **colores vivos, fondo
+    claro — nada de pantalla oscura**; se armó con el acento zafiro y los
+    colores de estado (verde/naranja) ya existentes en `app/lib/theme.ts`
+    sobre el fondo claro "gris niebla", no con el tema oscuro.
+  - **Calendario**: la agenda de siempre, renombrada de `index.tsx` a
+    `agenda.tsx` (mismo contenido, solo cambia el archivo/pestaña).
+  - **Ajustes**: nueva pestaña con su propio submenú (Sucursales,
+    Peluqueros, Servicios, Horarios, Configuración general) — las
+    pantallas que antes vivían sueltas en `admin/` se movieron a
+    `app/app/(tabs)/settings/`.
+  - **Más**: nueva pestaña con Lista de espera, Clientes, Campañas,
+    Preguntas y Cerrar sesión, movidas a `app/app/(tabs)/more/`.
+  - **Finanzas**: pasó de estar escondida dentro de Ajustes a ser una
+    pestaña directa (`app/app/(tabs)/finance.tsx`).
+  - `admin/_layout.tsx` quedó reducido a solo envolver `login.tsx`; al
+    iniciar sesión ahora redirige a `/` (Inicio) en vez de `/admin`.
+  - Nuevas traducciones (hebreo/inglés/español) para las pestañas nuevas y
+    los textos del dashboard en `app/lib/i18n.ts`.
+  - 🐛 **Detalle técnico aprendido de paso**: expo-router necesita los
+    "tipos de rutas" (`.expo/types/router.d.ts`) actualizados para que
+    `tsc` reconozca las pantallas nuevas — ese archivo solo se regenera
+    corriendo el servidor de desarrollo (`expo start`), no con
+    `expo export`. Se corrió brevemente antes de verificar.
+  - ✅ **Verificado**: `tsc` sin errores, `expo export --platform web`
+    compila las 27 rutas sin errores, y se probó en el navegador real que
+    cada ruta nueva (`/`, `/agenda`, `/settings`, `/settings/branches`,
+    `/finance`, `/more`, `/more/questions`) carga sin errores de consola y
+    redirige correctamente al login si no hay sesión iniciada. **Falta**
+    una verificación visual con sesión iniciada de verdad (el asistente no
+    tiene ni debe buscar la contraseña real del usuario) — pendiente que
+    el usuario la revise él mismo en su celular.
+  - ✅ **Desplegado** en Firebase Hosting
+    (https://bot-para-peluqueria.web.app).
 - 📞 **Hablar con una persona real (WhatsApp y teléfono) — PROGRAMADO.**
   - ✅ **WhatsApp**: opción **4️⃣ "לדבר ישירות עם הספר"** en el menú
     principal de `bot/conversation.js` — el bot le pasa al cliente el
