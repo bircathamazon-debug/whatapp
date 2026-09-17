@@ -258,7 +258,7 @@ interface Dict {
 const he: Dict = {
   tabs: { agenda: 'יומן', waitlist: 'רשימת המתנה', waitlistShort: 'המתנה', clients: 'לקוחות', campaigns: 'קמפיינים', questions: 'שאלות', home: 'בית', more: 'עוד' },
   home: {
-    greeting: 'שלום! 👋',
+    greeting: 'שלום',
     todayApptsLabel: (n) => `${n} תורים היום`,
     questionsAlert: (n) => `יש ${n} שאלות שממתינות למענה`,
     viewQuestions: 'לצפייה',
@@ -500,7 +500,7 @@ const he: Dict = {
 const en: Dict = {
   tabs: { agenda: 'Agenda', waitlist: 'Waitlist', waitlistShort: 'Waitlist', clients: 'Clients', campaigns: 'Campaigns', questions: 'Questions', home: 'Home', more: 'More' },
   home: {
-    greeting: 'Hello! 👋',
+    greeting: 'Hello',
     todayApptsLabel: (n) => `${n} appointments today`,
     questionsAlert: (n) => `${n} questions waiting for an answer`,
     viewQuestions: 'View',
@@ -742,7 +742,7 @@ const en: Dict = {
 const es: Dict = {
   tabs: { agenda: 'Agenda', waitlist: 'Lista de espera', waitlistShort: 'Espera', clients: 'Clientes', campaigns: 'Campañas', questions: 'Preguntas', home: 'Inicio', more: 'Más' },
   home: {
-    greeting: '¡Hola! 👋',
+    greeting: 'Hola',
     todayApptsLabel: (n) => `${n} citas hoy`,
     questionsAlert: (n) => `Tenés ${n} preguntas sin responder`,
     viewQuestions: 'Ver',

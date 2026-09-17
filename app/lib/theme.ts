@@ -28,23 +28,23 @@ export interface ThemeColors {
 }
 
 const light: ThemeColors = {
-  bg: '#eef0f4',
+  bg: '#f8f6f2',
   surface: '#ffffff',
-  surfaceMuted: '#e4e7ec',
-  border: '#e1e4ea',
-  text: '#1c1f24',
-  textMuted: '#71767d',
+  surfaceMuted: '#f0ece4',
+  border: '#e7e1d6',
+  text: '#211d19',
+  textMuted: '#8a8276',
   accent: '#1d4ed8',
-  accentSoft: '#e3ebfd',
+  accentSoft: '#e8edfb',
   statusConfirmed: '#12915c',
-  statusPending: '#e08e0b',
-  statusCompleted: '#6b7280',
+  statusPending: '#c17d0a',
+  statusCompleted: '#8a8276',
   statusCancelled: '#a39c85',
-  statusNoShow: '#d1293d',
-  danger: '#d1293d',
-  dangerSoft: '#fdeaec',
+  statusNoShow: '#c22a3d',
+  danger: '#c22a3d',
+  dangerSoft: '#fbebea',
   success: '#12915c',
-  successSoft: '#e6f4ea',
+  successSoft: '#eaf4ec',
 };
 
 const dark: ThemeColors = {

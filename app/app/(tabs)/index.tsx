@@ -3,7 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet, RefreshControl } 
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useBranch } from '../../lib/branchContext';
-import { useTheme, type ThemeColors, RADIUS, cardShadow, accentGlow } from '../../lib/theme';
+import { useTheme, type ThemeColors, RADIUS, cardShadow } from '../../lib/theme';
 import { getAppointmentsForDay } from '../../lib/appointments';
 import { getServicesByBranch } from '../../lib/services';
 import { getStaffByBranch } from '../../lib/staff';
@@ -83,11 +83,11 @@ export default function HomeScreen() {
 
   const dateHeader = new Intl.DateTimeFormat(dateLocale, { weekday: 'long', day: 'numeric', month: 'long' }).format(Date.now());
 
-  const QUICK_ACTIONS: { icon: IconName; label: string; color: string; onPress: () => void }[] = [
-    { icon: 'calendar', label: t.tabs.agenda, color: colors.accent, onPress: () => router.push('/agenda') },
-    { icon: 'wallet', label: t.finance.title, color: colors.success, onPress: () => router.push('/finance') },
-    { icon: 'megaphone', label: t.tabs.campaigns, color: colors.statusPending, onPress: () => router.push('/more/campaigns') },
-    { icon: 'settings', label: t.settings.title, color: colors.accent, onPress: () => router.push('/settings') },
+  const QUICK_ACTIONS: { icon: IconName; label: string; color: string; bg: string; onPress: () => void }[] = [
+    { icon: 'calendar-outline', label: t.tabs.agenda, color: colors.accent, bg: colors.accentSoft, onPress: () => router.push('/agenda') },
+    { icon: 'wallet-outline', label: t.finance.title, color: colors.success, bg: colors.successSoft, onPress: () => router.push('/finance') },
+    { icon: 'megaphone-outline', label: t.tabs.campaigns, color: colors.statusPending, bg: `${colors.statusPending}1f`, onPress: () => router.push('/more/campaigns') },
+    { icon: 'settings-outline', label: t.settings.title, color: colors.accent, bg: colors.accentSoft, onPress: () => router.push('/settings') },
   ];
 
   return (
@@ -106,35 +106,37 @@ export default function HomeScreen() {
         </View>
       )}
 
+      <Text style={styles.dateEyebrow}>{dateHeader}</Text>
       <Text style={styles.greeting}>{t.home.greeting}</Text>
-      <Text style={styles.dateSubtitle}>{dateHeader}</Text>
 
       {questionsCount > 0 && (
         <TouchableOpacity style={styles.alertCard} onPress={() => router.push('/more/questions')} activeOpacity={0.85}>
-          <View style={styles.alertIconWrap}>
-            <Ionicons name="help-circle" size={20} color="#fff" />
+          <View style={[styles.alertIconWrap, { backgroundColor: `${colors.statusPending}1f` }]}>
+            <Ionicons name="help-circle-outline" size={18} color={colors.statusPending} />
           </View>
           <Text style={styles.alertText}>{t.home.questionsAlert(questionsCount)}</Text>
           <Text style={styles.alertLink}>{t.home.viewQuestions}</Text>
         </TouchableOpacity>
       )}
 
-      <View style={styles.statsRow}>
-        <View style={[styles.statTile, styles.statTileAccent]}>
-          <Ionicons name="cash" size={22} color="#fff" style={{ marginBottom: 8 }} />
-          <Text style={styles.statAmount}>₪{todayRevenue}</Text>
-          <Text style={styles.statLabel}>{t.finance.todayRevenueTitle}</Text>
+      <View style={styles.heroCard}>
+        <View style={styles.heroIconWrap}>
+          <Ionicons name="cash-outline" size={20} color={colors.accent} />
         </View>
-        <View style={[styles.statTile, styles.statTileSuccess]}>
-          <Ionicons name="calendar" size={22} color="#fff" style={{ marginBottom: 8 }} />
-          <Text style={styles.statAmount}>{active.length}</Text>
-          <Text style={styles.statLabel}>{t.home.todayApptsLabel(active.length)}</Text>
+        <Text style={styles.heroLabel}>{t.finance.todayRevenueTitle}</Text>
+        <Text style={styles.heroAmount}>₪{todayRevenue}</Text>
+      </View>
+
+      <View style={styles.secondaryRow}>
+        <View style={styles.secondaryChip}>
+          <Ionicons name="calendar-outline" size={15} color={colors.textMuted} />
+          <Text style={styles.secondaryChipText}>{t.home.todayApptsLabel(active.length)}</Text>
         </View>
       </View>
 
       <Text style={styles.sectionTitle}>{t.home.nextApptTitle}</Text>
       {next ? (
-        <View style={[styles.nextCard, { borderRightColor: colors.accent }]}>
+        <View style={styles.nextCard}>
           <Text style={styles.nextTime}>
             {new Date(next.startsAt).toLocaleTimeString(dateLocale, { hour: '2-digit', minute: '2-digit', hour12: false })}
           </Text>
@@ -153,8 +155,8 @@ export default function HomeScreen() {
       <View style={styles.quickGrid}>
         {QUICK_ACTIONS.map((qa) => (
           <TouchableOpacity key={qa.label} style={styles.quickTile} onPress={qa.onPress} activeOpacity={0.8}>
-            <View style={[styles.quickIconWrap, { backgroundColor: qa.color }]}>
-              <Ionicons name={qa.icon} size={20} color="#fff" />
+            <View style={[styles.quickIconWrap, { backgroundColor: qa.bg }]}>
+              <Ionicons name={qa.icon} size={19} color={qa.color} />
             </View>
             <Text style={styles.quickLabel}>{qa.label}</Text>
           </TouchableOpacity>
@@ -166,7 +168,7 @@ export default function HomeScreen() {
         <Text style={styles.emptyInlineText}>{t.home.upcomingEmpty}</Text>
       ) : (
         upcoming.slice(0, 5).map((item) => (
-          <View key={item.id} style={[styles.upcomingRow, { borderRightColor: colors.accent }]}>
+          <View key={item.id} style={styles.upcomingRow}>
             <Text style={styles.upcomingTime}>
               {new Date(item.startsAt).toLocaleTimeString(dateLocale, { hour: '2-digit', minute: '2-digit', hour12: false })}
             </Text>
@@ -193,28 +195,46 @@ function makeStyles(colors: ThemeColors, mode: 'light' | 'dark') {
     branchChipActive: { backgroundColor: colors.accent },
     branchChipText: { fontSize: 12, color: colors.textMuted, fontWeight: '600' },
     branchChipTextActive: { color: '#fff' },
-    greeting: { fontSize: 26, fontWeight: '800', color: colors.text, letterSpacing: -0.3 },
-    dateSubtitle: { fontSize: 14, color: colors.textMuted, marginTop: 4, marginBottom: 18, textTransform: 'capitalize' },
+    dateEyebrow: { fontSize: 12, color: colors.textMuted, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.6 },
+    greeting: { fontSize: 28, fontWeight: '700', color: colors.text, letterSpacing: -0.4, marginTop: 4, marginBottom: 20 },
     alertCard: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 12,
-      backgroundColor: colors.statusPending,
+      backgroundColor: colors.surface,
       borderRadius: RADIUS.lg,
-      padding: 14,
-      marginBottom: 16,
+      padding: 13,
+      marginBottom: 14,
+      borderRightWidth: 3,
+      borderRightColor: colors.statusPending,
       ...cardShadow(mode, 'sm'),
     },
-    alertIconWrap: { width: 34, height: 34, borderRadius: RADIUS.md, backgroundColor: 'rgba(255,255,255,0.25)', alignItems: 'center', justifyContent: 'center' },
-    alertText: { flex: 1, color: '#fff', fontWeight: '700', fontSize: 13 },
-    alertLink: { color: '#fff', fontWeight: '800', fontSize: 12, textDecorationLine: 'underline' },
-    statsRow: { flexDirection: 'row', gap: 12, marginBottom: 8 },
-    statTile: { flex: 1, borderRadius: RADIUS.lg, padding: 16, ...cardShadow(mode, 'md') },
-    statTileAccent: { backgroundColor: colors.accent, ...accentGlow(colors, mode) },
-    statTileSuccess: { backgroundColor: colors.success },
-    statAmount: { fontSize: 24, fontWeight: '800', color: '#fff', letterSpacing: -0.3 },
-    statLabel: { fontSize: 12.5, color: 'rgba(255,255,255,0.9)', fontWeight: '600', marginTop: 4 },
-    sectionTitle: { fontSize: 15, fontWeight: '700', color: colors.text, marginTop: 22, marginBottom: 10 },
+    alertIconWrap: { width: 32, height: 32, borderRadius: RADIUS.md, alignItems: 'center', justifyContent: 'center' },
+    alertText: { flex: 1, color: colors.text, fontWeight: '700', fontSize: 13 },
+    alertLink: { color: colors.accent, fontWeight: '800', fontSize: 12 },
+    heroCard: {
+      backgroundColor: colors.surface,
+      borderRadius: RADIUS.xl,
+      padding: 22,
+      marginBottom: 12,
+      ...cardShadow(mode, 'md'),
+    },
+    heroIconWrap: { width: 40, height: 40, borderRadius: RADIUS.md, backgroundColor: colors.accentSoft, alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
+    heroLabel: { fontSize: 12, color: colors.textMuted, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
+    heroAmount: { fontSize: 38, fontWeight: '700', color: colors.text, letterSpacing: -0.6, marginTop: 6 },
+    secondaryRow: { flexDirection: 'row', gap: 10, marginBottom: 6 },
+    secondaryChip: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      backgroundColor: colors.surface,
+      borderRadius: RADIUS.pill,
+      paddingHorizontal: 14,
+      paddingVertical: 10,
+      ...cardShadow(mode, 'sm'),
+    },
+    secondaryChipText: { fontSize: 12.5, color: colors.text, fontWeight: '600' },
+    sectionTitle: { fontSize: 13.5, fontWeight: '700', color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 0.4, marginTop: 24, marginBottom: 10 },
     nextCard: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -222,10 +242,11 @@ function makeStyles(colors: ThemeColors, mode: 'light' | 'dark') {
       backgroundColor: colors.surface,
       borderRadius: RADIUS.lg,
       padding: 16,
-      borderRightWidth: 4,
+      borderRightWidth: 3,
+      borderRightColor: colors.accent,
       ...cardShadow(mode, 'md'),
     },
-    nextTime: { fontSize: 18, fontWeight: '800', color: colors.text, fontVariant: ['tabular-nums'] },
+    nextTime: { fontSize: 18, fontWeight: '700', color: colors.text, fontVariant: ['tabular-nums'] },
     nextName: { fontSize: 15, fontWeight: '700', color: colors.text },
     nextMeta: { fontSize: 12.5, color: colors.textMuted, marginTop: 2 },
     nextCardEmpty: { backgroundColor: colors.surface, borderRadius: RADIUS.lg, padding: 16, ...cardShadow(mode, 'sm') },
@@ -240,7 +261,7 @@ function makeStyles(colors: ThemeColors, mode: 'light' | 'dark') {
       gap: 10,
       ...cardShadow(mode, 'sm'),
     },
-    quickIconWrap: { width: 44, height: 44, borderRadius: RADIUS.md, alignItems: 'center', justifyContent: 'center' },
+    quickIconWrap: { width: 42, height: 42, borderRadius: RADIUS.md, alignItems: 'center', justifyContent: 'center' },
     quickLabel: { fontSize: 13, fontWeight: '700', color: colors.text, textAlign: 'center' },
     upcomingRow: {
       flexDirection: 'row',
@@ -249,7 +270,8 @@ function makeStyles(colors: ThemeColors, mode: 'light' | 'dark') {
       backgroundColor: colors.surface,
       borderRadius: RADIUS.md,
       padding: 12,
-      borderRightWidth: 3,
+      borderRightWidth: 2,
+      borderRightColor: colors.accent,
       marginBottom: 8,
       ...cardShadow(mode, 'sm'),
     },
