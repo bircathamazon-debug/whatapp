@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, TextInput, Linking, Alert, Switch } from 'react-native';
-import { useBranch } from '../../lib/branchContext';
-import { updateBranch } from '../../lib/branches';
-import { getStaffByBranch } from '../../lib/staff';
-import { getBlockedTimesByBranch, addBlockedTime, deleteBlockedTime } from '../../lib/blockedTimes';
-import { useTheme, type ThemeColors } from '../../lib/theme';
-import { useT, isRtl, LANGUAGE_NAMES, type Lang } from '../../lib/i18n';
-import { LOYALTY_THRESHOLD, NO_SHOW_DEPOSIT_THRESHOLD, REMINDER_WINDOWS_HOURS } from '../../../shared/types';
-import type { Staff, Branch, BlockedTime } from '../../../shared/types';
+import { useBranch } from '../../../lib/branchContext';
+import { updateBranch } from '../../../lib/branches';
+import { getStaffByBranch } from '../../../lib/staff';
+import { getBlockedTimesByBranch, addBlockedTime, deleteBlockedTime } from '../../../lib/blockedTimes';
+import { useTheme, type ThemeColors } from '../../../lib/theme';
+import { useT, isRtl, LANGUAGE_NAMES, type Lang } from '../../../lib/i18n';
+import { LOYALTY_THRESHOLD, NO_SHOW_DEPOSIT_THRESHOLD, REMINDER_WINDOWS_HOURS } from '../../../../shared/types';
+import type { Staff, Branch, BlockedTime } from '../../../../shared/types';
 
 function todayStr(): string {
   return new Intl.DateTimeFormat('en-CA').format(Date.now());

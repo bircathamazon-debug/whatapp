@@ -1,71 +1,54 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, RefreshControl, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { useBranch } from '../../lib/branchContext';
-import { useTheme, type ThemeColors, RADIUS, cardShadow } from '../../lib/theme';
-import { getAppointmentsForDay, adminCancelAppointment, adminConfirmAppointment } from '../../lib/appointments';
-import { getStaffByBranch } from '../../lib/staff';
+import { useTheme, type ThemeColors, RADIUS, cardShadow, accentGlow } from '../../lib/theme';
+import { getAppointmentsForDay } from '../../lib/appointments';
 import { getServicesByBranch } from '../../lib/services';
-import { getBlockedTimesByBranch } from '../../lib/blockedTimes';
+import { getStaffByBranch } from '../../lib/staff';
+import { getUnansweredByBranch } from '../../lib/unansweredMessages';
 import { useT, useDateLocale } from '../../lib/i18n';
-import type { Appointment, Staff, Service, BlockedTime } from '../../../shared/types';
+import type { Appointment, Service, Staff } from '../../../shared/types';
 
-const HOUR_START = 8;
-const HOUR_END = 20;
+type IconName = React.ComponentProps<typeof Ionicons>['name'];
 
-function startOfDay(offsetDays: number): number {
+function startOfDay(offsetDays = 0): number {
   const d = new Date();
   d.setDate(d.getDate() + offsetDays);
   d.setHours(0, 0, 0, 0);
   return d.getTime();
 }
 
-function dateStrOf(ms: number): string {
-  return new Intl.DateTimeFormat('en-CA').format(ms);
-}
-
-export default function AgendaScreen() {
+export default function HomeScreen() {
   const router = useRouter();
   const { branchId, branches, setBranchId } = useBranch();
   const { colors, mode } = useTheme();
   const t = useT();
   const dateLocale = useDateLocale();
   const styles = makeStyles(colors, mode);
-  const [dayOffset, setDayOffset] = useState(0);
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
-  const [staff, setStaff] = useState<Staff[]>([]);
-  const [services, setServices] = useState<Service[]>([]);
-  const [blockedTimes, setBlockedTimes] = useState<BlockedTime[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
 
-  const dayStart = startOfDay(dayOffset);
-  const dateStr = dateStrOf(dayStart);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [services, setServices] = useState<Service[]>([]);
+  const [staff, setStaff] = useState<Staff[]>([]);
+  const [questionsCount, setQuestionsCount] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
 
   const load = useCallback(async () => {
     if (!branchId) return;
-    setLoading(true);
-    try {
-      const dayEnd = startOfDay(dayOffset + 1);
-      const [appts, staffList, serviceList, blocked] = await Promise.all([
-        getAppointmentsForDay(branchId, dayStart, dayEnd),
-        getStaffByBranch(branchId),
-        getServicesByBranch(branchId),
-        getBlockedTimesByBranch(branchId),
-      ]);
-      setAppointments(appts);
-      setStaff(staffList);
-      setServices(serviceList);
-      setBlockedTimes(blocked.filter((b) => b.date === dateStr));
-    } finally {
-      setLoading(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [branchId, dayOffset]);
+    const [appts, serviceList, staffList, questions] = await Promise.all([
+      getAppointmentsForDay(branchId, startOfDay(0), startOfDay(1)),
+      getServicesByBranch(branchId),
+      getStaffByBranch(branchId),
+      getUnansweredByBranch(branchId),
+    ]);
+    setAppointments(appts);
+    setServices(serviceList);
+    setStaff(staffList);
+    setQuestionsCount(questions.filter((q) => !q.resolved).length);
+  }, [branchId]);
 
-  useEffect(() => {
-    load();
-  }, [load]);
+  useEffect(() => { load(); }, [load]);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -73,54 +56,46 @@ export default function AgendaScreen() {
     setRefreshing(false);
   };
 
-  const staffName = (id: string) => staff.find((s) => s.id === id)?.name ?? id;
-  const serviceName = (id: string) => services.find((s) => s.id === id)?.name ?? id;
-  const blockLabel = (staffId: string | null) => (staffId ? t.agenda.blockedForStaff(staffName(staffId)) : t.agenda.blockedForAll);
-  const statusLabel = (status: Appointment['status']): string => {
-    switch (status) {
-      case 'confirmed': return t.agenda.statusConfirmed;
-      case 'pending_deposit': return t.agenda.statusPending;
-      case 'cancelled': return t.agenda.statusCancelled;
-      case 'completed': return t.agenda.statusCompleted;
-      case 'no_show': return t.agenda.statusNoShow;
-    }
-  };
-
-  const cancel = (appt: Appointment) => {
-    Alert.alert(t.agenda.cancelTitle, t.agenda.cancelMessage(appt.clientName), [
-      { text: t.agenda.back, style: 'cancel' },
-      { text: t.agenda.cancelAppt, style: 'destructive', onPress: async () => { await adminCancelAppointment(appt.id); await load(); } },
-    ]);
-  };
-
-  const confirm = async (appt: Appointment) => {
-    await adminConfirmAppointment(appt.id);
-    await load();
-  };
-
   if (!branchId) {
     return (
       <View style={styles.center}>
         <Text style={styles.emptyText}>{t.agenda.needBranch}</Text>
-        <TouchableOpacity style={styles.smallBtn} onPress={() => router.push('/admin')}>
+        <TouchableOpacity style={styles.smallBtn} onPress={() => router.push('/settings/branches')}>
           <Text style={styles.smallBtnText}>{t.agenda.goToAdmin}</Text>
         </TouchableOpacity>
       </View>
     );
   }
 
-  const allDayBlocks = blockedTimes.filter((b) => b.allDay);
-  const hourBlocks = blockedTimes.filter((b) => !b.allDay);
+  const priceById = new Map(services.map((s) => [s.id, s.price]));
+  const serviceName = (id: string) => services.find((s) => s.id === id)?.name ?? id;
+  const staffName = (id: string) => staff.find((s) => s.id === id)?.name ?? id;
 
-  const dateObj = new Date(dayStart);
-  const dayNum = dateObj.getDate();
-  const monthWeekday = new Intl.DateTimeFormat(dateLocale, { weekday: 'long', month: 'long' }).format(dateObj);
+  const active = appointments.filter((a) => a.status !== 'cancelled');
+  const completed = appointments.filter((a) => a.status === 'completed');
+  const todayRevenue = completed.reduce((sum, a) => sum + (priceById.get(a.serviceId) ?? 0), 0);
 
-  const hours: number[] = [];
-  for (let h = HOUR_START; h <= HOUR_END; h++) hours.push(h);
+  const now = Date.now();
+  const upcoming = active
+    .filter((a) => a.startsAt >= now && (a.status === 'confirmed' || a.status === 'pending_deposit'))
+    .sort((a, b) => a.startsAt - b.startsAt);
+  const next = upcoming[0];
+
+  const dateHeader = new Intl.DateTimeFormat(dateLocale, { weekday: 'long', day: 'numeric', month: 'long' }).format(Date.now());
+
+  const QUICK_ACTIONS: { icon: IconName; label: string; color: string; onPress: () => void }[] = [
+    { icon: 'calendar', label: t.tabs.agenda, color: colors.accent, onPress: () => router.push('/agenda') },
+    { icon: 'wallet', label: t.finance.title, color: colors.success, onPress: () => router.push('/finance') },
+    { icon: 'megaphone', label: t.tabs.campaigns, color: colors.statusPending, onPress: () => router.push('/more/campaigns') },
+    { icon: 'settings', label: t.settings.title, color: colors.accent, onPress: () => router.push('/settings') },
+  ];
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={{ padding: 18, paddingBottom: 32 }}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+    >
       {branches.length > 1 && (
         <View style={styles.branchRow}>
           {branches.map((b) => (
@@ -131,123 +106,155 @@ export default function AgendaScreen() {
         </View>
       )}
 
-      <View style={styles.daybar}>
-        <TouchableOpacity onPress={() => setDayOffset((d) => d + 1)}><Text style={styles.chev}>›</Text></TouchableOpacity>
-        <View style={styles.dateWrap}>
-          <Text style={styles.dayNum}>{dayOffset === 0 ? t.agenda.today : dayNum}</Text>
-          <Text style={styles.dayText}>{monthWeekday}</Text>
+      <Text style={styles.greeting}>{t.home.greeting}</Text>
+      <Text style={styles.dateSubtitle}>{dateHeader}</Text>
+
+      {questionsCount > 0 && (
+        <TouchableOpacity style={styles.alertCard} onPress={() => router.push('/more/questions')} activeOpacity={0.85}>
+          <View style={styles.alertIconWrap}>
+            <Ionicons name="help-circle" size={20} color="#fff" />
+          </View>
+          <Text style={styles.alertText}>{t.home.questionsAlert(questionsCount)}</Text>
+          <Text style={styles.alertLink}>{t.home.viewQuestions}</Text>
+        </TouchableOpacity>
+      )}
+
+      <View style={styles.statsRow}>
+        <View style={[styles.statTile, styles.statTileAccent]}>
+          <Ionicons name="cash" size={22} color="#fff" style={{ marginBottom: 8 }} />
+          <Text style={styles.statAmount}>₪{todayRevenue}</Text>
+          <Text style={styles.statLabel}>{t.finance.todayRevenueTitle}</Text>
         </View>
-        <TouchableOpacity onPress={() => setDayOffset((d) => d - 1)}><Text style={styles.chev}>‹</Text></TouchableOpacity>
+        <View style={[styles.statTile, styles.statTileSuccess]}>
+          <Ionicons name="calendar" size={22} color="#fff" style={{ marginBottom: 8 }} />
+          <Text style={styles.statAmount}>{active.length}</Text>
+          <Text style={styles.statLabel}>{t.home.todayApptsLabel(active.length)}</Text>
+        </View>
       </View>
 
-      {allDayBlocks.length > 0 && (
-        <View style={styles.allDayBanner}>
-          {allDayBlocks.map((b) => (
-            <Text key={b.id} style={styles.allDayBannerText}>🔒 {blockLabel(b.staffId)}{b.reason ? ` — ${b.reason}` : ''}</Text>
-          ))}
+      <Text style={styles.sectionTitle}>{t.home.nextApptTitle}</Text>
+      {next ? (
+        <View style={[styles.nextCard, { borderRightColor: colors.accent }]}>
+          <Text style={styles.nextTime}>
+            {new Date(next.startsAt).toLocaleTimeString(dateLocale, { hour: '2-digit', minute: '2-digit', hour12: false })}
+          </Text>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.nextName}>{next.clientName}</Text>
+            <Text style={styles.nextMeta}>{serviceName(next.serviceId)} · {staffName(next.staffId)}</Text>
+          </View>
+        </View>
+      ) : (
+        <View style={styles.nextCardEmpty}>
+          <Text style={styles.emptyInlineText}>{t.home.nextApptNone}</Text>
         </View>
       )}
 
-      <ScrollView
-        contentContainerStyle={styles.list}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-      >
-        {!loading && appointments.length === 0 && allDayBlocks.length === 0 && (
-          <Text style={styles.emptyText}>{t.agenda.noAppointments}</Text>
-        )}
-        {hours.map((h) => {
-          const hourAppts = appointments
-            .filter((a) => new Date(a.startsAt).getHours() === h)
-            .sort((a, b) => a.startsAt - b.startsAt);
-          const hourBlock = hourBlocks.find((b) => Number(b.startTime?.split(':')[0]) === h);
-          return (
-            <View key={h} style={styles.hourRow}>
-              <Text style={styles.hourLabel}>{String(h).padStart(2, '0')}:00</Text>
-              <View style={styles.hourLine} />
-              <View style={styles.hourContent}>
-                {hourBlock && (
-                  <View style={styles.blockedChip}>
-                    <Text style={styles.blockedChipText}>
-                      🔒 {hourBlock.startTime}–{hourBlock.endTime} · {blockLabel(hourBlock.staffId)}{hourBlock.reason ? ` (${hourBlock.reason})` : ''}
-                    </Text>
-                  </View>
-                )}
-                {hourAppts.map((item) => (
-                  <View key={item.id} style={[styles.chip, { borderRightColor: statusColor(colors, item.status) }]}>
-                    <View style={styles.chipRow1}>
-                      <Text style={styles.chipName}>{item.clientName}</Text>
-                      <Text style={styles.chipTime}>{new Date(item.startsAt).toLocaleTimeString(dateLocale, { hour: '2-digit', minute: '2-digit', hour12: false })}</Text>
-                    </View>
-                    <Text style={styles.chipMeta}>{serviceName(item.serviceId)} · {staffName(item.staffId)} · {statusLabel(item.status)}</Text>
-                    {(item.status === 'confirmed' || item.status === 'pending_deposit') && (
-                      <View style={styles.chipActions}>
-                        {item.status === 'pending_deposit' && (
-                          <TouchableOpacity style={styles.confirmBtn} onPress={() => confirm(item)}>
-                            <Text style={styles.confirmBtnText}>{t.agenda.depositReceived}</Text>
-                          </TouchableOpacity>
-                        )}
-                        <TouchableOpacity style={styles.cancelBtn} onPress={() => cancel(item)}>
-                          <Text style={styles.cancelBtnText}>{t.agenda.cancel}</Text>
-                        </TouchableOpacity>
-                      </View>
-                    )}
-                  </View>
-                ))}
-              </View>
+      <Text style={styles.sectionTitle}>{t.home.quickActionsTitle}</Text>
+      <View style={styles.quickGrid}>
+        {QUICK_ACTIONS.map((qa) => (
+          <TouchableOpacity key={qa.label} style={styles.quickTile} onPress={qa.onPress} activeOpacity={0.8}>
+            <View style={[styles.quickIconWrap, { backgroundColor: qa.color }]}>
+              <Ionicons name={qa.icon} size={20} color="#fff" />
             </View>
-          );
-        })}
-      </ScrollView>
-    </View>
-  );
-}
+            <Text style={styles.quickLabel}>{qa.label}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
 
-function statusColor(colors: ThemeColors, status: Appointment['status']): string {
-  switch (status) {
-    case 'confirmed': return colors.statusConfirmed;
-    case 'pending_deposit': return colors.statusPending;
-    case 'completed': return colors.statusCompleted;
-    case 'cancelled': return colors.statusCancelled;
-    case 'no_show': return colors.statusNoShow;
-  }
+      <Text style={styles.sectionTitle}>{t.home.upcomingTitle}</Text>
+      {upcoming.length === 0 ? (
+        <Text style={styles.emptyInlineText}>{t.home.upcomingEmpty}</Text>
+      ) : (
+        upcoming.slice(0, 5).map((item) => (
+          <View key={item.id} style={[styles.upcomingRow, { borderRightColor: colors.accent }]}>
+            <Text style={styles.upcomingTime}>
+              {new Date(item.startsAt).toLocaleTimeString(dateLocale, { hour: '2-digit', minute: '2-digit', hour12: false })}
+            </Text>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.upcomingName}>{item.clientName}</Text>
+              <Text style={styles.upcomingMeta}>{serviceName(item.serviceId)} · {staffName(item.staffId)}</Text>
+            </View>
+          </View>
+        ))
+      )}
+    </ScrollView>
+  );
 }
 
 function makeStyles(colors: ThemeColors, mode: 'light' | 'dark') {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.bg },
     center: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24, gap: 12, backgroundColor: colors.bg },
-    branchRow: { flexDirection: 'row', gap: 8, padding: 12, flexWrap: 'wrap' },
+    emptyText: { color: colors.textMuted, textAlign: 'center', marginTop: 24 },
+    smallBtn: { backgroundColor: colors.accent, borderRadius: RADIUS.pill, paddingHorizontal: 18, paddingVertical: 11 },
+    smallBtnText: { color: '#fff', fontWeight: '700' },
+    branchRow: { flexDirection: 'row', gap: 8, flexWrap: 'wrap', marginBottom: 14 },
     branchChip: { backgroundColor: colors.surface, borderRadius: RADIUS.pill, paddingHorizontal: 14, paddingVertical: 7, ...cardShadow(mode, 'sm') },
     branchChipActive: { backgroundColor: colors.accent },
     branchChipText: { fontSize: 12, color: colors.textMuted, fontWeight: '600' },
     branchChipTextActive: { color: '#fff' },
-    daybar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 18, paddingVertical: 14, backgroundColor: colors.surface, ...cardShadow(mode, 'sm') },
-    chev: { fontSize: 20, fontWeight: '700', color: colors.accent, paddingHorizontal: 10 },
-    dateWrap: { alignItems: 'center' },
-    dayNum: { fontSize: 20, fontWeight: '800', color: colors.text, letterSpacing: -0.2 },
-    dayText: { fontSize: 12, color: colors.textMuted, marginTop: 1 },
-    allDayBanner: { marginHorizontal: 16, marginTop: 12, backgroundColor: colors.dangerSoft, borderRadius: RADIUS.md, padding: 12 },
-    allDayBannerText: { fontSize: 12.5, fontWeight: '700', color: colors.danger },
-    list: { padding: 16, paddingTop: 12 },
-    emptyList: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-    emptyText: { color: colors.textMuted, textAlign: 'center', marginTop: 24 },
-    smallBtn: { backgroundColor: colors.accent, borderRadius: RADIUS.pill, paddingHorizontal: 18, paddingVertical: 11 },
-    smallBtnText: { color: '#fff', fontWeight: '700' },
-    hourRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, minHeight: 36 },
-    hourLabel: { width: 42, fontSize: 11, color: colors.textMuted, paddingTop: 3, textAlign: 'right', fontVariant: ['tabular-nums'], fontWeight: '600' },
-    hourLine: { width: 1, backgroundColor: colors.border, alignSelf: 'stretch' },
-    hourContent: { flex: 1, paddingBottom: 12, gap: 8 },
-    blockedChip: { backgroundColor: colors.surfaceMuted, borderRadius: RADIUS.sm, borderWidth: 1, borderColor: colors.border, borderStyle: 'dashed', padding: 10 },
-    blockedChipText: { fontSize: 11, color: colors.textMuted, fontWeight: '600' },
-    chip: { backgroundColor: colors.surface, borderRadius: RADIUS.md, padding: 12, borderRightWidth: 4, ...cardShadow(mode, 'sm') },
-    chipRow1: { flexDirection: 'row', justifyContent: 'space-between' },
-    chipName: { fontSize: 13.5, fontWeight: '700', color: colors.text },
-    chipTime: { fontSize: 13.5, fontWeight: '800', color: colors.text, fontVariant: ['tabular-nums'] },
-    chipMeta: { fontSize: 11.5, color: colors.textMuted, marginTop: 3 },
-    chipActions: { flexDirection: 'row', gap: 8, marginTop: 10 },
-    confirmBtn: { backgroundColor: colors.successSoft, borderRadius: RADIUS.pill, paddingHorizontal: 12, paddingVertical: 7 },
-    confirmBtnText: { color: colors.success, fontWeight: '700', fontSize: 11 },
-    cancelBtn: { backgroundColor: colors.dangerSoft, borderRadius: RADIUS.pill, paddingHorizontal: 12, paddingVertical: 7 },
-    cancelBtnText: { color: colors.danger, fontWeight: '700', fontSize: 11 },
+    greeting: { fontSize: 26, fontWeight: '800', color: colors.text, letterSpacing: -0.3 },
+    dateSubtitle: { fontSize: 14, color: colors.textMuted, marginTop: 4, marginBottom: 18, textTransform: 'capitalize' },
+    alertCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      backgroundColor: colors.statusPending,
+      borderRadius: RADIUS.lg,
+      padding: 14,
+      marginBottom: 16,
+      ...cardShadow(mode, 'sm'),
+    },
+    alertIconWrap: { width: 34, height: 34, borderRadius: RADIUS.md, backgroundColor: 'rgba(255,255,255,0.25)', alignItems: 'center', justifyContent: 'center' },
+    alertText: { flex: 1, color: '#fff', fontWeight: '700', fontSize: 13 },
+    alertLink: { color: '#fff', fontWeight: '800', fontSize: 12, textDecorationLine: 'underline' },
+    statsRow: { flexDirection: 'row', gap: 12, marginBottom: 8 },
+    statTile: { flex: 1, borderRadius: RADIUS.lg, padding: 16, ...cardShadow(mode, 'md') },
+    statTileAccent: { backgroundColor: colors.accent, ...accentGlow(colors, mode) },
+    statTileSuccess: { backgroundColor: colors.success },
+    statAmount: { fontSize: 24, fontWeight: '800', color: '#fff', letterSpacing: -0.3 },
+    statLabel: { fontSize: 12.5, color: 'rgba(255,255,255,0.9)', fontWeight: '600', marginTop: 4 },
+    sectionTitle: { fontSize: 15, fontWeight: '700', color: colors.text, marginTop: 22, marginBottom: 10 },
+    nextCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 14,
+      backgroundColor: colors.surface,
+      borderRadius: RADIUS.lg,
+      padding: 16,
+      borderRightWidth: 4,
+      ...cardShadow(mode, 'md'),
+    },
+    nextTime: { fontSize: 18, fontWeight: '800', color: colors.text, fontVariant: ['tabular-nums'] },
+    nextName: { fontSize: 15, fontWeight: '700', color: colors.text },
+    nextMeta: { fontSize: 12.5, color: colors.textMuted, marginTop: 2 },
+    nextCardEmpty: { backgroundColor: colors.surface, borderRadius: RADIUS.lg, padding: 16, ...cardShadow(mode, 'sm') },
+    emptyInlineText: { color: colors.textMuted, fontSize: 13 },
+    quickGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
+    quickTile: {
+      width: '47%',
+      backgroundColor: colors.surface,
+      borderRadius: RADIUS.lg,
+      padding: 16,
+      alignItems: 'center',
+      gap: 10,
+      ...cardShadow(mode, 'sm'),
+    },
+    quickIconWrap: { width: 44, height: 44, borderRadius: RADIUS.md, alignItems: 'center', justifyContent: 'center' },
+    quickLabel: { fontSize: 13, fontWeight: '700', color: colors.text, textAlign: 'center' },
+    upcomingRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      backgroundColor: colors.surface,
+      borderRadius: RADIUS.md,
+      padding: 12,
+      borderRightWidth: 3,
+      marginBottom: 8,
+      ...cardShadow(mode, 'sm'),
+    },
+    upcomingTime: { fontSize: 13, fontWeight: '800', color: colors.text, fontVariant: ['tabular-nums'] },
+    upcomingName: { fontSize: 13.5, fontWeight: '700', color: colors.text },
+    upcomingMeta: { fontSize: 11.5, color: colors.textMuted, marginTop: 2 },
   });
 }

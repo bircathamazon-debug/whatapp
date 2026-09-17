@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, Alert, Switch } from 'react-native';
-import { useBranch } from '../../lib/branchContext';
-import { getStaffByBranch, addStaff, deleteStaff, updateStaff, emptyWeeklyHours } from '../../lib/staff';
-import { getServicesByBranch } from '../../lib/services';
-import { useTheme, type ThemeColors } from '../../lib/theme';
-import { useT } from '../../lib/i18n';
-import type { Staff, Service } from '../../../shared/types';
+import { useBranch } from '../../../lib/branchContext';
+import { getStaffByBranch, addStaff, deleteStaff, updateStaff, emptyWeeklyHours } from '../../../lib/staff';
+import { getServicesByBranch } from '../../../lib/services';
+import { useTheme, type ThemeColors } from '../../../lib/theme';
+import { useT } from '../../../lib/i18n';
+import type { Staff, Service } from '../../../../shared/types';
 
 export default function StaffScreen() {
   const { branchId } = useBranch();

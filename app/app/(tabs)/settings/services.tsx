@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, Alert, Switch } from 'react-native';
-import { useBranch } from '../../lib/branchContext';
-import { getServicesByBranch, addService, deleteService } from '../../lib/services';
-import { useTheme, type ThemeColors } from '../../lib/theme';
-import { useT } from '../../lib/i18n';
-import type { Service } from '../../../shared/types';
+import { useBranch } from '../../../lib/branchContext';
+import { getServicesByBranch, addService, deleteService } from '../../../lib/services';
+import { useTheme, type ThemeColors } from '../../../lib/theme';
+import { useT } from '../../../lib/i18n';
+import type { Service } from '../../../../shared/types';
 
 export default function ServicesScreen() {
   const { branchId } = useBranch();

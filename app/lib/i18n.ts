@@ -14,7 +14,18 @@ export type Lang = 'he' | 'en' | 'es';
 export const RTL_LANGS: Lang[] = ['he'];
 
 interface Dict {
-  tabs: { agenda: string; waitlist: string; waitlistShort: string; clients: string; campaigns: string; questions: string };
+  tabs: { agenda: string; waitlist: string; waitlistShort: string; clients: string; campaigns: string; questions: string; home: string; more: string };
+  home: {
+    greeting: string;
+    todayApptsLabel: (n: number) => string;
+    questionsAlert: (n: number) => string;
+    viewQuestions: string;
+    nextApptTitle: string;
+    nextApptNone: string;
+    quickActionsTitle: string;
+    upcomingTitle: string;
+    upcomingEmpty: string;
+  };
   agenda: {
     statusConfirmed: string;
     statusPending: string;
@@ -245,7 +256,18 @@ interface Dict {
 }
 
 const he: Dict = {
-  tabs: { agenda: 'יומן', waitlist: 'רשימת המתנה', waitlistShort: 'המתנה', clients: 'לקוחות', campaigns: 'קמפיינים', questions: 'שאלות' },
+  tabs: { agenda: 'יומן', waitlist: 'רשימת המתנה', waitlistShort: 'המתנה', clients: 'לקוחות', campaigns: 'קמפיינים', questions: 'שאלות', home: 'בית', more: 'עוד' },
+  home: {
+    greeting: 'שלום! 👋',
+    todayApptsLabel: (n) => `${n} תורים היום`,
+    questionsAlert: (n) => `יש ${n} שאלות שממתינות למענה`,
+    viewQuestions: 'לצפייה',
+    nextApptTitle: 'התור הבא',
+    nextApptNone: 'אין תורים נוספים היום',
+    quickActionsTitle: 'קיצורי דרך',
+    upcomingTitle: 'התורים הקרובים',
+    upcomingEmpty: 'אין תורים נוספים היום.',
+  },
   agenda: {
     statusConfirmed: 'מאושר',
     statusPending: 'ממתין למקדמה',
@@ -476,7 +498,18 @@ const he: Dict = {
 };
 
 const en: Dict = {
-  tabs: { agenda: 'Agenda', waitlist: 'Waitlist', waitlistShort: 'Waitlist', clients: 'Clients', campaigns: 'Campaigns', questions: 'Questions' },
+  tabs: { agenda: 'Agenda', waitlist: 'Waitlist', waitlistShort: 'Waitlist', clients: 'Clients', campaigns: 'Campaigns', questions: 'Questions', home: 'Home', more: 'More' },
+  home: {
+    greeting: 'Hello! 👋',
+    todayApptsLabel: (n) => `${n} appointments today`,
+    questionsAlert: (n) => `${n} questions waiting for an answer`,
+    viewQuestions: 'View',
+    nextApptTitle: 'Next appointment',
+    nextApptNone: 'No more appointments today',
+    quickActionsTitle: 'Quick actions',
+    upcomingTitle: 'Upcoming today',
+    upcomingEmpty: 'No more appointments today.',
+  },
   agenda: {
     statusConfirmed: 'Confirmed',
     statusPending: 'Awaiting deposit',
@@ -707,7 +740,18 @@ const en: Dict = {
 };
 
 const es: Dict = {
-  tabs: { agenda: 'Agenda', waitlist: 'Lista de espera', waitlistShort: 'Espera', clients: 'Clientes', campaigns: 'Campañas', questions: 'Preguntas' },
+  tabs: { agenda: 'Agenda', waitlist: 'Lista de espera', waitlistShort: 'Espera', clients: 'Clientes', campaigns: 'Campañas', questions: 'Preguntas', home: 'Inicio', more: 'Más' },
+  home: {
+    greeting: '¡Hola! 👋',
+    todayApptsLabel: (n) => `${n} citas hoy`,
+    questionsAlert: (n) => `Tenés ${n} preguntas sin responder`,
+    viewQuestions: 'Ver',
+    nextApptTitle: 'Próxima cita',
+    nextApptNone: 'No hay más citas hoy',
+    quickActionsTitle: 'Accesos rápidos',
+    upcomingTitle: 'Próximas citas de hoy',
+    upcomingEmpty: 'No hay más citas hoy.',
+  },
   agenda: {
     statusConfirmed: 'Confirmada',
     statusPending: 'Espera depósito',

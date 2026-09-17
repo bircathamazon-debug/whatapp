@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, RefreshControl } from 'react-native';
-import { useBranch } from '../../lib/branchContext';
-import { getActiveWaitlist } from '../../lib/waitlist';
-import { useTheme, type ThemeColors } from '../../lib/theme';
-import { useT } from '../../lib/i18n';
-import type { WaitlistEntry } from '../../../shared/types';
+import { useBranch } from '../../../lib/branchContext';
+import { getActiveWaitlist } from '../../../lib/waitlist';
+import { useTheme, type ThemeColors } from '../../../lib/theme';
+import { useT } from '../../../lib/i18n';
+import type { WaitlistEntry } from '../../../../shared/types';
 
 export default function WaitlistScreen() {
   const { branchId } = useBranch();

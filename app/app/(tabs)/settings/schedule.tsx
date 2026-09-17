@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Switch, Alert } from 'react-native';
-import { useBranch } from '../../lib/branchContext';
-import { getStaffByBranch, updateStaff } from '../../lib/staff';
-import { useTheme, type ThemeColors } from '../../lib/theme';
-import { useT } from '../../lib/i18n';
-import type { Staff, WeeklyHours } from '../../../shared/types';
+import { useBranch } from '../../../lib/branchContext';
+import { getStaffByBranch, updateStaff } from '../../../lib/staff';
+import { useTheme, type ThemeColors } from '../../../lib/theme';
+import { useT } from '../../../lib/i18n';
+import type { Staff, WeeklyHours } from '../../../../shared/types';
 
 export default function ScheduleScreen() {
   const { branchId } = useBranch();

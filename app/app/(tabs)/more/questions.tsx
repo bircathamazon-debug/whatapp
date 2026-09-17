@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, RefreshControl, TouchableOpacity, Alert } from 'react-native';
-import { useBranch } from '../../lib/branchContext';
-import { getUnansweredByBranch, markMessageResolved, deleteUnansweredMessage } from '../../lib/unansweredMessages';
-import { useTheme, type ThemeColors } from '../../lib/theme';
-import { useT } from '../../lib/i18n';
-import type { UnansweredMessage } from '../../../shared/types';
+import { useBranch } from '../../../lib/branchContext';
+import { getUnansweredByBranch, markMessageResolved, deleteUnansweredMessage } from '../../../lib/unansweredMessages';
+import { useTheme, type ThemeColors } from '../../../lib/theme';
+import { useT } from '../../../lib/i18n';
+import type { UnansweredMessage } from '../../../../shared/types';
 
 export default function QuestionsScreen() {
   const { branchId } = useBranch();

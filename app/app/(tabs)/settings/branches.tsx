@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, Alert } from 'react-native';
-import { useBranch } from '../../lib/branchContext';
-import { addBranch, deleteBranch } from '../../lib/branches';
-import { useTheme, type ThemeColors } from '../../lib/theme';
-import { useT } from '../../lib/i18n';
+import { useBranch } from '../../../lib/branchContext';
+import { addBranch, deleteBranch } from '../../../lib/branches';
+import { useTheme, type ThemeColors } from '../../../lib/theme';
+import { useT } from '../../../lib/i18n';
 
 export default function BranchesScreen() {
   const { branches, reload } = useBranch();

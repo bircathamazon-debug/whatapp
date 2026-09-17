@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, RefreshControl, TextInput } from 'react-native';
-import { useBranch } from '../../lib/branchContext';
-import { getClientsByBranch } from '../../lib/clients';
-import { useTheme, type ThemeColors } from '../../lib/theme';
-import { useT } from '../../lib/i18n';
-import { LOYALTY_THRESHOLD } from '../../../shared/types';
-import type { Client } from '../../../shared/types';
+import { useBranch } from '../../../lib/branchContext';
+import { getClientsByBranch } from '../../../lib/clients';
+import { useTheme, type ThemeColors } from '../../../lib/theme';
+import { useT } from '../../../lib/i18n';
+import { LOYALTY_THRESHOLD } from '../../../../shared/types';
+import type { Client } from '../../../../shared/types';
 
 export default function ClientsScreen() {
   const { branchId } = useBranch();

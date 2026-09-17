@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
-import { useBranch } from '../../lib/branchContext';
-import { broadcastEmptySlots } from '../../lib/campaigns';
-import { useTheme, type ThemeColors } from '../../lib/theme';
-import { useT } from '../../lib/i18n';
+import { useBranch } from '../../../lib/branchContext';
+import { broadcastEmptySlots } from '../../../lib/campaigns';
+import { useTheme, type ThemeColors } from '../../../lib/theme';
+import { useT } from '../../../lib/i18n';
 
 export default function CampaignsScreen() {
   const { branchId } = useBranch();

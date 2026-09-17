@@ -64,41 +64,43 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
+          title: t.tabs.home,
+          tabBarLabel: t.tabs.home,
+          tabBarIcon: ({ color, focused }) => <TabIcon name="home-outline" nameFocused="home" color={color} focused={focused} />,
+        }}
+      />
+      <Tabs.Screen
+        name="agenda"
+        options={{
           title: t.tabs.agenda,
           tabBarLabel: t.tabs.agenda,
           tabBarIcon: ({ color, focused }) => <TabIcon name="calendar-outline" nameFocused="calendar" color={color} focused={focused} />,
         }}
       />
       <Tabs.Screen
-        name="waitlist"
+        name="settings"
         options={{
-          title: t.tabs.waitlist,
-          tabBarLabel: t.tabs.waitlistShort,
-          tabBarIcon: ({ color, focused }) => <TabIcon name="time-outline" nameFocused="time" color={color} focused={focused} />,
+          title: t.settings.title,
+          tabBarLabel: t.settings.title,
+          headerShown: false,
+          tabBarIcon: ({ color, focused }) => <TabIcon name="settings-outline" nameFocused="settings" color={color} focused={focused} />,
         }}
       />
       <Tabs.Screen
-        name="clients"
+        name="finance"
         options={{
-          title: t.tabs.clients,
-          tabBarLabel: t.tabs.clients,
-          tabBarIcon: ({ color, focused }) => <TabIcon name="people-outline" nameFocused="people" color={color} focused={focused} />,
+          title: t.finance.title,
+          tabBarLabel: t.finance.title,
+          tabBarIcon: ({ color, focused }) => <TabIcon name="wallet-outline" nameFocused="wallet" color={color} focused={focused} />,
         }}
       />
       <Tabs.Screen
-        name="campaigns"
+        name="more"
         options={{
-          title: t.tabs.campaigns,
-          tabBarLabel: t.tabs.campaigns,
-          tabBarIcon: ({ color, focused }) => <TabIcon name="megaphone-outline" nameFocused="megaphone" color={color} focused={focused} />,
-        }}
-      />
-      <Tabs.Screen
-        name="questions"
-        options={{
-          title: t.tabs.questions,
-          tabBarLabel: t.tabs.questions,
-          tabBarIcon: ({ color, focused }) => <TabIcon name="help-circle-outline" nameFocused="help-circle" color={color} focused={focused} />,
+          title: t.tabs.more,
+          tabBarLabel: t.tabs.more,
+          headerShown: false,
+          tabBarIcon: ({ color, focused }) => <TabIcon name="ellipsis-horizontal-circle-outline" nameFocused="ellipsis-horizontal-circle" color={color} focused={focused} />,
         }}
       />
     </Tabs>

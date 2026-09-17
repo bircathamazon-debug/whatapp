@@ -30,7 +30,7 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      router.replace('/admin');
+      router.replace('/');
     } catch {
       Alert.alert(t.login.error, t.login.errorMessage);
     } finally {
