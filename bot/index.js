@@ -22,22 +22,40 @@ const BRANCH_ID = process.env.BRANCH_ID;
 // "quiero reservar" / "un corte para mañana"), esperamos este tiempo desde
 // el último mensaje antes de procesar, y las juntamos en una sola consulta
 // — así no le mandamos 3 respuestas separadas por algo que era un solo
-// pensamiento.
+// pensamiento. Pero esto NO debe aplicarse a los números de menú (1, 2,
+// 3...): esos son respuestas cerradas a una pregunta que el bot ya hizo, no
+// hace falta "esperar a ver si sigue escribiendo", y hacerlo esperar los
+// hacía sentir lentos en cada paso de una reserva.
 const MESSAGE_DEBOUNCE_MS = 4000;
 
 /** phone -> { parts: string[], pushName?: string, timer } */
 const pendingByJid = new Map();
 
+/** Un solo dígito (0-9): respuesta directa a un menú numerado, no hace
+ * falta agruparla con nada más. */
+function isQuickMenuReply(text) {
+  return /^[0-9]$/.test(text.trim());
+}
+
 function enqueueMessage(sock, jid, text, pushName) {
-  let entry = pendingByJid.get(jid);
-  if (!entry) {
-    entry = { parts: [], pushName, timer: null };
-    pendingByJid.set(jid, entry);
+  const entry = pendingByJid.get(jid);
+  // Si no hay nada ya esperando a juntarse y el mensaje es un dígito suelto,
+  // se procesa al instante en vez de esperar los 4 segundos del debounce.
+  if ((!entry || entry.parts.length === 0) && isQuickMenuReply(text)) {
+    pendingByJid.delete(jid);
+    processMessage(sock, jid, text, pushName);
+    return;
   }
-  entry.parts.push(text);
-  if (pushName) entry.pushName = pushName;
-  if (entry.timer) clearTimeout(entry.timer);
-  entry.timer = setTimeout(() => flushPending(sock, jid), MESSAGE_DEBOUNCE_MS);
+
+  let queued = entry;
+  if (!queued) {
+    queued = { parts: [], pushName, timer: null };
+    pendingByJid.set(jid, queued);
+  }
+  queued.parts.push(text);
+  if (pushName) queued.pushName = pushName;
+  if (queued.timer) clearTimeout(queued.timer);
+  queued.timer = setTimeout(() => flushPending(sock, jid), MESSAGE_DEBOUNCE_MS);
 }
 
 async function flushPending(sock, jid) {
@@ -46,9 +64,12 @@ async function flushPending(sock, jid) {
   pendingByJid.delete(jid);
   const text = entry.parts.join(' ').trim();
   if (!text) return;
+  await processMessage(sock, jid, text, entry.pushName);
+}
 
+async function processMessage(sock, jid, text, pushName) {
   try {
-    const replies = await handleIncomingMessage(jid, text, BRANCH_ID, entry.pushName);
+    const replies = await handleIncomingMessage(jid, text, BRANCH_ID, pushName);
     for (const reply of replies) {
       await sock.sendMessage(jid, { text: reply });
     }

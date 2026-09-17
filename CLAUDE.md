@@ -438,6 +438,29 @@ detalle técnico completo de arquitectura y setup.
     comandos, y el bot se reconectó a WhatsApp sin problemas). La
     transcripción de notas de voz ya está activa de verdad — falta
     probarla en vivo mandándole un audio real al bot.
+- 🐛 **Bug real encontrado y corregido: el bot tardaba mucho en responder a
+  los números del menú.** El usuario probó en vivo: al pedir una cita "en
+  el número 1" pareció que la cita se confirmó sola, sin preguntar día y
+  hora, y en general notó que tardaba mucho en responder a cualquier
+  mensaje o botón. Causa real: el "agrupar mensajes seguidos" de la ronda
+  anterior (`bot/index.js`, esperar 4 segundos antes de procesar, pensado
+  para cuando alguien escribe una frase en varios globos) se aplicaba a
+  **todos** los mensajes, incluidos los números sueltos del menú (1, 2,
+  3...) que son respuestas cerradas a una pregunta que el bot ya hizo —
+  no había nada que "esperar a que termine de escribir". Con esa demora
+  de 4 segundos en cada paso, si el cliente perdía la paciencia y volvía
+  a tocar "1" (que en realidad iba avanzando el flujo: servicio → día →
+  hora), las respuestas llegaban todas juntas y con retraso, dando la
+  sensación de que se había saltado los pasos.
+  - ✅ **Corregido**: ahora un mensaje que es un solo dígito (0-9) se
+    procesa al instante, sin esperar. La espera de 4 segundos se mantiene
+    solo para mensajes que no son un número suelto (texto libre escrito
+    en varios globos), que es el caso para el que se había pensado.
+  - ✅ **Desplegado** en Railway (`railway up`), el bot se reconectó a
+    WhatsApp sin pedir QR nuevo.
+  - ⬜ **Falta que el usuario lo pruebe de nuevo en vivo** pidiendo una
+    cita real, para confirmar que ahora responde rápido y que se ven
+    claramente las preguntas de día y hora antes de confirmar.
 - ✅ **Finanzas (ingresos, gastos y suscripción de pago) — PROGRAMADA Y
   DESPLEGADA, FALTA CONFIGURAR STRIPE DE VERDAD.** El
   usuario pidió explícitamente cobro automático real con tarjeta (no un
