@@ -313,14 +313,46 @@ detalle técnico completo de arquitectura y setup.
   - ✅ **Teléfono (IVR)**: ya existía — al presionar **0**,
     `functions/src/ivr.ts` transfiere la llamada a `branch.phone` (hoy el
     mismo número personal del peluquero).
-  - ⬜ **Voz natural en el IVR, entrenada para responder cualquier
-    pregunta** — el usuario decidió **seguir por ahora con el menú
-    robótico actual** ("apretá 1, apretá 2") y no avanzar con esto todavía.
-    Queda anotado para cuando se retome: requiere elegir un proveedor de
-    voz IA de pago (ej. ElevenLabs Conversational AI, Realtime API de
-    OpenAI) que cambiaría el presupuesto mensual (hoy ~$50-150/mes) —
-    explicar costo y opciones antes de programarlo, como se hizo con
-    Firebase/Railway/Twilio.
+  - ✅ **Voz más humana en el IVR — PROGRAMADO Y DESPLEGADO** (retomado
+    después: el usuario pidió que "la persona que habla" suene lo más
+    humana posible). Se le presentaron 2 opciones con su costo: (a) solo
+    mejorar la voz robótica actual por una voz neuronal, sin agregar
+    ningún proveedor nuevo ni tocar el presupuesto — sigue siendo el
+    mismo menú "apretá 1, apretá 2"; (b) IA conversacional completa (el
+    cliente habla libre, sin menú) — requiere contratar un proveedor
+    nuevo (ElevenLabs, OpenAI Realtime) y sube el presupuesto ~$50-150/mes
+    más, semanas de trabajo. El usuario eligió la opción (a).
+    - `functions/src/ivrStrings.ts`: nuevo campo `twilioVoice` por
+      idioma — hebreo usa la voz neuronal de Google
+      (`Google.he-IL-Wavenet-C`, Twilio no tiene voces de Amazon Polly en
+      hebreo), inglés y español usan voces neuronales de Amazon Polly
+      (`Polly.Joanna-Neural` / `Polly.Lucia-Neural`).
+    - `functions/src/ivr.ts` y `notify.ts`: todos los `<Say>` (menú
+      principal, confirmaciones, cancelaciones, recordatorios
+      telefónicos) ahora incluyen `voice="..."` además de `language`.
+    - ✅ Desplegado en `bot-para-peluqueria`. **Falta probarlo con una
+      llamada real** una vez que Twilio esté configurado de verdad (ver
+      punto siguiente) — hoy no se puede oír todavía porque no hay una
+      línea de teléfono real conectada.
+    - Si más adelante se quiere la opción (b) completa, queda anotada
+      igual para cuando se decida avanzar y se acuerde el costo.
+  - 🐛 **Encontrado: el teléfono nunca tuvo una línea real conectada.**
+    El usuario probó llamar para agendar y no atendió nadie. Causa: en
+    `functions/.env`, `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` y
+    `TWILIO_PHONE_NUMBER` están vacíos — solo `TWILIO_IVR_BASE_URL` tenía
+    valor. A diferencia de Firebase/Railway/Stripe/Tranzila (todos
+    marcados como configurados en este documento), **Twilio nunca se
+    terminó de configurar con una cuenta y un número reales** — el código
+    del IVR está listo y probado en código, pero no hay a quién llamar
+    todavía.
+    - ⬜ **Falta que el usuario cree la cuenta en twilio.com, compre un
+      número de teléfono** (costo bajo, ~U$S1-2/mes + centavos por
+      minuto) **y me pase 3 datos**: `Account SID`, `Auth Token` (ambos
+      del Dashboard principal de Twilio) y el número comprado. Con eso se
+      cargan en `functions/.env` y se configura en Twilio el webhook del
+      número ("A call comes in" → `https://us-central1-bot-para-peluqueria.cloudfunctions.net/ivrIncomingCall`).
+      El usuario confirmó que quiere avanzar con esto — queda pendiente
+      que pase los 3 datos.
 - ✅ **Despliegue de esta ronda de cambios — COMPLETO.**
   1. ✅ Firebase: reglas de Firestore (`blockedTimes`) y las 26 funciones
      actualizadas, publicadas en `bot-para-peluqueria` sin errores.
