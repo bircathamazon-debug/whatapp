@@ -28,7 +28,7 @@ export const ivrIncomingCall = onRequest(async (req, res) => {
   if (branch?.maintenanceMode) {
     res.send(`<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Say language="${s.twilioLang}">${s.maintenanceMessage}</Say>
+  <Say language="${s.twilioLang}" voice="${s.twilioVoice}">${s.maintenanceMessage}</Say>
   <Dial>${branch.phone}</Dial>
 </Response>`);
     return;
@@ -37,9 +37,9 @@ export const ivrIncomingCall = onRequest(async (req, res) => {
   res.send(`<?xml version="1.0" encoding="UTF-8"?>
 <Response>
   <Gather numDigits="1" action="/ivrMenu?branchId=${branchId}" method="POST" timeout="8">
-    <Say language="${s.twilioLang}">${s.greeting}</Say>
+    <Say language="${s.twilioLang}" voice="${s.twilioVoice}">${s.greeting}</Say>
   </Gather>
-  <Say language="${s.twilioLang}">${s.noChoice}</Say>
+  <Say language="${s.twilioLang}" voice="${s.twilioVoice}">${s.noChoice}</Say>
 </Response>`);
 });
 
@@ -54,7 +54,7 @@ export const ivrMenu = onRequest(async (req, res) => {
   const branch = branchSnap.exists ? (branchSnap.data() as Branch) : null;
   const s = getIvrStrings(branch?.language);
   if (!branch) {
-    res.send(sayAndHangup(s.twilioLang, s.systemError));
+    res.send(sayAndHangup(s.twilioLang, s.twilioVoice, s.systemError));
     return;
   }
 
@@ -66,27 +66,27 @@ export const ivrMenu = onRequest(async (req, res) => {
   if (digit === '2') {
     const next = await findNextAppointment(from);
     if (!next) {
-      res.send(sayAndHangup(s.twilioLang, s.noAppointmentFound));
+      res.send(sayAndHangup(s.twilioLang, s.twilioVoice, s.noAppointmentFound));
       return;
     }
     await cancelAppointment(next.id, 'client');
-    res.send(sayAndHangup(s.twilioLang, s.appointmentCancelled));
+    res.send(sayAndHangup(s.twilioLang, s.twilioVoice, s.appointmentCancelled));
     return;
   }
 
   if (digit === '1') {
     const booked = await bookNextAvailableSlot(branch, from);
     if (!booked) {
-      res.send(sayAndHangup(s.twilioLang, s.noSlotsAvailable));
+      res.send(sayAndHangup(s.twilioLang, s.twilioVoice, s.noSlotsAvailable));
       return;
     }
     const dateStr = formatDate(booked.startsAt, branch.timezone);
     const timeStr = formatTime(booked.startsAt, branch.timezone);
-    res.send(sayAndHangup(s.twilioLang, s.appointmentBooked(dateStr, timeStr)));
+    res.send(sayAndHangup(s.twilioLang, s.twilioVoice, s.appointmentBooked(dateStr, timeStr)));
     return;
   }
 
-  res.send(sayAndHangup(s.twilioLang, s.invalidChoice));
+  res.send(sayAndHangup(s.twilioLang, s.twilioVoice, s.invalidChoice));
 });
 
 /** Llamada saliente (reminders.ts la usa a través de notify.dispatchTwilio) al presionar 1/2 en la llamada de recordatorio. */
@@ -97,18 +97,18 @@ export const ivrReminderResponse = onRequest(async (req, res) => {
   res.set('Content-Type', 'text/xml');
 
   if (!appointmentId) {
-    res.send(sayAndHangup(s.twilioLang, s.reminderError));
+    res.send(sayAndHangup(s.twilioLang, s.twilioVoice, s.reminderError));
     return;
   }
 
   if (digit === '1') {
     await confirmAppointment(appointmentId);
-    res.send(sayAndHangup(s.twilioLang, s.reminderConfirmed));
+    res.send(sayAndHangup(s.twilioLang, s.twilioVoice, s.reminderConfirmed));
   } else if (digit === '2') {
     await cancelAppointment(appointmentId, 'client');
-    res.send(sayAndHangup(s.twilioLang, s.reminderCancelled));
+    res.send(sayAndHangup(s.twilioLang, s.twilioVoice, s.reminderCancelled));
   } else {
-    res.send(sayAndHangup(s.twilioLang, s.invalidChoice));
+    res.send(sayAndHangup(s.twilioLang, s.twilioVoice, s.invalidChoice));
   }
 });
 
@@ -164,8 +164,8 @@ async function bookNextAvailableSlot(branch: Branch, clientPhone: string): Promi
   return null;
 }
 
-function sayAndHangup(lang: string, text: string): string {
-  return `<?xml version="1.0" encoding="UTF-8"?><Response><Say language="${lang}">${text}</Say><Hangup/></Response>`;
+function sayAndHangup(lang: string, voice: string, text: string): string {
+  return `<?xml version="1.0" encoding="UTF-8"?><Response><Say language="${lang}" voice="${voice}">${text}</Say><Hangup/></Response>`;
 }
 
 function normalizePhone(twilioFrom: string): string {

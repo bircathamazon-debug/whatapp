@@ -114,11 +114,11 @@ export async function dispatchTwilio(
   const base = process.env.TWILIO_IVR_BASE_URL;
   let twiml: string;
   if (awaitingReply === 'confirm_cancel' && relatedAppointmentId && base) {
-    twiml = `<Response><Gather numDigits="1" action="${base}/ivrReminderResponse?appointmentId=${relatedAppointmentId}&amp;lang=${language ?? 'he'}" method="POST" timeout="8"><Say language="${s.twilioLang}">${escapeXml(
+    twiml = `<Response><Gather numDigits="1" action="${base}/ivrReminderResponse?appointmentId=${relatedAppointmentId}&amp;lang=${language ?? 'he'}" method="POST" timeout="8"><Say language="${s.twilioLang}" voice="${s.twilioVoice}">${escapeXml(
       text
-    )}</Say></Gather><Say language="${s.twilioLang}">${s.noChoice}</Say></Response>`;
+    )}</Say></Gather><Say language="${s.twilioLang}" voice="${s.twilioVoice}">${s.noChoice}</Say></Response>`;
   } else {
-    twiml = `<Response><Say language="${s.twilioLang}">${escapeXml(text)}</Say></Response>`;
+    twiml = `<Response><Say language="${s.twilioLang}" voice="${s.twilioVoice}">${escapeXml(text)}</Say></Response>`;
   }
   await client.calls.create({ to, from, twiml });
 }
