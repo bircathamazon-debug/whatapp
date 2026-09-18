@@ -188,6 +188,21 @@ detalle técnico completo de arquitectura y setup.
     volver a correr `firebase deploy --only hosting` (o el predeploy lo
     hace solo) para que la página web se actualice — no se actualiza
     sola como el bot de Railway.
+  - 🐛 **Bug real encontrado y corregido (después de que el usuario
+    reportó dos veces "no veo el cambio" con un diseño ya confirmado
+    como bien publicado del lado del servidor)**: Firebase Hosting por
+    defecto guarda el HTML en el navegador del cliente por 1 hora
+    (`cache-control: max-age=3600`) — así que aunque el archivo nuevo ya
+    estaba arriba, el navegador del usuario seguía mostrando la página
+    vieja hasta que pasaba esa hora o borraba caché a mano. Se agregó un
+    bloque `headers` en `firebase.json`: el HTML ahora es `no-cache`
+    (siempre revisa si hay versión nueva), y los archivos con
+    identificador único en el nombre (JS, fuentes — `_expo/static/` y
+    `assets/`) siguen con caché largo, que es seguro porque cualquier
+    cambio de contenido les cambia el nombre de archivo. Verificado con
+    curl que cada tipo de archivo recibe el cache-control correcto. Con
+    esto, un despliegue nuevo se ve solo con refrescar la página, sin
+    depender de que el usuario borre caché.
 - ✅ **Rediseño "look de app nativa" — PROGRAMADO, DESPLEGADO Y PROBADO.**
   Al ver la página recién publicada, el usuario dijo que no le gustó cómo
   se veía y pidió que se sienta como una app de celular top (referencia:
