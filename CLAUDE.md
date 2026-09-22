@@ -642,6 +642,20 @@ detalle técnico completo de arquitectura y setup.
     usuario: ¿alertas por mail/WhatsApp al propio peluquero o al
     desarrollador?, ¿qué tan rápido hay que reaccionar?, ¿alcanza con los
     logs de Firebase/Railway o conviene un servicio de monitoreo aparte?
+  - ⬜ **Cobro automático real del depósito (hallazgo de la comparación
+    con la competencia)** — el usuario dijo explícitamente "lo hacemos
+    más adelante", queda anotado, todavía sin arrancar. Hoy el bot le
+    dice al cliente "te vamos a mandar un link de pago" cuando un
+    servicio requiere depósito, pero **ese link nunca se genera ni se
+    envía** (`functions/src/booking.ts`) — el peluquero tiene que marcar
+    a mano "depósito recibido" en la Agenda, confiando en que el cliente
+    pagó por otro medio (efectivo, Bit, transferencia). Investigación de
+    mercado (Booksy/Fresha/Vagaro): cobrar el depósito al momento de
+    reservar, integrado, es el feature de pagos #1 de la industria. Con
+    Tranzila ya conectado para las suscripciones, se podría reusar el
+    mismo mecanismo para generar un link de pago real por depósito.
+    Cuando se retome, también revisar si conviene corregir el texto del
+    mensaje mientras tanto (no prometer un link que no se manda).
 - **Decisiones ya tomadas con el usuario:**
   - El piloto se hace en la peluquería propia o de un familiar.
   - Se arranca con Baileys (gratis) y se migra a la API oficial de WhatsApp
