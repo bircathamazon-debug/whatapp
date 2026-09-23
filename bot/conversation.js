@@ -289,6 +289,19 @@ async function handleBookDay(phone, text, branch, state) {
   ];
 }
 
+/** Dice si una hora concreta cae dentro del horario de atención de alguno
+ * de los peluqueros dados (ignorando si ya hay una cita puesta ahí) — para
+ * distinguir "cerrado a esa hora" de "ocupado por otra cita". */
+async function withinWorkingHours(branch, staffList, service, dateStr, epoch) {
+  const blockedTimes = await blockedTimesForDay(branch.id, dateStr);
+  for (const staff of staffList.filter(Boolean)) {
+    const duration = getStaffServiceDuration(staff, service);
+    const slots = getAvailableSlots(staff, duration, dateStr, [], branch.timezone, Date.now(), blockedTimes);
+    if (slots.some((s) => s.startsAt === epoch)) return true;
+  }
+  return false;
+}
+
 async function handleBookTime(phone, text, branch, state) {
   if (text === '0') {
     await saveConversation(phone, { step: 'BOOK_DAY', data: state.data });
@@ -312,6 +325,15 @@ async function handleBookTime(phone, text, branch, state) {
     if (exactMatch) {
       return bookChosenSlot(phone, branch, state, exactMatch);
     }
+
+    const service = await docById('services', state.data.serviceId);
+    const staffList = state.data.staffId === 'any' ? await getActiveStaff(branch.id) : [await docById('staff', state.data.staffId)];
+    const isOpen = await withinWorkingHours(branch, staffList, service, state.data.dateStr, desiredEpoch);
+    if (!isOpen) {
+      const lines = (state.data.slots || []).map((s, i) => `${i + 1}️⃣ ${formatTime(s.startsAt, branch)}${staffList.length > 1 ? ` — ${s.staffName}` : ''}`);
+      return [t(branch, 'outsideWorkingHours', state.data.dateLabel), ...lines, t(branch, 'chooseOtherDay')];
+    }
+
     return handleOccupiedSlot(phone, branch, state, { startsAt: desiredEpoch });
   }
 

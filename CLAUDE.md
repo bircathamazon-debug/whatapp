@@ -642,6 +642,45 @@ detalle técnico completo de arquitectura y setup.
     número, el bot no lo entiende y responde "no entendí" (aunque igual
     le muestra el menú a continuación, así que puede seguir desde ahí
     tocando un número). Ver detalle en el backlog más abajo.
+- 🐛 **Cuarto bug real encontrado y corregido: el bot decía "esa hora está
+  ocupada" cuando en realidad estaba fuera del horario de atención.** El
+  usuario probó pedir el viernes a las 14:00 y le dijo "ocupada" — pero
+  es mentira, es una cuenta de pruebas sin citas reales ese día a esa
+  hora. Causa real (confirmado consultando los datos): יעקב אמסלם tiene
+  el viernes de 9:00 a 14:00 — las 14:00 es literalmente la hora de
+  cierre, no una cita tomada. El bot no distinguía "cerrado a esa hora"
+  de "ocupado por otra cita" — cualquiera de los dos casos devolvía el
+  mismo mensaje de "ocupada".
+  - ✅ **Corregido**: nueva función `withinWorkingHours()` en
+    `bot/conversation.js` que chequea si la hora pedida cae dentro del
+    horario configurado de algún peluquero (sin mirar si hay una cita
+    puesta ahí). Si la hora pedida está fuera de horario, el bot ahora
+    responde con un mensaje distinto ("está cerrado a esa hora — fuera
+    del horario de atención") y le muestra los horarios reales
+    disponibles ese día — en vez de decirle que está "ocupado". Si la
+    hora SÍ está dentro del horario pero coincide con una cita real, se
+    mantiene el mensaje de "ocupada" de siempre. Nuevo texto
+    `outsideWorkingHours` agregado en los 3 idiomas (`bot/i18n.js`).
+  - ✅ **Desplegado** en Railway, reconectado a WhatsApp sin pedir QR
+    nuevo (hubo un "Crashed" de un instante durante el redespliegue,
+    normal al reiniciar el contenedor — se verificó que quedó estable
+    en "Online" después).
+- ✅ **Pedido explícito del usuario: sacar la frase de "si no pagás se
+  cancela" del mensaje de seña — PROGRAMADO Y DESPLEGADO.** El mensaje
+  `depositRequired` (en `functions/src/notify.ts`, los 3 idiomas) tenía
+  al final "si no se paga en 30 minutos, el horario se libera" — el
+  usuario pidió sacarlo por ahora (probablemente porque, como ya está
+  anotado en el backlog, el link de pago prometido en la misma frase
+  todavía no se genera ni se envía de verdad, así que amenazar con una
+  cancelación automática por no pagar algo que ni siquiera se puede
+  pagar todavía es confuso). Se sacó esa oración de las 3 versiones del
+  mensaje, quedó solo el aviso del monto de la seña y que se va a
+  mandar un link de pago. **Ojo**: el cron que efectivamente libera
+  esas citas a los 30 minutos (`releaseDeposits` en
+  `functions/src/crons.ts`) sigue activo — esto solo cambió el texto
+  del mensaje, no el comportamiento real (que ya existía desde antes).
+  Desplegado en `bot-para-peluqueria` (`botCreateAppointment` y el
+  resto de funciones).
 - ✅ **Finanzas (ingresos, gastos y suscripción de pago) — PROGRAMADA Y
   DESPLEGADA, FALTA CONFIGURAR STRIPE DE VERDAD.** El
   usuario pidió explícitamente cobro automático real con tarjeta (no un

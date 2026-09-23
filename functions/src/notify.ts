@@ -185,7 +185,7 @@ const templatesHe: TemplateSet = {
     `התפנה תור בתאריך ${dateStr} בשעה ${timeStr}. השיבו 1 בתוך ${minutesToRespond} דקות כדי לתפוס אותו.`,
 
   depositRequired: (amount) =>
-    `כדי לאשר את התור צריך מקדמה של ₪${amount}. נשלח לך קישור לתשלום. אם לא ישולם תוך 30 דקות, השעה תשוחרר.`,
+    `כדי לאשר את התור צריך מקדמה של ₪${amount}. נשלח לך קישור לתשלום.`,
 
   birthday: (clientName) =>
     `🎉 יום הולדת שמח ${clientName}! מתנה בשבילך: 15% הנחה על התספורת הבאה החודש. מחכים לך!`,
@@ -220,7 +220,7 @@ const templatesEn: TemplateSet = {
     `A slot opened up on ${dateStr} at ${timeStr}. Reply 1 within ${minutesToRespond} minutes to take it.`,
 
   depositRequired: (amount) =>
-    `A deposit of ₪${amount} is required to confirm the appointment. We'll send you a payment link. If it's not paid within 30 minutes, the slot will be released.`,
+    `A deposit of ₪${amount} is required to confirm the appointment. We'll send you a payment link.`,
 
   birthday: (clientName) =>
     `🎉 Happy birthday ${clientName}! A gift for you: 15% off your next haircut this month. See you soon!`,
@@ -255,7 +255,7 @@ const templatesEs: TemplateSet = {
     `Se liberó un turno el ${dateStr} a las ${timeStr}. Respondé 1 dentro de ${minutesToRespond} minutos para tomarlo.`,
 
   depositRequired: (amount) =>
-    `Para confirmar el turno hace falta una seña de ₪${amount}. Te enviamos un link de pago. Si no se paga en 30 minutos, el horario se libera.`,
+    `Para confirmar el turno hace falta una seña de ₪${amount}. Te enviamos un link de pago.`,
 
   birthday: (clientName) =>
     `🎉 ¡Feliz cumpleaños ${clientName}! Un regalo para vos: 15% de descuento en tu próximo corte este mes. ¡Te esperamos!`,
