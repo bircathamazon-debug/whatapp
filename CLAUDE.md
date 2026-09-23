@@ -419,14 +419,40 @@ detalle técnico completo de arquitectura y setup.
     terminó de configurar con una cuenta y un número reales** — el código
     del IVR está listo y probado en código, pero no hay a quién llamar
     todavía.
-    - ⬜ **Falta que el usuario cree la cuenta en twilio.com, compre un
-      número de teléfono** (costo bajo, ~U$S1-2/mes + centavos por
-      minuto) **y me pase 3 datos**: `Account SID`, `Auth Token` (ambos
-      del Dashboard principal de Twilio) y el número comprado. Con eso se
-      cargan en `functions/.env` y se configura en Twilio el webhook del
-      número ("A call comes in" → `https://us-central1-bot-para-peluqueria.cloudfunctions.net/ivrIncomingCall`).
-      El usuario confirmó que quiere avanzar con esto — queda pendiente
-      que pase los 3 datos.
+    - ✅ Cuenta creada en twilio.com por el usuario, `Account SID` y
+      `Auth Token` ya cargados en `functions/.env`. Falta el número.
+    - 🐛 **Encontrado y en trámite: cuenta nueva bloqueada por
+      cumplimiento de Twilio (error 22300 "Account is restricted from
+      provisioning new long code Phone Numbers")** al intentar comprar
+      un número israelí, tanto desde la consola web (donde además
+      apareció un bug aparte: si se dejan tildadas las casillas SMS/MMS
+      junto con Israel, la búsqueda no encuentra nada porque los
+      números israelíes solo tienen capacidad de Voz, y la página
+      muestra números de EE.UU. en su lugar de forma confusa en vez de
+      avisar "no hay resultados" — hay que buscar con **solo "Voice"
+      tildado**) como directo por la API (probado con curl, mismo
+      error). Se confirmó con la cuenta ya en modo "Full" (no trial) y
+      con el "Primary Customer Profile" aprobado en Twilio Trust Hub —
+      ninguna de esas dos cosas destraba este bloqueo en particular, es
+      un trámite de verificación aparte. Se mandó un mail a
+      `verifymyaccount@twilio.com` con los datos de la cuenta, quedó
+      fusionado en el ticket **#29667195** ("Twilio Account
+      Verification - Action Required"). Twilio respondió pidiendo más
+      datos del negocio (uso profesional/personal, nombre legal,
+      servicios, rol en el negocio, qué productos de Twilio se van a
+      usar) — se armó y envió la respuesta con los datos reales:
+      negocio "Peluquería de Yaacob" (המספרה של יעקב), Miguel Azulay
+      (el usuario) armando el sistema para un familiar, uso: Programmable
+      Voice únicamente (sin SMS) para el IVR de reservas.
+    - ⬜ **Esperando la respuesta de Twilio** a esa segunda vuelta de
+      información — una vez que liberen el bloqueo, retomar: comprar el
+      número (ya identificados varios de Jerusalén/Tel Aviv/Netanya
+      disponibles vía API), cargar `TWILIO_PHONE_NUMBER` en
+      `functions/.env`, redesplegar todas las funciones, configurar el
+      webhook del número ("A call comes in" →
+      `https://us-central1-bot-para-peluqueria.cloudfunctions.net/ivrIncomingCall`
+      — se puede hacer en el mismo POST de compra vía API con
+      `VoiceUrl`/`VoiceMethod`), y probar con una llamada real.
 - ✅ **Despliegue de esta ronda de cambios — COMPLETO.**
   1. ✅ Firebase: reglas de Firestore (`blockedTimes`) y las 26 funciones
      actualizadas, publicadas en `bot-para-peluqueria` sin errores.
