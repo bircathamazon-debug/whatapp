@@ -3,15 +3,15 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, Alert, S
 import { useBranch } from '../../../lib/branchContext';
 import { getStaffByBranch, addStaff, deleteStaff, updateStaff, emptyWeeklyHours } from '../../../lib/staff';
 import { getServicesByBranch } from '../../../lib/services';
-import { useTheme, type ThemeColors } from '../../../lib/theme';
+import { useTheme, type ThemeColors, RADIUS, cardShadow, accentBorder } from '../../../lib/theme';
 import { useT } from '../../../lib/i18n';
 import type { Staff, Service } from '../../../../shared/types';
 
 export default function StaffScreen() {
   const { branchId } = useBranch();
-  const { colors } = useTheme();
+  const { colors, mode } = useTheme();
   const t = useT();
-  const styles = makeStyles(colors);
+  const styles = makeStyles(colors, mode);
   const [staff, setStaff] = useState<Staff[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [name, setName] = useState('');
@@ -141,26 +141,36 @@ export default function StaffScreen() {
   );
 }
 
-function makeStyles(colors: ThemeColors) {
+function makeStyles(colors: ThemeColors, mode: 'light' | 'dark') {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.bg },
     emptyText: { color: colors.textMuted, textAlign: 'center', marginTop: 40 },
     form: { marginBottom: 8 },
     label: { fontSize: 12, color: colors.textMuted, fontWeight: '600', marginBottom: 6, marginTop: 10 },
-    input: { backgroundColor: colors.surface, borderRadius: 10, padding: 12, borderWidth: 1, borderColor: colors.border, color: colors.text },
-    btn: { backgroundColor: colors.accent, borderRadius: 10, padding: 14, alignItems: 'center', marginTop: 16, marginBottom: 8 },
+    input: { backgroundColor: colors.surfaceMuted, borderRadius: RADIUS.md, padding: 12, color: colors.text },
+    btn: { backgroundColor: colors.accent, borderRadius: RADIUS.lg, padding: 14, alignItems: 'center', marginTop: 16, marginBottom: 8 },
     btnText: { color: '#fff', fontWeight: '700' },
-    card: { flexDirection: 'row', backgroundColor: colors.surface, borderRadius: 12, padding: 14, marginBottom: 10, alignItems: 'center', gap: 10 },
+    card: {
+      flexDirection: 'row',
+      backgroundColor: colors.surface,
+      borderRadius: RADIUS.lg,
+      padding: 14,
+      marginBottom: 10,
+      alignItems: 'center',
+      gap: 10,
+      ...cardShadow(mode, 'sm'),
+      ...accentBorder(colors),
+    },
     cardRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
     cardName: { fontSize: 15, fontWeight: '700', color: colors.text },
     cardMeta: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
     delete: { fontSize: 18, paddingHorizontal: 4 },
     durationsToggle: { fontSize: 12, color: colors.accent, fontWeight: '600', marginTop: 10 },
-    durationsPanel: { marginTop: 10, backgroundColor: colors.bg, borderRadius: 10, padding: 12, borderWidth: 1, borderColor: colors.border },
+    durationsPanel: { marginTop: 10, backgroundColor: colors.surfaceMuted, borderRadius: RADIUS.md, padding: 12 },
     durationsTitle: { fontSize: 13, fontWeight: '700', color: colors.text, marginBottom: 4 },
     durationsHint: { fontSize: 11, color: colors.textMuted, marginBottom: 10 },
     durationRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8, gap: 8 },
     durationServiceName: { fontSize: 13, color: colors.text, flex: 1 },
-    durationInput: { backgroundColor: colors.surface, borderRadius: 8, padding: 8, borderWidth: 1, borderColor: colors.border, color: colors.text, width: 110, textAlign: 'center' },
+    durationInput: { backgroundColor: colors.surface, borderRadius: RADIUS.sm, padding: 8, color: colors.text, width: 110, textAlign: 'center', ...cardShadow(mode, 'sm') },
   });
 }

@@ -2,15 +2,15 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, RefreshControl, TouchableOpacity, Alert } from 'react-native';
 import { useBranch } from '../../../lib/branchContext';
 import { getUnansweredByBranch, markMessageResolved, deleteUnansweredMessage } from '../../../lib/unansweredMessages';
-import { useTheme, type ThemeColors } from '../../../lib/theme';
+import { useTheme, type ThemeColors, RADIUS, cardShadow, accentBorder } from '../../../lib/theme';
 import { useT } from '../../../lib/i18n';
 import type { UnansweredMessage } from '../../../../shared/types';
 
 export default function QuestionsScreen() {
   const { branchId } = useBranch();
-  const { colors } = useTheme();
+  const { colors, mode } = useTheme();
   const t = useT();
-  const styles = makeStyles(colors);
+  const styles = makeStyles(colors, mode);
   const [messages, setMessages] = useState<UnansweredMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -82,12 +82,12 @@ export default function QuestionsScreen() {
   );
 }
 
-function makeStyles(colors: ThemeColors) {
+function makeStyles(colors: ThemeColors, mode: 'light' | 'dark') {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.bg },
     list: { padding: 12 },
     emptyText: { color: colors.textMuted, textAlign: 'center', marginTop: 40, paddingHorizontal: 24, lineHeight: 20 },
-    card: { backgroundColor: colors.surface, borderRadius: 12, padding: 14, marginBottom: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 4, elevation: 2 },
+    card: { backgroundColor: colors.surface, borderRadius: RADIUS.lg, padding: 14, marginBottom: 10, ...cardShadow(mode, 'sm'), ...accentBorder(colors) },
     cardResolved: { opacity: 0.55 },
     rowBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
     name: { fontSize: 15, fontWeight: '700', color: colors.text },
@@ -95,7 +95,7 @@ function makeStyles(colors: ThemeColors) {
     text: { fontSize: 14, color: colors.text, marginTop: 8, fontStyle: 'italic' },
     meta: { fontSize: 12, color: colors.textMuted, marginTop: 6 },
     actionsRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 10 },
-    resolveBtn: { backgroundColor: colors.accentSoft, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 8 },
+    resolveBtn: { backgroundColor: colors.accentSoft, borderRadius: RADIUS.md, paddingHorizontal: 12, paddingVertical: 8 },
     resolveBtnText: { color: colors.accent, fontWeight: '700', fontSize: 12 },
     delete: { fontSize: 16, paddingHorizontal: 4 },
   });

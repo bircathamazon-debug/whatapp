@@ -6,7 +6,7 @@ import { getServicesByBranch } from '../../lib/services';
 import { getExpensesByBranch, addExpense, deleteExpense } from '../../lib/expenses';
 import { createSubscriptionCheckout, openBillingPortal } from '../../lib/stripe';
 import { createTranzilaCheckoutUrl, cancelTranzilaSubscription } from '../../lib/tranzila';
-import { useTheme, type ThemeColors } from '../../lib/theme';
+import { useTheme, type ThemeColors, RADIUS, cardShadow, accentBorder } from '../../lib/theme';
 import { useT, useDateLocale } from '../../lib/i18n';
 import type { Appointment, Service, Expense } from '../../../shared/types';
 
@@ -40,10 +40,10 @@ const CATEGORIES: Expense['category'][] = ['rent', 'utilities', 'staff', 'suppli
 export default function FinanceScreen() {
   const { branchId, branches } = useBranch();
   const branch = branches.find((b) => b.id === branchId);
-  const { colors } = useTheme();
+  const { colors, mode } = useTheme();
   const t = useT();
   const dateLocale = useDateLocale();
-  const styles = makeStyles(colors);
+  const styles = makeStyles(colors, mode);
 
   const CATEGORY_LABEL: Record<Expense['category'], string> = {
     rent: t.finance.categoryRent,
@@ -267,35 +267,35 @@ export default function FinanceScreen() {
   );
 }
 
-function makeStyles(colors: ThemeColors) {
+function makeStyles(colors: ThemeColors, mode: 'light' | 'dark') {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.bg },
     emptyText: { color: colors.textMuted, textAlign: 'center', marginTop: 40 },
     sectionTitle: { fontSize: 14, fontWeight: '700', color: colors.text, marginTop: 20, marginBottom: 10 },
     hint: { fontSize: 12, color: colors.textMuted, marginBottom: 10, lineHeight: 18 },
     revenueRow: { flexDirection: 'row', gap: 10 },
-    revenueCard: { flex: 1, backgroundColor: colors.surface, borderRadius: 12, padding: 14 },
+    revenueCard: { flex: 1, backgroundColor: colors.surface, borderRadius: RADIUS.lg, padding: 14, ...cardShadow(mode, 'sm'), ...accentBorder(colors) },
     revenueLabel: { fontSize: 12, color: colors.textMuted, fontWeight: '600' },
-    revenueAmount: { fontSize: 22, fontWeight: '800', color: colors.text, marginTop: 6 },
+    revenueAmount: { fontSize: 22, fontWeight: '800', color: colors.accent, marginTop: 6 },
     revenueMeta: { fontSize: 12, color: colors.textMuted, marginTop: 4 },
-    netCard: { borderRadius: 12, padding: 14, marginTop: 10 },
+    netCard: { borderRadius: RADIUS.lg, padding: 14, marginTop: 10, ...cardShadow(mode, 'sm') },
     netPositive: { backgroundColor: colors.successSoft },
     netNegative: { backgroundColor: colors.dangerSoft },
     netLabel: { fontSize: 12, color: colors.textMuted, fontWeight: '600' },
     netAmount: { fontSize: 22, fontWeight: '800', color: colors.text, marginTop: 6 },
-    subscriptionCard: { backgroundColor: colors.surface, borderRadius: 12, padding: 14, gap: 10 },
+    subscriptionCard: { backgroundColor: colors.surface, borderRadius: RADIUS.lg, padding: 14, gap: 10, ...cardShadow(mode, 'sm'), ...accentBorder(colors) },
     subscriptionStatus: { fontSize: 13, color: colors.text, lineHeight: 19 },
     chipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 10 },
-    chip: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, borderRadius: 14, paddingHorizontal: 12, paddingVertical: 6 },
-    chipActive: { backgroundColor: colors.accent, borderColor: colors.accent },
+    chip: { backgroundColor: colors.surface, borderRadius: RADIUS.pill, paddingHorizontal: 12, paddingVertical: 6, ...cardShadow(mode, 'sm') },
+    chipActive: { backgroundColor: colors.accent },
     chipText: { fontSize: 12, color: colors.textMuted },
     chipTextActive: { color: '#fff', fontWeight: '600' },
-    expenseForm: { backgroundColor: colors.surface, borderRadius: 12, padding: 14, gap: 8 },
+    expenseForm: { backgroundColor: colors.surface, borderRadius: RADIUS.lg, padding: 14, gap: 8, ...cardShadow(mode, 'sm'), ...accentBorder(colors) },
     fieldLabel: { fontSize: 11.5, fontWeight: '700', color: colors.textMuted },
-    input: { backgroundColor: colors.surfaceMuted, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 9, fontSize: 13, color: colors.text },
-    saveBtn: { backgroundColor: colors.accent, borderRadius: 8, padding: 11, alignItems: 'center', marginTop: 2 },
+    input: { backgroundColor: colors.surfaceMuted, borderRadius: RADIUS.md, paddingHorizontal: 12, paddingVertical: 9, fontSize: 13, color: colors.text },
+    saveBtn: { backgroundColor: colors.accent, borderRadius: RADIUS.md, padding: 11, alignItems: 'center', marginTop: 2 },
     saveBtnText: { color: '#fff', fontWeight: '700', fontSize: 13 },
-    expenseRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, borderRadius: 10, padding: 12, marginTop: 8, gap: 10 },
+    expenseRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, borderRadius: RADIUS.lg, padding: 12, marginTop: 8, gap: 10, ...cardShadow(mode, 'sm'), ...accentBorder(colors) },
     expenseRowTitle: { fontSize: 12.5, fontWeight: '700', color: colors.text },
     expenseRowSub: { fontSize: 11, color: colors.textMuted, marginTop: 2 },
     expenseRowDelete: { color: colors.danger, fontSize: 15, fontWeight: '700', paddingHorizontal: 4 },

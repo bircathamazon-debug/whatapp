@@ -2,15 +2,15 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Switch, Alert } from 'react-native';
 import { useBranch } from '../../../lib/branchContext';
 import { getStaffByBranch, updateStaff } from '../../../lib/staff';
-import { useTheme, type ThemeColors } from '../../../lib/theme';
+import { useTheme, type ThemeColors, RADIUS, cardShadow, accentBorder } from '../../../lib/theme';
 import { useT } from '../../../lib/i18n';
 import type { Staff, WeeklyHours } from '../../../../shared/types';
 
 export default function ScheduleScreen() {
   const { branchId } = useBranch();
-  const { colors } = useTheme();
+  const { colors, mode } = useTheme();
   const t = useT();
-  const styles = makeStyles(colors);
+  const styles = makeStyles(colors, mode);
   const [staffList, setStaffList] = useState<Staff[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [hours, setHours] = useState<WeeklyHours>({});
@@ -117,28 +117,28 @@ export default function ScheduleScreen() {
   );
 }
 
-function makeStyles(colors: ThemeColors) {
+function makeStyles(colors: ThemeColors, mode: 'light' | 'dark') {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.bg },
     emptyText: { color: colors.textMuted, textAlign: 'center', marginTop: 40 },
     staffRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
-    staffChip: { backgroundColor: colors.surface, borderRadius: 16, paddingHorizontal: 14, paddingVertical: 8, borderWidth: 1, borderColor: colors.border },
-    staffChipActive: { backgroundColor: colors.accent, borderColor: colors.accent },
+    staffChip: { backgroundColor: colors.surface, borderRadius: RADIUS.pill, paddingHorizontal: 14, paddingVertical: 8, ...cardShadow(mode, 'sm') },
+    staffChipActive: { backgroundColor: colors.accent },
     staffChipText: { color: colors.textMuted, fontWeight: '600' },
     staffChipTextActive: { color: '#fff' },
     sectionTitle: { fontSize: 14, fontWeight: '700', color: colors.text, marginTop: 20, marginBottom: 10 },
-    dayRow: { backgroundColor: colors.surface, borderRadius: 10, padding: 12, marginBottom: 8 },
+    dayRow: { backgroundColor: colors.surface, borderRadius: RADIUS.lg, padding: 12, marginBottom: 8, ...cardShadow(mode, 'sm'), ...accentBorder(colors) },
     dayHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
     dayName: { fontSize: 14, fontWeight: '600', color: colors.text },
     timeRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 8 },
-    timeInput: { backgroundColor: colors.surfaceMuted, borderRadius: 8, padding: 10, width: 80, textAlign: 'center', color: colors.text },
+    timeInput: { backgroundColor: colors.surfaceMuted, borderRadius: RADIUS.md, padding: 10, width: 80, textAlign: 'center', color: colors.text },
     timeSep: { color: colors.textMuted },
-    addBtn: { backgroundColor: colors.accent, borderRadius: 8, paddingHorizontal: 14, paddingVertical: 10 },
+    addBtn: { backgroundColor: colors.accent, borderRadius: RADIUS.md, paddingHorizontal: 14, paddingVertical: 10 },
     addBtnText: { color: '#fff', fontWeight: '600', fontSize: 12 },
-    blockedRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: colors.surface, borderRadius: 8, padding: 10, marginTop: 6 },
+    blockedRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: colors.surface, borderRadius: RADIUS.md, padding: 10, marginTop: 6, ...cardShadow(mode, 'sm'), ...accentBorder(colors) },
     blockedDate: { color: colors.text },
     delete: { fontSize: 16 },
-    saveBtn: { backgroundColor: colors.accent, borderRadius: 12, padding: 16, alignItems: 'center', marginTop: 24, marginBottom: 40 },
+    saveBtn: { backgroundColor: colors.accent, borderRadius: RADIUS.xl, padding: 16, alignItems: 'center', marginTop: 24, marginBottom: 40 },
     saveBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
   });
 }

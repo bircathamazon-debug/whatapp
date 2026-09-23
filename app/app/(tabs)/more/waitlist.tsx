@@ -2,16 +2,16 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, RefreshControl } from 'react-native';
 import { useBranch } from '../../../lib/branchContext';
 import { getActiveWaitlist } from '../../../lib/waitlist';
-import { useTheme, type ThemeColors } from '../../../lib/theme';
+import { useTheme, type ThemeColors, RADIUS, cardShadow, accentBorder } from '../../../lib/theme';
 import { useT } from '../../../lib/i18n';
 import type { WaitlistEntry } from '../../../../shared/types';
 
 export default function WaitlistScreen() {
   const { branchId } = useBranch();
-  const { colors } = useTheme();
+  const { colors, mode } = useTheme();
   const t = useT();
   const STATUS_LABEL: Record<string, string> = { waiting: t.waitlist.statusWaiting, offered: t.waitlist.statusOffered };
-  const styles = makeStyles(colors);
+  const styles = makeStyles(colors, mode);
   const [entries, setEntries] = useState<WaitlistEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -56,12 +56,12 @@ export default function WaitlistScreen() {
   );
 }
 
-function makeStyles(colors: ThemeColors) {
+function makeStyles(colors: ThemeColors, mode: 'light' | 'dark') {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.bg },
     list: { padding: 12 },
     emptyText: { color: colors.textMuted, textAlign: 'center', marginTop: 40, paddingHorizontal: 24, lineHeight: 20 },
-    card: { backgroundColor: colors.surface, borderRadius: 12, padding: 14, marginBottom: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 4, elevation: 2 },
+    card: { backgroundColor: colors.surface, borderRadius: RADIUS.lg, padding: 14, marginBottom: 10, ...cardShadow(mode, 'sm'), ...accentBorder(colors) },
     rowBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
     name: { fontSize: 15, fontWeight: '700', color: colors.text },
     badge: { fontSize: 11, color: colors.statusPending, fontWeight: '700' },

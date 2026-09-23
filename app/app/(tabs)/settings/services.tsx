@@ -2,15 +2,15 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, Alert, Switch } from 'react-native';
 import { useBranch } from '../../../lib/branchContext';
 import { getServicesByBranch, addService, deleteService } from '../../../lib/services';
-import { useTheme, type ThemeColors } from '../../../lib/theme';
+import { useTheme, type ThemeColors, RADIUS, cardShadow, accentBorder } from '../../../lib/theme';
 import { useT } from '../../../lib/i18n';
 import type { Service } from '../../../../shared/types';
 
 export default function ServicesScreen() {
   const { branchId } = useBranch();
-  const { colors } = useTheme();
+  const { colors, mode } = useTheme();
   const t = useT();
-  const styles = makeStyles(colors);
+  const styles = makeStyles(colors, mode);
   const [services, setServices] = useState<Service[]>([]);
   const [name, setName] = useState('');
   const [duration, setDuration] = useState('30');
@@ -94,17 +94,26 @@ export default function ServicesScreen() {
   );
 }
 
-function makeStyles(colors: ThemeColors) {
+function makeStyles(colors: ThemeColors, mode: 'light' | 'dark') {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.bg },
     emptyText: { color: colors.textMuted, textAlign: 'center', marginTop: 40 },
     form: { marginBottom: 8 },
     label: { fontSize: 12, color: colors.textMuted, fontWeight: '600', marginBottom: 6, marginTop: 10 },
-    input: { backgroundColor: colors.surface, borderRadius: 10, padding: 12, borderWidth: 1, borderColor: colors.border, color: colors.text },
+    input: { backgroundColor: colors.surfaceMuted, borderRadius: RADIUS.md, padding: 12, color: colors.text },
     switchRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 },
-    btn: { backgroundColor: colors.accent, borderRadius: 10, padding: 14, alignItems: 'center', marginTop: 16, marginBottom: 8 },
+    btn: { backgroundColor: colors.accent, borderRadius: RADIUS.lg, padding: 14, alignItems: 'center', marginTop: 16, marginBottom: 8 },
     btnText: { color: '#fff', fontWeight: '700' },
-    card: { flexDirection: 'row', backgroundColor: colors.surface, borderRadius: 12, padding: 14, marginBottom: 10, alignItems: 'center' },
+    card: {
+      flexDirection: 'row',
+      backgroundColor: colors.surface,
+      borderRadius: RADIUS.lg,
+      padding: 14,
+      marginBottom: 10,
+      alignItems: 'center',
+      ...cardShadow(mode, 'sm'),
+      ...accentBorder(colors),
+    },
     cardName: { fontSize: 15, fontWeight: '700', color: colors.text },
     cardMeta: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
     delete: { fontSize: 18, paddingHorizontal: 8 },

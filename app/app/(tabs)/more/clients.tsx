@@ -2,16 +2,16 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, RefreshControl, TextInput } from 'react-native';
 import { useBranch } from '../../../lib/branchContext';
 import { getClientsByBranch } from '../../../lib/clients';
-import { useTheme, type ThemeColors } from '../../../lib/theme';
+import { useTheme, type ThemeColors, RADIUS, cardShadow, accentBorder } from '../../../lib/theme';
 import { useT } from '../../../lib/i18n';
 import { LOYALTY_THRESHOLD } from '../../../../shared/types';
 import type { Client } from '../../../../shared/types';
 
 export default function ClientsScreen() {
   const { branchId } = useBranch();
-  const { colors } = useTheme();
+  const { colors, mode } = useTheme();
   const t = useT();
-  const styles = makeStyles(colors);
+  const styles = makeStyles(colors, mode);
   const [clients, setClients] = useState<Client[]>([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
@@ -64,13 +64,13 @@ export default function ClientsScreen() {
   );
 }
 
-function makeStyles(colors: ThemeColors) {
+function makeStyles(colors: ThemeColors, mode: 'light' | 'dark') {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.bg },
-    search: { backgroundColor: colors.surface, margin: 12, borderRadius: 10, padding: 12, borderWidth: 1, borderColor: colors.border, color: colors.text },
+    search: { backgroundColor: colors.surfaceMuted, margin: 12, borderRadius: RADIUS.md, padding: 12, color: colors.text },
     list: { padding: 12, paddingTop: 0 },
     emptyText: { color: colors.textMuted, textAlign: 'center', marginTop: 40 },
-    card: { backgroundColor: colors.surface, borderRadius: 12, padding: 14, marginBottom: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.06, shadowRadius: 4, elevation: 2 },
+    card: { backgroundColor: colors.surface, borderRadius: RADIUS.lg, padding: 14, marginBottom: 10, ...cardShadow(mode, 'sm'), ...accentBorder(colors) },
     rowBetween: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
     name: { fontSize: 15, fontWeight: '700', color: colors.text },
     warnBadge: { fontSize: 11, color: colors.statusPending, fontWeight: '700' },

@@ -220,11 +220,25 @@ detalle técnico completo de arquitectura y setup.
     borde plano a sombra real, que es lo que hace que se sienta como app
     y no como página web.
   - Se aplicó ya a: barra de pestañas, menú del panel, login, agenda
-    (línea de tiempo). **Pendiente**: pasar el mismo tratamiento visual a
-    las pantallas más chicas (Sucursales, Peluqueros, Servicios,
-    Horarios, Ajustes, Finanzas, Clientes, Lista de espera, Campañas,
-    Preguntas) — hoy funcionan bien pero todavía con el estilo de tarjeta
-    plana anterior.
+    (línea de tiempo).
+  - ✅ **Extendido a las 10 pantallas restantes — PROGRAMADO, VERIFICADO Y
+    DESPLEGADO** (cerraba el pendiente anterior): Sucursales, Servicios,
+    Peluqueros, Horarios, Ajustes generales, Finanzas, Clientes, Lista de
+    espera, Campañas y Preguntas. Mismo tratamiento mecánico en las 10:
+    radios consistentes (`RADIUS` de `app/lib/theme.ts`), sombra flotante
+    (`cardShadow(mode,'sm')`) y borde de color sutil (`accentBorder`) en
+    cada tarjeta, inputs sin borde plano (relleno `surfaceMuted`) en vez
+    de `borderWidth`/`borderColor`. En Ajustes generales se tuvo cuidado
+    de no tocar el patrón de borde de color que ya usaban las tarjetas de
+    selección (modo Shabat, modo mantenimiento) — ese borde cambia de
+    color según si la opción está elegida o no, es intencional y se
+    conservó tal cual, solo se les sumó la sombra nueva. El botón único de
+    Campañas usa `accentGlow` (el mismo "brillo" de color que el botón de
+    login) por ser la única acción de esa pantalla. Verificado con
+    `tsc --noEmit` sin errores, `expo export --platform web` sin errores,
+    desplegado a Firebase Hosting y confirmado con una captura real de la
+    página de login ya en producción (turquesa eléctrico, tarjeta
+    flotante, todo cargando bien).
   - 🐛 **Bug real encontrado y corregido de paso**: la pantalla de
     Finanzas no tenía título registrado en el Stack de navegación de
     `admin/_layout.tsx` (se agregó).

@@ -2,15 +2,15 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, Alert } from 'react-native';
 import { useBranch } from '../../../lib/branchContext';
 import { addBranch, deleteBranch } from '../../../lib/branches';
-import { useTheme, type ThemeColors } from '../../../lib/theme';
+import { useTheme, type ThemeColors, RADIUS, cardShadow, accentBorder } from '../../../lib/theme';
 import { useT } from '../../../lib/i18n';
 
 export default function BranchesScreen() {
   const { branches, reload } = useBranch();
-  const { colors } = useTheme();
+  const { colors, mode } = useTheme();
   const t = useT();
   const SHABBAT_MODE_LABEL: Record<string, string> = { off: t.branches.shabbatOff, silent: t.branches.shabbatSilent, closed: t.branches.shabbatClosed };
-  const styles = makeStyles(colors);
+  const styles = makeStyles(colors, mode);
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
   const [geonameId, setGeonameId] = useState('293397'); // Jerusalén por defecto (geonameid de Hebcal)
@@ -78,16 +78,25 @@ export default function BranchesScreen() {
   );
 }
 
-function makeStyles(colors: ThemeColors) {
+function makeStyles(colors: ThemeColors, mode: 'light' | 'dark') {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.bg },
     form: { marginBottom: 8 },
     label: { fontSize: 12, color: colors.textMuted, fontWeight: '600', marginBottom: 6, marginTop: 10 },
-    input: { backgroundColor: colors.surface, borderRadius: 10, padding: 12, borderWidth: 1, borderColor: colors.border, color: colors.text },
-    btn: { backgroundColor: colors.accent, borderRadius: 10, padding: 14, alignItems: 'center', marginTop: 16 },
+    input: { backgroundColor: colors.surfaceMuted, borderRadius: RADIUS.md, padding: 12, color: colors.text },
+    btn: { backgroundColor: colors.accent, borderRadius: RADIUS.lg, padding: 14, alignItems: 'center', marginTop: 16 },
     btnText: { color: '#fff', fontWeight: '700' },
     sectionTitle: { fontSize: 14, fontWeight: '700', color: colors.text, marginTop: 24, marginBottom: 8 },
-    card: { flexDirection: 'row', backgroundColor: colors.surface, borderRadius: 12, padding: 14, marginBottom: 10, alignItems: 'center' },
+    card: {
+      flexDirection: 'row',
+      backgroundColor: colors.surface,
+      borderRadius: RADIUS.lg,
+      padding: 14,
+      marginBottom: 10,
+      alignItems: 'center',
+      ...cardShadow(mode, 'sm'),
+      ...accentBorder(colors),
+    },
     cardName: { fontSize: 15, fontWeight: '700', color: colors.text },
     cardMeta: { fontSize: 12, color: colors.textMuted, marginTop: 2 },
     delete: { fontSize: 18, paddingHorizontal: 8 },

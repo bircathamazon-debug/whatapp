@@ -4,7 +4,7 @@ import { useBranch } from '../../../lib/branchContext';
 import { updateBranch } from '../../../lib/branches';
 import { getStaffByBranch } from '../../../lib/staff';
 import { getBlockedTimesByBranch, addBlockedTime, deleteBlockedTime } from '../../../lib/blockedTimes';
-import { useTheme, type ThemeColors } from '../../../lib/theme';
+import { useTheme, type ThemeColors, RADIUS, cardShadow, accentBorder } from '../../../lib/theme';
 import { useT, isRtl, LANGUAGE_NAMES, type Lang } from '../../../lib/i18n';
 import { LOYALTY_THRESHOLD, NO_SHOW_DEPOSIT_THRESHOLD, REMINDER_WINDOWS_HOURS } from '../../../../shared/types';
 import type { Staff, Branch, BlockedTime } from '../../../../shared/types';
@@ -18,14 +18,14 @@ const FUNCTIONS_BASE_URL = process.env.EXPO_PUBLIC_FUNCTIONS_BASE_URL;
 export default function SettingsScreen() {
   const { branchId, branches, reload } = useBranch();
   const branch = branches.find((b) => b.id === branchId);
-  const { colors } = useTheme();
+  const { colors, mode } = useTheme();
   const t = useT();
   const SHABBAT_MODES: { value: Branch['shabbatMode']; label: string; hint: string }[] = [
     { value: 'off', label: t.settings.shabbatOffLabel, hint: t.settings.shabbatOffHint },
     { value: 'silent', label: t.settings.shabbatSilentLabel, hint: t.settings.shabbatSilentHint },
     { value: 'closed', label: t.settings.shabbatClosedLabel, hint: t.settings.shabbatClosedHint },
   ];
-  const styles = makeStyles(colors);
+  const styles = makeStyles(colors, mode);
   const [staff, setStaff] = useState<Staff[]>([]);
   const [blockedTimes, setBlockedTimes] = useState<BlockedTime[]>([]);
 
@@ -234,25 +234,25 @@ export default function SettingsScreen() {
   );
 }
 
-function makeStyles(colors: ThemeColors) {
+function makeStyles(colors: ThemeColors, mode: 'light' | 'dark') {
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.bg },
     emptyText: { color: colors.textMuted, textAlign: 'center', marginTop: 40 },
     sectionTitle: { fontSize: 14, fontWeight: '700', color: colors.text, marginTop: 20, marginBottom: 10 },
     hint: { fontSize: 12, color: colors.textMuted, marginBottom: 10, lineHeight: 18 },
-    segmented: { flexDirection: 'row', backgroundColor: colors.surfaceMuted, borderRadius: 10, padding: 3, gap: 3, alignSelf: 'flex-start' },
-    segment: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 8 },
+    segmented: { flexDirection: 'row', backgroundColor: colors.surfaceMuted, borderRadius: RADIUS.md, padding: 3, gap: 3, alignSelf: 'flex-start' },
+    segment: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: RADIUS.sm },
     segmentActive: { backgroundColor: colors.accent },
     segmentText: { fontSize: 13, fontWeight: '700', color: colors.textMuted },
     segmentTextActive: { color: '#fff' },
     chipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 10 },
-    staffChip: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, borderRadius: 14, paddingHorizontal: 12, paddingVertical: 6 },
-    staffChipActive: { backgroundColor: colors.accent, borderColor: colors.accent },
+    staffChip: { backgroundColor: colors.surface, borderRadius: RADIUS.pill, paddingHorizontal: 12, paddingVertical: 6, ...cardShadow(mode, 'sm') },
+    staffChipActive: { backgroundColor: colors.accent },
     staffChipText: { fontSize: 12, color: colors.textMuted },
     staffChipTextActive: { color: '#fff', fontWeight: '600' },
-    blockCard: { backgroundColor: colors.surface, borderRadius: 12, padding: 14, gap: 8 },
+    blockCard: { backgroundColor: colors.surface, borderRadius: RADIUS.lg, padding: 14, gap: 8, ...cardShadow(mode, 'sm'), ...accentBorder(colors) },
     fieldLabel: { fontSize: 11.5, fontWeight: '700', color: colors.textMuted },
-    input: { backgroundColor: colors.surfaceMuted, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 9, fontSize: 13, color: colors.text },
+    input: { backgroundColor: colors.surfaceMuted, borderRadius: RADIUS.md, paddingHorizontal: 12, paddingVertical: 9, fontSize: 13, color: colors.text },
     allDayRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 2 },
     checkbox: { width: 20, height: 20, borderRadius: 5, borderWidth: 1.5, borderColor: colors.border, alignItems: 'center', justifyContent: 'center' },
     checkboxActive: { backgroundColor: colors.accent, borderColor: colors.accent },
@@ -261,22 +261,22 @@ function makeStyles(colors: ThemeColors) {
     timeRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
     timeInput: { flex: 1 },
     timeSep: { fontSize: 12, color: colors.textMuted },
-    saveBtn: { backgroundColor: colors.accent, borderRadius: 8, padding: 11, alignItems: 'center', marginTop: 2 },
+    saveBtn: { backgroundColor: colors.accent, borderRadius: RADIUS.md, padding: 11, alignItems: 'center', marginTop: 2 },
     saveBtnText: { color: '#fff', fontWeight: '700', fontSize: 13 },
-    blockRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, borderRadius: 10, padding: 12, marginTop: 8, gap: 10 },
+    blockRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, borderRadius: RADIUS.lg, padding: 12, marginTop: 8, gap: 10, ...cardShadow(mode, 'sm'), ...accentBorder(colors) },
     blockRowTitle: { fontSize: 12.5, fontWeight: '700', color: colors.text },
     blockRowSub: { fontSize: 11, color: colors.textMuted, marginTop: 2 },
     blockRowDelete: { color: colors.danger, fontSize: 15, fontWeight: '700', paddingHorizontal: 4 },
-    option: { backgroundColor: colors.surface, borderRadius: 10, padding: 14, marginBottom: 8, borderWidth: 2, borderColor: 'transparent' },
+    option: { backgroundColor: colors.surface, borderRadius: RADIUS.lg, padding: 14, marginBottom: 8, borderWidth: 2, borderColor: 'transparent', ...cardShadow(mode, 'sm') },
     optionActive: { borderColor: colors.accent },
     optionLabel: { fontSize: 14, fontWeight: '700', color: colors.text },
     optionLabelActive: { color: colors.accent },
     optionHint: { fontSize: 12, color: colors.textMuted, marginTop: 4 },
-    calendarBtn: { backgroundColor: colors.accentSoft, borderRadius: 10, padding: 14, marginBottom: 8 },
+    calendarBtn: { backgroundColor: colors.accentSoft, borderRadius: RADIUS.lg, padding: 14, marginBottom: 8 },
     calendarBtnText: { color: colors.accent, fontWeight: '600', fontSize: 13 },
-    infoCard: { backgroundColor: colors.surface, borderRadius: 10, padding: 14 },
+    infoCard: { backgroundColor: colors.surface, borderRadius: RADIUS.lg, padding: 14, ...cardShadow(mode, 'sm'), ...accentBorder(colors) },
     infoLine: { fontSize: 13, color: colors.text, marginBottom: 6 },
-    maintenanceCard: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.surface, borderRadius: 12, padding: 14, marginBottom: 8, borderWidth: 2, borderColor: 'transparent' },
+    maintenanceCard: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: colors.surface, borderRadius: RADIUS.lg, padding: 14, marginBottom: 8, borderWidth: 2, borderColor: 'transparent', ...cardShadow(mode, 'sm') },
     maintenanceCardActive: { borderColor: colors.danger, backgroundColor: colors.dangerSoft },
     maintenanceTitle: { fontSize: 14, fontWeight: '700', color: colors.text },
     maintenanceHint: { fontSize: 12, color: colors.textMuted, marginTop: 4, lineHeight: 17 },
