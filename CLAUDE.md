@@ -152,9 +152,24 @@ detalle técnico completo de arquitectura y setup.
     redesplegar las que crean citas —`botCreateAppointment`,
     `adminCreateAppointment`, `generateRecurringAppointments`, etc.— para
     que tomen la variable nueva, porque cada función de 2ª gen. congela su
-    propio entorno al desplegarse). **Falta**: que cada peluquero apriete
-    "Conectar Google Calendar" en Ajustes (ya existe el botón) y probar
-    que una cita nueva aparezca sola en su calendario.
+    propio entorno al desplegarse).
+  - 🐛 **Encontrado y corregido: el botón "Conectar Google Calendar" daba
+    `access_denied` (error 403 de Google).** Causa: la pantalla de
+    consentimiento de OAuth en Google Cloud (proyecto "BOT PARA
+    PELUQUERIA") está en modo "Testing" — en ese modo Google solo deja
+    entrar a cuentas de Gmail agregadas a mano como "usuarios de prueba"
+    en la sección **Audience** (antes se llamaba "OAuth consent screen",
+    Google rediseñó esa pantalla). Se agregó ahí el Gmail del peluquero
+    (`flowsivan613@gmail.com`). **Nota para el futuro**: cada peluquero
+    nuevo que se sume va a necesitar que su Gmail se agregue igual a esa
+    lista mientras el proyecto siga en modo de prueba — cuando se venda a
+    muchas peluquerías (Fase 1) va a hacer falta "publicar" la app y
+    pasar la verificación de Google para que cualquier cuenta pueda
+    conectar sin este paso manual.
+  - ✅ **Conectado y probado por el usuario** — el botón ya funciona,
+    quedó vinculado el Google Calendar de יעקב אמסלם. Pendiente que el
+    usuario confirme con una reserva de prueba que la cita aparece sola
+    en el calendario (paso normal de verificación, no bloquea nada).
 - ✅ **App del panel publicada como página web (Firebase Hosting) —
   CONFIGURADO, DESPLEGADO Y PROBADO.** El usuario preguntó cómo descarga
   el peluquero la app (agenda/calendario/ajustes) — hasta ahora nunca se
