@@ -26,6 +26,8 @@ export interface ThemeColors {
   dangerSoft: string;
   success: string;
   successSoft: string;
+  /** Fondo "de afuera" en pantallas anchas (compu) — ver `WEB_SHELL_MAX_WIDTH`. */
+  shellBg: string;
 }
 
 const light: ThemeColors = {
@@ -46,6 +48,7 @@ const light: ThemeColors = {
   dangerSoft: '#fbebea',
   success: '#0fa568',
   successSoft: '#eaf4ec',
+  shellBg: '#e7e2d6',
 };
 
 const dark: ThemeColors = {
@@ -66,7 +69,12 @@ const dark: ThemeColors = {
   dangerSoft: '#33201f',
   success: '#1fb673',
   successSoft: '#173226',
+  shellBg: '#08090b',
 };
+
+/** Ancho máximo de la app en pantallas anchas (compu) — la mantiene con
+ * proporción de celular, centrada, en vez de estirarse borde a borde. */
+export const WEB_SHELL_MAX_WIDTH = 480;
 
 export function useTheme(): { mode: 'light' | 'dark'; colors: ThemeColors } {
   const { branches, branchId } = useBranch();
@@ -106,6 +114,19 @@ export function accentGlow(colors: ThemeColors, mode: 'light' | 'dark') {
     shadowOpacity: mode === 'dark' ? 0.45 : 0.3,
     shadowRadius: 14,
     elevation: 6,
+  };
+}
+
+/** Igual que `accentGlow` pero para un color cualquiera — para los íconos de
+ * colores (verde, naranja, etc.) de los accesos rápidos de Inicio, que
+ * necesitan su propio "brillo" y no el turquesa de acento. */
+export function coloredGlow(color: string, mode: 'light' | 'dark') {
+  return {
+    shadowColor: color,
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: mode === 'dark' ? 0.5 : 0.35,
+    shadowRadius: 10,
+    elevation: 5,
   };
 }
 

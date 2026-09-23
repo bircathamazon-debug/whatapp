@@ -3,7 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet, RefreshControl } 
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useBranch } from '../../lib/branchContext';
-import { useTheme, type ThemeColors, RADIUS, cardShadow, accentGlow, accentBorder } from '../../lib/theme';
+import { useTheme, type ThemeColors, RADIUS, cardShadow, accentGlow, accentBorder, coloredGlow } from '../../lib/theme';
 import { getAppointmentsForDay } from '../../lib/appointments';
 import { getServicesByBranch } from '../../lib/services';
 import { getStaffByBranch } from '../../lib/staff';
@@ -155,8 +155,8 @@ export default function HomeScreen() {
       <View style={styles.quickGrid}>
         {QUICK_ACTIONS.map((qa) => (
           <TouchableOpacity key={qa.label} style={styles.quickTile} onPress={qa.onPress} activeOpacity={0.8}>
-            <View style={[styles.quickIconWrap, { backgroundColor: qa.color }]}>
-              <Ionicons name={qa.icon} size={23} color="#fff" />
+            <View style={[styles.quickIconWrap, { backgroundColor: qa.color }, coloredGlow(qa.color, mode)]}>
+              <Ionicons name={qa.icon} size={26} color="#fff" />
             </View>
             <Text style={styles.quickLabel}>{qa.label}</Text>
           </TouchableOpacity>
@@ -267,15 +267,15 @@ function makeStyles(colors: ThemeColors, mode: 'light' | 'dark') {
       width: '47%',
       backgroundColor: colors.surface,
       borderRadius: RADIUS.lg,
-      paddingVertical: 20,
+      paddingVertical: 24,
       paddingHorizontal: 14,
       alignItems: 'center',
-      gap: 12,
-      ...cardShadow(mode, 'sm'),
+      gap: 14,
+      ...cardShadow(mode, 'md'),
       ...accentBorder(colors),
     },
-    quickIconWrap: { width: 50, height: 50, borderRadius: RADIUS.md, alignItems: 'center', justifyContent: 'center' },
-    quickLabel: { fontSize: 14, fontWeight: '800', color: colors.text, textAlign: 'center', letterSpacing: -0.1 },
+    quickIconWrap: { width: 58, height: 58, borderRadius: RADIUS.lg, alignItems: 'center', justifyContent: 'center' },
+    quickLabel: { fontSize: 13.5, fontWeight: '800', color: colors.text, textAlign: 'center', letterSpacing: 0.1, textTransform: 'uppercase' },
     upcomingRow: {
       flexDirection: 'row',
       alignItems: 'center',

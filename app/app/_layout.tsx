@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
-import { I18nManager } from 'react-native';
+import { I18nManager, Platform, View } from 'react-native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { BranchProvider } from '../lib/branchContext';
-import { useTheme } from '../lib/theme';
+import { useTheme, WEB_SHELL_MAX_WIDTH } from '../lib/theme';
 import { useLang, isRtl } from '../lib/i18n';
 
 // Por defecto arranca en RTL (hebreo, el mercado actual) hasta que se sepa
@@ -28,22 +28,49 @@ function ThemedStack() {
     }
   }, [lang]);
 
+  const stack = (
+    <Stack
+      screenOptions={{
+        headerStyle: { backgroundColor: colors.surface },
+        headerTintColor: colors.text,
+        headerTitleStyle: { fontWeight: '700', fontSize: 18 },
+        contentStyle: { backgroundColor: colors.bg },
+      }}
+    >
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      {/* admin/_layout.tsx ya define su propio Stack con los títulos en
+          hebreo de cada pantalla; acá solo se oculta el header duplicado. */}
+      <Stack.Screen name="admin" options={{ headerShown: false }} />
+    </Stack>
+  );
+
   return (
     <>
       <StatusBar style={mode === 'dark' ? 'light' : 'dark'} />
-      <Stack
-        screenOptions={{
-          headerStyle: { backgroundColor: colors.surface },
-          headerTintColor: colors.text,
-          headerTitleStyle: { fontWeight: '700', fontSize: 18 },
-          contentStyle: { backgroundColor: colors.bg },
-        }}
-      >
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        {/* admin/_layout.tsx ya define su propio Stack con los títulos en
-            hebreo de cada pantalla; acá solo se oculta el header duplicado. */}
-        <Stack.Screen name="admin" options={{ headerShown: false }} />
-      </Stack>
+      {Platform.OS === 'web' ? (
+        // En pantallas anchas (compu) la app se centra con proporción de
+        // celular en vez de estirarse borde a borde — si no, todo se ve
+        // desarmado y "de página web" (íconos chicos perdidos en cajas
+        // gigantes vacías).
+        <View style={{ flex: 1, minHeight: '100%' as any, backgroundColor: colors.shellBg, alignItems: 'center' }}>
+          <View
+            style={{
+              flex: 1,
+              width: '100%',
+              maxWidth: WEB_SHELL_MAX_WIDTH,
+              backgroundColor: colors.bg,
+              shadowColor: '#000',
+              shadowOpacity: mode === 'dark' ? 0.5 : 0.15,
+              shadowRadius: 30,
+              shadowOffset: { width: 0, height: 0 },
+            }}
+          >
+            {stack}
+          </View>
+        </View>
+      ) : (
+        stack
+      )}
     </>
   );
 }

@@ -170,6 +170,36 @@ detalle técnico completo de arquitectura y setup.
     quedó vinculado el Google Calendar de יעקב אמסלם. Pendiente que el
     usuario confirme con una reserva de prueba que la cita aparece sola
     en el calendario (paso normal de verificación, no bloquea nada).
+- ✅ **Bug real encontrado y corregido: la app se veía "desarmada" en
+  pantallas anchas (compu) — PROGRAMADO, VERIFICADO Y DESPLEGADO.** El
+  usuario reportó que en Inicio los íconos de los accesos rápidos se
+  veían simples y chicos "dentro del marco", y pidió que se vea más
+  profesional/elegante en general. Causa real encontrada: ninguna
+  pantalla (salvo el login) tenía un límite de ancho — en una ventana de
+  navegador ancha la app se estiraba borde a borde, así que las tarjetas
+  quedaban enormes y vacías con el ícono y el texto perdidos en una
+  esquina, en vez de una tarjeta compacta y prolija. No era un problema
+  de "los íconos son chicos", sino de que el contenedor era gigante.
+  - `app/lib/theme.ts`: nuevo color `shellBg` (claro/oscuro) y constante
+    `WEB_SHELL_MAX_WIDTH = 480`; nueva función `coloredGlow()` (como
+    `accentGlow` pero para cualquier color, no solo el turquesa).
+  - `app/app/_layout.tsx`: en la versión web, toda la app ahora se centra
+    en una columna con proporción de celular (ancho máximo 480px), con
+    sombra, sobre un fondo neutro alrededor — igual que ya hacía la
+    pantalla de login, ahora aplicado a toda la app de una sola vez (no
+    pantalla por pantalla). En el celular real no cambia nada, ya usaba
+    todo el ancho de la pantalla como corresponde.
+  - `app/app/(tabs)/index.tsx`: además, las tarjetas de accesos rápidos
+    de Inicio (Calendario/Finanzas/Campañas/Ajustes) se agrandaron un
+    poco (ícono de 50→58px) y ganaron su propio "brillo" de color debajo
+    del ícono (`coloredGlow`), en vez de quedar planas.
+  - Verificado con `tsc --noEmit` sin errores, `expo export` sin errores,
+    desplegado a Firebase Hosting y confirmado con capturas reales del
+    login en pantalla ancha (antes se estiraba, ahora queda centrado
+    como una app) y en celular (sin cambios, seguía bien). **Falta** que
+    el usuario confirme en el navegador real cómo se ve ahora la
+    pantalla de Inicio con las tarjetas más grandes — el asistente no
+    tiene credenciales para entrar y verlo directamente.
 - ✅ **App del panel publicada como página web (Firebase Hosting) —
   CONFIGURADO, DESPLEGADO Y PROBADO.** El usuario preguntó cómo descarga
   el peluquero la app (agenda/calendario/ajustes) — hasta ahora nunca se
