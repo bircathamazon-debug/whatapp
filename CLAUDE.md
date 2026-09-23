@@ -583,9 +583,28 @@ detalle técnico completo de arquitectura y setup.
     (`runSerialized` en `bot/index.js`) — nunca dos al mismo tiempo para
     el mismo número de teléfono.
   - ✅ **Desplegado** en Railway.
+- 🐛 **Tercer bug real encontrado y corregido, mismo origen que los dos
+  anteriores: al pedir una cita, el bot mostraba "התור אושר" (cita
+  confirmada) de una sola vez, sin preguntar día ni hora.** Causa:
+  WhatsApp (multi-dispositivo) a veces reenvía el mismo mensaje
+  duplicado por dentro (una sincronización interna, no un mensaje nuevo
+  del cliente). Antes no se notaba porque todo pasaba por la espera de 4
+  segundos y las copias se juntaban en un solo mensaje sin sentido; pero
+  desde que los números sueltos (1, 2, 3...) se procesan al instante
+  (corrección anterior), cada copia duplicada de un mismo "1" avanzaba
+  un paso más en la reserva por su cuenta — servicio → peluquero → día →
+  hora → confirmada — todo en una fracción de segundo, dando la
+  sensación de que el bot se saltaba los pasos.
+  - ✅ **Corregido** en `bot/index.js`: ahora se ignoran los eventos que
+    no son `type: 'notify'` (mensaje nuevo real; Baileys también avisa
+    `'append'` para sincronizaciones internas), y además se guarda una
+    lista de los últimos IDs de mensaje ya procesados para descartar
+    cualquier duplicado que aun así llegue marcado como `'notify'`.
+  - ✅ **Desplegado** en Railway (`railway up`), confirmado en los logs
+    que se reconectó a WhatsApp sin pedir QR nuevo.
   - ⬜ **Falta que el usuario pruebe de nuevo en vivo** una reserva
-    completa (varios números seguidos, rápido) para confirmar que ahora
-    el bot no pierde el hilo y responde rápido.
+    completa para confirmar que ahora sí pregunta día y hora paso a
+    paso, sin saltarse nada.
 - ✅ **Finanzas (ingresos, gastos y suscripción de pago) — PROGRAMADA Y
   DESPLEGADA, FALTA CONFIGURAR STRIPE DE VERDAD.** El
   usuario pidió explícitamente cobro automático real con tarjeta (no un

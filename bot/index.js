@@ -28,6 +28,29 @@ const BRANCH_ID = process.env.BRANCH_ID;
 // hacía sentir lentos en cada paso de una reserva.
 const MESSAGE_DEBOUNCE_MS = 4000;
 
+/** IDs de mensajes ya procesados. WhatsApp (multi-dispositivo) a veces
+ * reenvía el mismo mensaje más de una vez por dentro (ej. `type: 'append'`
+ * de una sincronización, además del `'notify'` original) — antes no se
+ * notaba porque todo pasaba por el debounce de 4 segundos y las copias se
+ * juntaban en un solo mensaje, pero ahora que un número suelto (1, 2, 3...)
+ * se procesa al instante, cada copia duplicada avanzaba un paso más en la
+ * reserva por su cuenta, dando la sensación de que el bot se saltaba
+ * "elegir día"/"elegir hora" y confirmaba una cita sola. Guardamos los
+ * últimos IDs vistos para descartar los repetidos. */
+const processedMessageIds = new Set();
+const MAX_PROCESSED_IDS = 2000;
+
+function alreadyProcessed(id) {
+  if (!id) return false;
+  if (processedMessageIds.has(id)) return true;
+  processedMessageIds.add(id);
+  if (processedMessageIds.size > MAX_PROCESSED_IDS) {
+    const oldest = processedMessageIds.values().next().value;
+    processedMessageIds.delete(oldest);
+  }
+  return false;
+}
+
 /** phone -> { parts: string[], pushName?: string, timer } */
 const pendingByJid = new Map();
 
@@ -137,11 +160,16 @@ async function connectToWhatsApp() {
     }
   });
 
-  sock.ev.on('messages.upsert', async ({ messages }) => {
+  sock.ev.on('messages.upsert', async ({ messages, type }) => {
+    // 'notify' = mensaje nuevo real; 'append'/otros = sincronización interna
+    // (historial, otros dispositivos vinculados) — no son mensajes nuevos
+    // del cliente y no hay que responderles.
+    if (type !== 'notify') return;
     for (const msg of messages) {
       const rawJid = msg.key.remoteJid ?? '';
       if (rawJid.endsWith('@g.us') || rawJid.endsWith('@broadcast')) continue; // ignorar grupos y difusión
       if (msg.key.fromMe) continue;
+      if (alreadyProcessed(msg.key.id)) continue; // mismo mensaje reenviado por WhatsApp
 
       // WhatsApp puede direccionar chats personales por "LID" (identificador
       // de privacidad, termina en @lid) en vez del número de teléfono
