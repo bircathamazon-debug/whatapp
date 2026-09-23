@@ -746,6 +746,22 @@ detalle técnico completo de arquitectura y setup.
     el usuario si conviene, por ejemplo, reconocer "quiero/necesito
     una cita" además del saludo exacto, o llevar el primer mensaje de
     cualquier conversación nueva directo al menú sin importar el texto.
+  - ✅ **RESUELTO — pedido explícito del usuario, PROGRAMADO Y
+    DESPLEGADO.** Antes de tocar el código se le preguntó el alcance
+    exacto (¿solo al arrancar la charla, o también interrumpiendo una
+    reserva ya empezada?) — eligió **solo al arrancar la charla**, para
+    no perder el avance de alguien que ya está eligiendo servicio/día/
+    hora. Cambio en `bot/conversation.js` (`handleMainMenu`): cuando el
+    cliente no está en medio de ninguna reserva (recién arranca, o ya
+    terminó/canceló una) y escribe cualquier cosa que no sea una opción
+    del menú (frase libre, emoji, lo que sea), el bot ya no dice "no
+    entendí" — directamente le muestra el menú principal para que
+    pueda seguir. El mensaje se sigue guardando en "Preguntas" para que
+    el peluquero lo revise. Si el cliente ya está en medio de elegir
+    servicio/peluquero/día/hora, sigue como antes (le pide corregir con
+    un número válido, no lo saca del flujo) — eso no se tocó.
+    Verificado con `node --check`, desplegado en Railway, reconectado a
+    WhatsApp sin pedir QR nuevo.
   - ⬜ **Cobro automático real del depósito (hallazgo de la comparación
     con la competencia)** — el usuario dijo explícitamente "lo hacemos
     más adelante", queda anotado, todavía sin arrancar. Hoy el bot le

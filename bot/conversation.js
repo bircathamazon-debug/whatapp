@@ -200,12 +200,15 @@ async function handleMainMenu(phone, text, branch, state) {
     return [...lines, '', t(branch, 'mainMenu')];
   }
 
-  // No coincide con ninguna opción esperada: probablemente el cliente
-  // escribió una pregunta libre. Se guarda para revisión y se ofrece
-  // automáticamente el contacto directo, para no dejarlo sin respuesta.
+  // No coincide con ninguna opción esperada: puede ser una pregunta
+  // libre, un emoji o cualquier otra cosa. Como en este punto el
+  // cliente no está en medio de ninguna reserva, en vez de decirle
+  // "no entendí" directamente le mostramos el menú principal — así,
+  // sea lo que sea que haya escrito, siempre ve las opciones para
+  // seguir. Igual se guarda para que el peluquero lo revise en
+  // "Preguntas".
   await logUnansweredMessage(branch, phone, text, 'MAIN_MENU');
-  const talkLines = await buildTalkToStaffLines(branch);
-  return [t(branch, 'notUnderstood'), ...(talkLines ? [t(branch, 'askTalkToStaff'), ...talkLines] : []), '', t(branch, 'mainMenu')];
+  return [t(branch, 'mainMenu')];
 }
 
 async function handleBookService(phone, text, branch, state) {
