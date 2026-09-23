@@ -602,9 +602,20 @@ detalle técnico completo de arquitectura y setup.
     cualquier duplicado que aun así llegue marcado como `'notify'`.
   - ✅ **Desplegado** en Railway (`railway up`), confirmado en los logs
     que se reconectó a WhatsApp sin pedir QR nuevo.
-  - ⬜ **Falta que el usuario pruebe de nuevo en vivo** una reserva
-    completa para confirmar que ahora sí pregunta día y hora paso a
-    paso, sin saltarse nada.
+  - ✅ **Confirmado por el usuario en vivo** — probó escribiendo "menu"
+    y después "1", y ahora la reserva pregunta día y hora paso a paso
+    sin saltarse nada. (Nota de diagnóstico: el primer intento de
+    prueba del usuario había fallado porque escribió una frase libre
+    tipo "Hola, ¿me puedes hacer una cita?" en vez de tocar un número —
+    el bot todavía no entiende pedidos en lenguaje natural, solo el
+    menú numerado; no tenía que ver con este bug. Ver el hallazgo de UX
+    real anotado más abajo en el backlog.)
+  - 📌 **Hallazgo real de este diagnóstico, anotado en el backlog**: si
+    un cliente nuevo escribe una frase normal ("hola, quiero una cita")
+    en vez de una palabra exacta de saludo ("menu"/"hola"/"hi") o un
+    número, el bot no lo entiende y responde "no entendí" (aunque igual
+    le muestra el menú a continuación, así que puede seguir desde ahí
+    tocando un número). Ver detalle en el backlog más abajo.
 - ✅ **Finanzas (ingresos, gastos y suscripción de pago) — PROGRAMADA Y
   DESPLEGADA, FALTA CONFIGURAR STRIPE DE VERDAD.** El
   usuario pidió explícitamente cobro automático real con tarjeta (no un
@@ -720,6 +731,21 @@ detalle técnico completo de arquitectura y setup.
     usuario: ¿alertas por mail/WhatsApp al propio peluquero o al
     desarrollador?, ¿qué tan rápido hay que reaccionar?, ¿alcanza con los
     logs de Firebase/Railway o conviene un servicio de monitoreo aparte?
+  - ⬜ **Bot: entender un pedido de cita en lenguaje natural, no solo
+    números** (hallazgo real, encontrado diagnosticando un reporte del
+    usuario — todavía sin arrancar). Hoy, si un cliente escribe una
+    frase normal como "hola, ¿me podés hacer una cita?" en vez de tocar
+    un número del menú, el bot no la entiende — solo reconoce mensajes
+    que son exactamente una palabra de saludo (`menu`/`hola`/`hi`, ver
+    `greetingRegex` en `bot/i18n.js`) o un número suelto. Hoy en ese
+    caso igual responde "no entendí" y le muestra el menú a
+    continuación, así que el cliente puede seguir desde ahí — no se
+    pierde el pedido, pero no es lo más natural para alguien que
+    escribe como le hablaría a una persona (probablemente el caso más
+    común de cómo un cliente real arranca la conversación). Pensar con
+    el usuario si conviene, por ejemplo, reconocer "quiero/necesito
+    una cita" además del saludo exacto, o llevar el primer mensaje de
+    cualquier conversación nueva directo al menú sin importar el texto.
   - ⬜ **Cobro automático real del depósito (hallazgo de la comparación
     con la competencia)** — el usuario dijo explícitamente "lo hacemos
     más adelante", queda anotado, todavía sin arrancar. Hoy el bot le
