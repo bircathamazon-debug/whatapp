@@ -444,12 +444,38 @@ detalle técnico completo de arquitectura y setup.
       negocio "Peluquería de Yaacob" (המספרה של יעקב), Miguel Azulay
       (el usuario) armando el sistema para un familiar, uso: Programmable
       Voice únicamente (sin SMS) para el IVR de reservas.
-    - ⬜ **Esperando la respuesta de Twilio** a esa segunda vuelta de
-      información — una vez que liberen el bloqueo, retomar: comprar el
-      número (ya identificados varios de Jerusalén/Tel Aviv/Netanya
-      disponibles vía API), cargar `TWILIO_PHONE_NUMBER` en
-      `functions/.env`, redesplegar todas las funciones, configurar el
-      webhook del número ("A call comes in" →
+    - 🐛 **Twilio respondió y negó el desbloqueo — el motivo real es que
+      falta una página web pública del negocio.** Su mail literal: "once
+      your website is fully developed, please feel free to reach out to
+      us" (además ofrecieron reembolso si no se quiere seguir). Se le
+      presentaron 3 opciones al usuario (armar una web simple ahora,
+      pedir reembolso y probar otro proveedor, o pausar el teléfono por
+      ahora) — eligió **armar la web ahora**.
+    - ✅ **Página pública del negocio — PROGRAMADA Y DESPLEGADA.**
+      **URL: https://peluqueria-yaacob.web.app**. Página de una sola
+      pantalla en hebreo (mismo estilo turquesa/marfil que el panel):
+      nombre del negocio, servicio y precio (תספורת ₪60), horarios
+      reales (domingo-jueves 9-19, viernes 9-14, sábado cerrado),
+      ubicación (Jerusalén) y un botón de "קביעת תור בוואטסאפ" que abre
+      WhatsApp directo al número dedicado del bot
+      (+972 53-398-1227, con un mensaje precargado). Se armó como un
+      **sitio nuevo y separado** de Firebase Hosting (`peluqueria-yaacob`,
+      creado con `firebase hosting:sites:create`), con su propia carpeta
+      `website/index.html` — no toca ni depende del panel (`app/`), así
+      que desplegar uno no afecta al otro. `firebase.json` ahora tiene
+      un array de 2 sitios de hosting: `bot-para-peluqueria` (el panel,
+      como antes) y `peluqueria-yaacob` (esta página nueva).
+      Desplegado con `firebase deploy --only hosting:peluqueria-yaacob`
+      y verificado con una captura real. **Nota**: no se puso un botón
+      de "llamar" todavía porque el número de teléfono del IVR (Twilio)
+      no existe aún — solo se prometió lo que ya funciona de verdad
+      (WhatsApp).
+    - ⬜ **Falta**: mandarle a Twilio el link de esta página respondiendo
+      al mismo hilo del mail, y esperar que reconsideren. Una vez que
+      liberen el bloqueo, retomar: comprar el número (ya identificados
+      varios de Jerusalén/Tel Aviv/Netanya disponibles vía API), cargar
+      `TWILIO_PHONE_NUMBER` en `functions/.env`, redesplegar todas las
+      funciones, configurar el webhook del número ("A call comes in" →
       `https://us-central1-bot-para-peluqueria.cloudfunctions.net/ivrIncomingCall`
       — se puede hacer en el mismo POST de compra vía API con
       `VoiceUrl`/`VoiceMethod`), y probar con una llamada real.
