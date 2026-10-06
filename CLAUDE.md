@@ -470,15 +470,39 @@ detalle técnico completo de arquitectura y setup.
       de "llamar" todavía porque el número de teléfono del IVR (Twilio)
       no existe aún — solo se prometió lo que ya funciona de verdad
       (WhatsApp).
-    - ⬜ **Falta**: mandarle a Twilio el link de esta página respondiendo
-      al mismo hilo del mail, y esperar que reconsideren. Una vez que
-      liberen el bloqueo, retomar: comprar el número (ya identificados
-      varios de Jerusalén/Tel Aviv/Netanya disponibles vía API), cargar
-      `TWILIO_PHONE_NUMBER` en `functions/.env`, redesplegar todas las
-      funciones, configurar el webhook del número ("A call comes in" →
-      `https://us-central1-bot-para-peluqueria.cloudfunctions.net/ivrIncomingCall`
-      — se puede hacer en el mismo POST de compra vía API con
-      `VoiceUrl`/`VoiceMethod`), y probar con una llamada real.
+    - 🐛 **CERRADO — Twilio no funcionó, cuenta en trámite de reembolso.**
+      Se mandó el link de la página (peluqueria-yaacob.web.app) y se
+      contestaron todas las preguntas del equipo de "Fraud Operations"
+      en varias rondas (uso personal/profesional, caso de uso, SMS,
+      verificación de identidad) — igual negaron sacar el bloqueo.
+      - ⚠️ **Alerta de seguridad real, encontrada en el camino**: en una
+        de las rondas, Twilio pidió por mail los últimos 4 dígitos de
+        la tarjeta, el nombre del titular, el código postal de
+        facturación y el monto de la última transacción, "para
+        verificar el pago" — ese patrón (combinación de esos datos
+        específicos pedida por mail, insistiendo con una respuesta
+        "tranquilizadora" en vez de ofrecer la alternativa de reembolso
+        que ya se les había propuesto) es exactamente el de un intento
+        de phishing para conseguir datos de tarjeta, independientemente
+        de si el resto del hilo es Twilio real o no — ninguna empresa
+        legítima necesita que el cliente le repita por mail datos de
+        pago que ya tiene guardados en su propio sistema. Se decidió
+        con el usuario no mandar nunca el nombre/código postal/monto, y
+        solo se compartieron los últimos 4 dígitos solos (de bajo
+        riesgo por separado, ya que aparecen en cualquier recibo) como
+        único punto medio. **Vale la pena recordar esto** si en el
+        futuro llega un pedido parecido de cualquier proveedor.
+      - ✅ **Se pidió el reembolso** — Twilio respondió ofreciendo
+        procesarlo. Cuenta de Twilio **abandonada para este piloto**.
+    - ⬜ **Próximo paso, a decidir con el usuario**: cómo seguir con el
+      teléfono — probar un proveedor alternativo (Vonage, Plivo,
+      Telnyx, etc., sin garantía de que pidan menos requisitos) o
+      pausar el IVR telefónico por ahora y seguir solo con WhatsApp
+      (que ya funciona de punta a punta). El código del IVR
+      (`functions/src/ivr.ts`) queda listo y sin tocar para cuando se
+      retome con el proveedor que se elija — no es específico de
+      Twilio en su lógica de reservas, solo en el formato de
+      TwiML/webhook de la llamada entrante.
 - ✅ **Despliegue de esta ronda de cambios — COMPLETO.**
   1. ✅ Firebase: reglas de Firestore (`blockedTimes`) y las 26 funciones
      actualizadas, publicadas en `bot-para-peluqueria` sin errores.
