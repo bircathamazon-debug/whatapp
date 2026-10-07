@@ -494,15 +494,57 @@ detalle técnico completo de arquitectura y setup.
         futuro llega un pedido parecido de cualquier proveedor.
       - ✅ **Se pidió el reembolso** — Twilio respondió ofreciendo
         procesarlo. Cuenta de Twilio **abandonada para este piloto**.
-    - ⬜ **Próximo paso, a decidir con el usuario**: cómo seguir con el
-      teléfono — probar un proveedor alternativo (Vonage, Plivo,
-      Telnyx, etc., sin garantía de que pidan menos requisitos) o
-      pausar el IVR telefónico por ahora y seguir solo con WhatsApp
-      (que ya funciona de punta a punta). El código del IVR
-      (`functions/src/ivr.ts`) queda listo y sin tocar para cuando se
-      retome con el proveedor que se elija — no es específico de
-      Twilio en su lógica de reservas, solo en el formato de
-      TwiML/webhook de la llamada entrante.
+    - ✅ **Se eligió Telnyx como alternativa — EN TRÁMITE.** Se investigó
+      con un sub-agente de research (comparando Telnyx, Plivo, Vonage,
+      Bandwidth/Infobip/Bird) — Telnyx ganó porque su propia
+      documentación dice que los números locales de Israel para
+      **individuos** no piden verificación, y tiene voz en hebreo de
+      mejor calidad (NaturalHD) que la única opción que tenía Twilio.
+      - ✅ Cuenta creada en telnyx.com, clave de API cargada en
+        `functions/.env` (`TELNYX_API_KEY`) y probada por API — funciona.
+      - ✅ Cuenta pasada a nivel "Paid" (el usuario cargó una tarjeta
+        directo en la página propia de Telnyx — normal y seguro, nada
+        que ver con el pedido raro de Twilio por mail). Saldo cargado:
+        US$15.
+      - 🐛 **Encontrado y en trámite: los números de Israel de Telnyx NO
+        están atados a una ciudad** (no hay "Jerusalén"/"Tel Aviv" para
+        elegir, como sí tenía Twilio) — vienen de un bloque de prefijos
+        compartidos (072/076/043) que usan los operadores alternativos
+        en Israel. Suenan igual de israelíes, simplemente no se puede
+        elegir la ciudad exacta.
+      - ✅ Número comprado: **+972 76-567-1114** (US$3 de alta + US$3/mes,
+        ya descontados del saldo). Pedido con ID
+        `cb834d67-73a9-46eb-86cc-393940f1928a`, quedó **"pending"**.
+      - 🐛 **Encontrado y en trámite: el pedido se armó por error con
+        requisitos de EMPRESA** (pide certificado de registro de
+        empresa) **en vez de individuo** — contradice la propia
+        documentación de Telnyx, que dice que los individuos no
+        necesitan ningún documento para números locales de Israel. Se
+        completaron por API los 3 requisitos que sí correspondían
+        (contacto, descripción de uso, dirección — se creó una
+        "Address" en Telnyx con los datos reales del usuario: Miguel
+        Menahem Azulay, HaRav Shaulzon 51 Apt 25, Jerusalén 9540052,
+        +972543147000). Quedan 2 campos de documento sin poder
+        completarse (comprobante de domicilio + certificado de
+        empresa) — el panel de Telnyx no mostró dónde subirlos.
+      - ✅ **Se contactó al soporte en vivo de Telnyx** (chat, no mail)
+        pidiendo que pasen el pedido de "empresa" a "individuo". El
+        soporte confirmó el diagnóstico y lo mandó a la cola de
+        soporte humano — **esperando respuesta**.
+      - ⬜ **Falta**: respuesta de soporte de Telnyx. Una vez resuelto:
+        configurar el webhook del número (conectarlo a una "Call
+        Control Application" o "TeXML Application" apuntando a
+        `https://us-central1-bot-para-peluqueria.cloudfunctions.net/ivrIncomingCall`),
+        y reescribir `functions/src/ivr.ts` para usar la API de Telnyx
+        en vez de la de Twilio (Telnyx tiene "TeXML", compatible con el
+        formato TwiML que ya usa el código, así que el cambio debería
+        ser menor — cambiar el cliente/autenticación, no toda la
+        lógica de reservas). Guardar `TELNYX_PHONE_NUMBER` en
+        `functions/.env` cuando el número quede activo.
+      - **Alternativa de respaldo si Telnyx tampoco funciona**: Plivo
+        (quedó como segunda opción en la investigación), o directamente
+        pausar el IVR telefónico y seguir solo con WhatsApp (que ya
+        funciona de punta a punta) hasta más adelante.
 - ✅ **Despliegue de esta ronda de cambios — COMPLETO.**
   1. ✅ Firebase: reglas de Firestore (`blockedTimes`) y las 26 funciones
      actualizadas, publicadas en `bot-para-peluqueria` sin errores.
