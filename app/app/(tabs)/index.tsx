@@ -113,22 +113,14 @@ export default function HomeScreen() {
       <Text style={styles.dateEyebrow}>{dateHeader}</Text>
       <Text style={styles.greeting}>{t.home.greeting}</Text>
 
-      {questionsCount > 0 && (
-        <Pressable style={({ pressed }) => [styles.alertCard, pressed && styles.pressedScale]} onPress={() => router.push('/more/questions')}>
-          <View style={[styles.alertIconWrap, { backgroundColor: colors.statusPending }]}>
-            <Ionicons name="help-circle" size={18} color="#fff" />
-          </View>
-          <Text style={styles.alertText}>{t.home.questionsAlert(questionsCount)}</Text>
-          <Text style={styles.alertLink}>{t.home.viewQuestions}</Text>
-        </Pressable>
-      )}
-
       <View style={styles.heroCard}>
         <View style={styles.heroIconWrap}>
-          <Ionicons name="cash" size={20} color="#fff" />
+          <Ionicons name="cash" size={16} color="#fff" />
         </View>
-        <Text style={styles.heroLabel}>{t.finance.todayRevenueTitle}</Text>
-        <Text style={styles.heroAmount}>₪{todayRevenue}</Text>
+        <View>
+          <Text style={styles.heroLabel}>{t.finance.todayRevenueTitle}</Text>
+          <Text style={styles.heroAmount}>₪{todayRevenue}</Text>
+        </View>
       </View>
 
       <View style={styles.secondaryRow}>
@@ -166,6 +158,16 @@ export default function HomeScreen() {
           </Pressable>
         ))}
       </View>
+
+      {questionsCount > 0 && (
+        <Pressable style={({ pressed }) => [styles.alertCard, pressed && styles.pressedScale]} onPress={() => router.push('/more/questions')}>
+          <View style={[styles.alertIconWrap, { backgroundColor: colors.statusPending }]}>
+            <Ionicons name="help-circle" size={18} color="#fff" />
+          </View>
+          <Text style={styles.alertText}>{t.home.questionsAlert(questionsCount)}</Text>
+          <Text style={styles.alertLink}>{t.home.viewQuestions}</Text>
+        </Pressable>
+      )}
 
       <Text style={styles.sectionTitle}>{t.home.upcomingTitle}</Text>
       {upcoming.length === 0 ? (
@@ -217,25 +219,28 @@ function makeStyles(colors: ThemeColors, mode: 'light' | 'dark') {
     alertText: { flex: 1, color: colors.text, fontWeight: '700', fontSize: 13 },
     alertLink: { color: colors.accent, fontWeight: '800', fontSize: 12 },
     heroCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
       backgroundColor: colors.surface,
-      borderRadius: RADIUS.xl,
-      padding: 16,
-      marginBottom: 8,
-      ...cardShadow(mode, 'md'),
+      borderRadius: RADIUS.lg,
+      paddingVertical: 10,
+      paddingHorizontal: 14,
+      marginBottom: 6,
+      ...cardShadow(mode, 'sm'),
       ...accentBorder(colors),
     },
     heroIconWrap: {
-      width: 36,
-      height: 36,
-      borderRadius: RADIUS.md,
+      width: 30,
+      height: 30,
+      borderRadius: RADIUS.sm,
       backgroundColor: colors.accent,
       alignItems: 'center',
       justifyContent: 'center',
-      marginBottom: 8,
       ...accentGlow(colors, mode),
     },
-    heroLabel: { fontSize: 12, color: colors.textMuted, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
-    heroAmount: { fontSize: 32, fontWeight: '800', color: colors.accent, letterSpacing: -0.6, marginTop: 2 },
+    heroLabel: { fontSize: 11, color: colors.textMuted, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
+    heroAmount: { fontSize: 20, fontWeight: '800', color: colors.accent, letterSpacing: -0.4 },
     secondaryRow: { flexDirection: 'row', gap: 10, marginBottom: 4 },
     secondaryChip: {
       flexDirection: 'row',
