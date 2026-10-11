@@ -160,7 +160,7 @@ export default function HomeScreen() {
         {QUICK_ACTIONS.map((qa) => (
           <Pressable key={qa.label} style={({ pressed }) => [styles.quickTile, pressed && styles.pressedScale]} onPress={qa.onPress}>
             <View style={[styles.quickIconWrap, { backgroundColor: qa.color }, coloredGlow(qa.color, mode)]}>
-              <Ionicons name={qa.icon} size={26} color="#fff" />
+              <Ionicons name={qa.icon} size={36} color="#fff" />
             </View>
             <Text style={styles.quickLabel}>{qa.label}</Text>
           </Pressable>
@@ -274,7 +274,7 @@ function makeStyles(colors: ThemeColors, mode: 'light' | 'dark') {
       alignItems: 'center',
       gap: 14,
     },
-    quickIconWrap: { width: 58, height: 58, borderRadius: RADIUS.pill, alignItems: 'center', justifyContent: 'center' },
+    quickIconWrap: { width: 88, height: 88, borderRadius: RADIUS.pill, alignItems: 'center', justifyContent: 'center' },
     quickLabel: { fontSize: 13.5, fontWeight: '800', color: colors.text, textAlign: 'center', letterSpacing: 0.1, textTransform: 'uppercase' },
     upcomingRow: {
       flexDirection: 'row',
