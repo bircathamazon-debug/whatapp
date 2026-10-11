@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, RefreshControl } from 'react-native';
+import { View, Text, ScrollView, Pressable, StyleSheet, RefreshControl } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useBranch } from '../../lib/branchContext';
@@ -60,9 +60,9 @@ export default function HomeScreen() {
     return (
       <View style={styles.center}>
         <Text style={styles.emptyText}>{t.agenda.needBranch}</Text>
-        <TouchableOpacity style={styles.smallBtn} onPress={() => router.push('/settings/branches')}>
+        <Pressable style={({ pressed }) => [styles.smallBtn, pressed && styles.pressedScale]} onPress={() => router.push('/settings/branches')}>
           <Text style={styles.smallBtnText}>{t.agenda.goToAdmin}</Text>
-        </TouchableOpacity>
+        </Pressable>
       </View>
     );
   }
@@ -99,9 +99,13 @@ export default function HomeScreen() {
       {branches.length > 1 && (
         <View style={styles.branchRow}>
           {branches.map((b) => (
-            <TouchableOpacity key={b.id} style={[styles.branchChip, b.id === branchId && styles.branchChipActive]} onPress={() => setBranchId(b.id)}>
+            <Pressable
+              key={b.id}
+              style={({ pressed }) => [styles.branchChip, b.id === branchId && styles.branchChipActive, pressed && styles.pressedScale]}
+              onPress={() => setBranchId(b.id)}
+            >
               <Text style={[styles.branchChipText, b.id === branchId && styles.branchChipTextActive]}>{b.name}</Text>
-            </TouchableOpacity>
+            </Pressable>
           ))}
         </View>
       )}
@@ -110,13 +114,13 @@ export default function HomeScreen() {
       <Text style={styles.greeting}>{t.home.greeting}</Text>
 
       {questionsCount > 0 && (
-        <TouchableOpacity style={styles.alertCard} onPress={() => router.push('/more/questions')} activeOpacity={0.85}>
+        <Pressable style={({ pressed }) => [styles.alertCard, pressed && styles.pressedScale]} onPress={() => router.push('/more/questions')}>
           <View style={[styles.alertIconWrap, { backgroundColor: colors.statusPending }]}>
             <Ionicons name="help-circle" size={18} color="#fff" />
           </View>
           <Text style={styles.alertText}>{t.home.questionsAlert(questionsCount)}</Text>
           <Text style={styles.alertLink}>{t.home.viewQuestions}</Text>
-        </TouchableOpacity>
+        </Pressable>
       )}
 
       <View style={styles.heroCard}>
@@ -154,12 +158,12 @@ export default function HomeScreen() {
       <Text style={styles.sectionTitle}>{t.home.quickActionsTitle}</Text>
       <View style={styles.quickGrid}>
         {QUICK_ACTIONS.map((qa) => (
-          <TouchableOpacity key={qa.label} style={styles.quickTile} onPress={qa.onPress} activeOpacity={0.8}>
+          <Pressable key={qa.label} style={({ pressed }) => [styles.quickTile, pressed && styles.pressedScale]} onPress={qa.onPress}>
             <View style={[styles.quickIconWrap, { backgroundColor: qa.color }, coloredGlow(qa.color, mode)]}>
               <Ionicons name={qa.icon} size={26} color="#fff" />
             </View>
             <Text style={styles.quickLabel}>{qa.label}</Text>
-          </TouchableOpacity>
+          </Pressable>
         ))}
       </View>
 
@@ -291,5 +295,8 @@ function makeStyles(colors: ThemeColors, mode: 'light' | 'dark') {
     upcomingTime: { fontSize: 13, fontWeight: '800', color: colors.accent, fontVariant: ['tabular-nums'] },
     upcomingName: { fontSize: 13.5, fontWeight: '700', color: colors.text },
     upcomingMeta: { fontSize: 11.5, color: colors.textMuted, marginTop: 2 },
+    /** Feedback táctil instantáneo al tocar (no al soltar) — principio de
+     * Apple de "responder en el instante del toque". */
+    pressedScale: { transform: [{ scale: 0.96 }], opacity: 0.85 },
   });
 }
