@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Switch, Alert } from 'react-native';
+import { View, Text, TextInput, Pressable, StyleSheet, ScrollView, Switch, Alert } from 'react-native';
 import { useBranch } from '../../../lib/branchContext';
 import { getStaffByBranch, updateStaff } from '../../../lib/staff';
-import { useTheme, type ThemeColors, RADIUS, cardShadow, accentBorder } from '../../../lib/theme';
+import { useTheme, type ThemeColors, RADIUS, cardShadow, accentBorder, PRESSED_SCALE } from '../../../lib/theme';
 import { useT } from '../../../lib/i18n';
 import type { Staff, WeeklyHours } from '../../../../shared/types';
 
@@ -70,9 +70,13 @@ export default function ScheduleScreen() {
     <ScrollView style={styles.container} contentContainerStyle={{ padding: 16 }}>
       <View style={styles.staffRow}>
         {staffList.map((s) => (
-          <TouchableOpacity key={s.id} style={[styles.staffChip, s.id === selectedId && styles.staffChipActive]} onPress={() => selectStaff(s)}>
+          <Pressable
+            key={s.id}
+            style={({ pressed }) => [styles.staffChip, s.id === selectedId && styles.staffChipActive, pressed && PRESSED_SCALE]}
+            onPress={() => selectStaff(s)}
+          >
             <Text style={[styles.staffChipText, s.id === selectedId && styles.staffChipTextActive]}>{s.name}</Text>
-          </TouchableOpacity>
+          </Pressable>
         ))}
       </View>
 
@@ -99,20 +103,20 @@ export default function ScheduleScreen() {
       <Text style={styles.sectionTitle}>{t.schedule.blockedDays}</Text>
       <View style={styles.timeRow}>
         <TextInput style={[styles.timeInput, { flex: 1 }]} value={newBlockedDate} onChangeText={setNewBlockedDate} placeholder="2026-04-23" placeholderTextColor={colors.textMuted} />
-        <TouchableOpacity style={styles.addBtn} onPress={addBlockedDate}>
+        <Pressable style={({ pressed }) => [styles.addBtn, pressed && PRESSED_SCALE]} onPress={addBlockedDate}>
           <Text style={styles.addBtnText}>{t.schedule.addBtn}</Text>
-        </TouchableOpacity>
+        </Pressable>
       </View>
       {blockedDates.map((date) => (
         <View key={date} style={styles.blockedRow}>
           <Text style={styles.blockedDate}>{date}</Text>
-          <TouchableOpacity onPress={() => removeBlockedDate(date)}><Text style={styles.delete}>🗑️</Text></TouchableOpacity>
+          <Pressable style={({ pressed }) => pressed && PRESSED_SCALE} onPress={() => removeBlockedDate(date)}><Text style={styles.delete}>🗑️</Text></Pressable>
         </View>
       ))}
 
-      <TouchableOpacity style={styles.saveBtn} onPress={save} disabled={saving}>
+      <Pressable style={({ pressed }) => [styles.saveBtn, pressed && PRESSED_SCALE]} onPress={save} disabled={saving}>
         <Text style={styles.saveBtnText}>{saving ? t.schedule.saving : t.schedule.save}</Text>
-      </TouchableOpacity>
+      </Pressable>
     </ScrollView>
   );
 }

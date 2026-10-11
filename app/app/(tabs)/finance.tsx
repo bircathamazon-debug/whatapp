@@ -1,12 +1,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, TextInput, Alert, Linking } from 'react-native';
+import { View, Text, Pressable, StyleSheet, ScrollView, TextInput, Alert, Linking } from 'react-native';
 import { useBranch } from '../../lib/branchContext';
 import { getAppointmentsForDay } from '../../lib/appointments';
 import { getServicesByBranch } from '../../lib/services';
 import { getExpensesByBranch, addExpense, deleteExpense } from '../../lib/expenses';
 import { createSubscriptionCheckout, openBillingPortal } from '../../lib/stripe';
 import { createTranzilaCheckoutUrl, cancelTranzilaSubscription } from '../../lib/tranzila';
-import { useTheme, type ThemeColors, RADIUS, cardShadow, accentBorder } from '../../lib/theme';
+import { useTheme, type ThemeColors, RADIUS, cardShadow, accentBorder, PRESSED_SCALE } from '../../lib/theme';
 import { useT, useDateLocale } from '../../lib/i18n';
 import type { Appointment, Service, Expense } from '../../../shared/types';
 
@@ -208,8 +208,8 @@ export default function FinanceScreen() {
       <Text style={styles.sectionTitle}>{t.finance.subscriptionTitle}</Text>
       <View style={styles.subscriptionCard}>
         <Text style={styles.subscriptionStatus}>{subscriptionStatusText}</Text>
-        <TouchableOpacity
-          style={styles.saveBtn}
+        <Pressable
+          style={({ pressed }) => [styles.saveBtn, pressed && PRESSED_SCALE]}
           disabled={subscribing}
           onPress={
             subscription?.status === 'active'
@@ -226,7 +226,7 @@ export default function FinanceScreen() {
                 : t.finance.manageBtn
               : t.finance.subscribeBtn}
           </Text>
-        </TouchableOpacity>
+        </Pressable>
       </View>
 
       <Text style={styles.sectionTitle}>{t.finance.expensesTitle}</Text>
@@ -234,9 +234,13 @@ export default function FinanceScreen() {
 
       <View style={styles.chipsRow}>
         {CATEGORIES.map((c) => (
-          <TouchableOpacity key={c} style={[styles.chip, expenseCategory === c && styles.chipActive]} onPress={() => setExpenseCategory(c)}>
+          <Pressable
+            key={c}
+            style={({ pressed }) => [styles.chip, expenseCategory === c && styles.chipActive, pressed && PRESSED_SCALE]}
+            onPress={() => setExpenseCategory(c)}
+          >
             <Text style={[styles.chipText, expenseCategory === c && styles.chipTextActive]}>{CATEGORY_LABEL[c]}</Text>
-          </TouchableOpacity>
+          </Pressable>
         ))}
       </View>
 
@@ -246,9 +250,9 @@ export default function FinanceScreen() {
         <Text style={styles.fieldLabel}>{t.finance.amountPlaceholder}</Text>
         <TextInput style={styles.input} value={expenseAmount} onChangeText={setExpenseAmount} placeholder="500" placeholderTextColor={colors.textMuted} keyboardType="number-pad" />
         <TextInput style={styles.input} value={expenseDescription} onChangeText={setExpenseDescription} placeholder={t.finance.descriptionPlaceholder} placeholderTextColor={colors.textMuted} />
-        <TouchableOpacity style={styles.saveBtn} onPress={submitExpense}>
+        <Pressable style={({ pressed }) => [styles.saveBtn, pressed && PRESSED_SCALE]} onPress={submitExpense}>
           <Text style={styles.saveBtnText}>{t.finance.addExpense}</Text>
-        </TouchableOpacity>
+        </Pressable>
       </View>
 
       <Text style={styles.sectionTitle}>{t.finance.monthExpensesTitle}: ₪{monthExpensesTotal}</Text>
@@ -258,9 +262,9 @@ export default function FinanceScreen() {
             <Text style={styles.expenseRowTitle}>{CATEGORY_LABEL[e.category]} · ₪{e.amount}</Text>
             <Text style={styles.expenseRowSub}>{e.date}{e.description ? ` · ${e.description}` : ''}</Text>
           </View>
-          <TouchableOpacity onPress={() => removeExpense(e)}>
+          <Pressable style={({ pressed }) => pressed && PRESSED_SCALE} onPress={() => removeExpense(e)}>
             <Text style={styles.expenseRowDelete}>✕</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       ))}
     </ScrollView>

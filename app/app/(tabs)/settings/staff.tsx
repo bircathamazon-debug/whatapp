@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, Alert, Switch } from 'react-native';
+import { View, Text, TextInput, Pressable, StyleSheet, FlatList, Alert, Switch } from 'react-native';
 import { useBranch } from '../../../lib/branchContext';
 import { getStaffByBranch, addStaff, deleteStaff, updateStaff, emptyWeeklyHours } from '../../../lib/staff';
 import { getServicesByBranch } from '../../../lib/services';
-import { useTheme, type ThemeColors, RADIUS, cardShadow, accentBorder } from '../../../lib/theme';
+import { useTheme, type ThemeColors, RADIUS, cardShadow, accentBorder, PRESSED_SCALE } from '../../../lib/theme';
 import { useT } from '../../../lib/i18n';
 import type { Staff, Service } from '../../../../shared/types';
 
@@ -85,9 +85,9 @@ export default function StaffScreen() {
             <TextInput style={styles.input} value={name} onChangeText={setName} placeholder={t.staff.namePlaceholder} placeholderTextColor={colors.textMuted} />
             <Text style={styles.label}>{t.staff.phone}</Text>
             <TextInput style={styles.input} value={phone} onChangeText={setPhone} placeholder="+972501234567" placeholderTextColor={colors.textMuted} keyboardType="phone-pad" />
-            <TouchableOpacity style={styles.btn} onPress={save}>
+            <Pressable style={({ pressed }) => [styles.btn, pressed && PRESSED_SCALE]} onPress={save}>
               <Text style={styles.btnText}>{t.staff.add}</Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
         }
         renderItem={({ item }) => (
@@ -99,16 +99,17 @@ export default function StaffScreen() {
                   <Text style={styles.cardMeta}>{item.phone}</Text>
                 </View>
                 <Switch value={item.active} onValueChange={() => toggleActive(item)} />
-                <TouchableOpacity onPress={() => remove(item)}>
+                <Pressable style={({ pressed }) => pressed && PRESSED_SCALE} onPress={() => remove(item)}>
                   <Text style={styles.delete}>🗑️</Text>
-                </TouchableOpacity>
+                </Pressable>
               </View>
               {services.length > 0 && (
-                <TouchableOpacity
+                <Pressable
+                  style={({ pressed }) => pressed && PRESSED_SCALE}
                   onPress={() => (editingDurationsFor === item.id ? setEditingDurationsFor(null) : openDurations(item))}
                 >
                   <Text style={styles.durationsToggle}>{t.staff.durationsBtn}</Text>
-                </TouchableOpacity>
+                </Pressable>
               )}
               {editingDurationsFor === item.id && (
                 <View style={styles.durationsPanel}>
@@ -127,9 +128,9 @@ export default function StaffScreen() {
                       />
                     </View>
                   ))}
-                  <TouchableOpacity style={styles.btn} onPress={() => saveDurations(item)}>
+                  <Pressable style={({ pressed }) => [styles.btn, pressed && PRESSED_SCALE]} onPress={() => saveDurations(item)}>
                     <Text style={styles.btnText}>{t.staff.save}</Text>
-                  </TouchableOpacity>
+                  </Pressable>
                 </View>
               )}
             </View>

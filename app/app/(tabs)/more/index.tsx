@@ -1,10 +1,10 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert, ScrollView, I18nManager } from 'react-native';
+import { View, Text, Pressable, StyleSheet, Alert, ScrollView, I18nManager } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../../lib/firebase';
-import { useTheme, type ThemeColors, RADIUS, cardShadow } from '../../../lib/theme';
+import { useTheme, type ThemeColors, RADIUS, cardShadow, PRESSED_SCALE } from '../../../lib/theme';
 import { useT } from '../../../lib/i18n';
 
 type IconName = React.ComponentProps<typeof Ionicons>['name'];
@@ -35,27 +35,26 @@ export default function MoreMenuScreen() {
 
       <View style={styles.menuCard}>
         {MENU.map((item, i) => (
-          <TouchableOpacity
+          <Pressable
             key={item.route}
-            style={[styles.menuItem, i < MENU.length - 1 && styles.menuItemDivider]}
+            style={({ pressed }) => [styles.menuItem, i < MENU.length - 1 && styles.menuItemDivider, pressed && PRESSED_SCALE]}
             onPress={() => router.push(item.route)}
-            activeOpacity={0.7}
           >
             <View style={styles.iconBadge}>
               <Ionicons name={item.icon} size={20} color={colors.accent} />
             </View>
             <Text style={styles.menuText}>{item.label}</Text>
             <Ionicons name="chevron-forward" size={18} color={colors.textMuted} style={styles.chevron} />
-          </TouchableOpacity>
+          </Pressable>
         ))}
       </View>
 
-      <TouchableOpacity style={styles.logoutItem} onPress={logout} activeOpacity={0.7}>
+      <Pressable style={({ pressed }) => [styles.logoutItem, pressed && PRESSED_SCALE]} onPress={logout}>
         <View style={[styles.iconBadge, styles.iconBadgeDanger]}>
           <Ionicons name="log-out" size={20} color={colors.danger} />
         </View>
         <Text style={[styles.menuText, styles.logoutText]}>{t.adminMenu.logout}</Text>
-      </TouchableOpacity>
+      </Pressable>
     </ScrollView>
   );
 }

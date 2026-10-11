@@ -3,7 +3,7 @@ import {
   View,
   Text,
   TextInput,
-  TouchableOpacity,
+  Pressable,
   StyleSheet,
   Alert,
   KeyboardAvoidingView,
@@ -13,7 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../lib/firebase';
-import { useTheme, type ThemeColors, RADIUS, cardShadow, accentGlow, accentBorder } from '../../lib/theme';
+import { useTheme, type ThemeColors, RADIUS, cardShadow, accentGlow, accentBorder, PRESSED_SCALE } from '../../lib/theme';
 import { useT } from '../../lib/i18n';
 
 export default function LoginScreen() {
@@ -75,14 +75,13 @@ export default function LoginScreen() {
           />
         </View>
 
-        <TouchableOpacity
-          style={[styles.btn, loading && styles.btnDisabled]}
+        <Pressable
+          style={({ pressed }) => [styles.btn, loading && styles.btnDisabled, pressed && PRESSED_SCALE]}
           onPress={login}
           disabled={loading}
-          activeOpacity={0.85}
         >
           <Text style={styles.btnText}>{loading ? t.login.submitting : t.login.submit}</Text>
-        </TouchableOpacity>
+        </Pressable>
       </View>
     </KeyboardAvoidingView>
   );

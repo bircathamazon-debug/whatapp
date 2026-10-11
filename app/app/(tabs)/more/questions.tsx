@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, RefreshControl, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, FlatList, StyleSheet, RefreshControl, Pressable, Alert } from 'react-native';
 import { useBranch } from '../../../lib/branchContext';
 import { getUnansweredByBranch, markMessageResolved, deleteUnansweredMessage } from '../../../lib/unansweredMessages';
-import { useTheme, type ThemeColors, RADIUS, cardShadow, accentBorder } from '../../../lib/theme';
+import { useTheme, type ThemeColors, RADIUS, cardShadow, accentBorder, PRESSED_SCALE } from '../../../lib/theme';
 import { useT } from '../../../lib/i18n';
 import type { UnansweredMessage } from '../../../../shared/types';
 
@@ -67,13 +67,13 @@ export default function QuestionsScreen() {
             <Text style={styles.meta}>{t.questions.from(item.phone)} · {t.questions.stepLabel(item.step)}</Text>
             <View style={styles.actionsRow}>
               {!item.resolved && (
-                <TouchableOpacity style={styles.resolveBtn} onPress={() => resolve(item)}>
+                <Pressable style={({ pressed }) => [styles.resolveBtn, pressed && PRESSED_SCALE]} onPress={() => resolve(item)}>
                   <Text style={styles.resolveBtnText}>{t.questions.resolve}</Text>
-                </TouchableOpacity>
+                </Pressable>
               )}
-              <TouchableOpacity onPress={() => remove(item)}>
+              <Pressable style={({ pressed }) => pressed && PRESSED_SCALE} onPress={() => remove(item)}>
                 <Text style={styles.delete}>{t.questions.delete}</Text>
-              </TouchableOpacity>
+              </Pressable>
             </View>
           </View>
         )}

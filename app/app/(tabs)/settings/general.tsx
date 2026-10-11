@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, TextInput, Linking, Alert, Switch } from 'react-native';
+import { View, Text, Pressable, StyleSheet, ScrollView, TextInput, Linking, Alert, Switch } from 'react-native';
 import { useBranch } from '../../../lib/branchContext';
 import { updateBranch } from '../../../lib/branches';
 import { getStaffByBranch } from '../../../lib/staff';
 import { getBlockedTimesByBranch, addBlockedTime, deleteBlockedTime } from '../../../lib/blockedTimes';
-import { useTheme, type ThemeColors, RADIUS, cardShadow, accentBorder } from '../../../lib/theme';
+import { useTheme, type ThemeColors, RADIUS, cardShadow, accentBorder, PRESSED_SCALE } from '../../../lib/theme';
 import { useT, isRtl, LANGUAGE_NAMES, type Lang } from '../../../lib/i18n';
 import { LOYALTY_THRESHOLD, NO_SHOW_DEPOSIT_THRESHOLD, REMINDER_WINDOWS_HOURS } from '../../../../shared/types';
 import type { Staff, Branch, BlockedTime } from '../../../../shared/types';
@@ -131,33 +131,47 @@ export default function SettingsScreen() {
       <Text style={styles.hint}>{t.settings.languageHint}</Text>
       <View style={styles.chipsRow}>
         {(Object.keys(LANGUAGE_NAMES) as Lang[]).map((lang) => (
-          <TouchableOpacity key={lang} style={[styles.staffChip, ((branch.language as Lang) ?? 'he') === lang && styles.staffChipActive]} onPress={() => setLanguage(lang)}>
+          <Pressable
+            key={lang}
+            style={({ pressed }) => [styles.staffChip, ((branch.language as Lang) ?? 'he') === lang && styles.staffChipActive, pressed && PRESSED_SCALE]}
+            onPress={() => setLanguage(lang)}
+          >
             <Text style={[styles.staffChipText, ((branch.language as Lang) ?? 'he') === lang && styles.staffChipTextActive]}>{LANGUAGE_NAMES[lang]}</Text>
-          </TouchableOpacity>
+          </Pressable>
         ))}
       </View>
 
       <Text style={styles.sectionTitle}>{t.settings.displayMode}</Text>
       <View style={styles.segmented}>
-        <TouchableOpacity style={[styles.segment, (branch.themeMode ?? 'light') === 'light' && styles.segmentActive]} onPress={() => setThemeMode('light')}>
+        <Pressable
+          style={({ pressed }) => [styles.segment, (branch.themeMode ?? 'light') === 'light' && styles.segmentActive, pressed && PRESSED_SCALE]}
+          onPress={() => setThemeMode('light')}
+        >
           <Text style={[styles.segmentText, (branch.themeMode ?? 'light') === 'light' && styles.segmentTextActive]}>{t.settings.light}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.segment, branch.themeMode === 'dark' && styles.segmentActive]} onPress={() => setThemeMode('dark')}>
+        </Pressable>
+        <Pressable
+          style={({ pressed }) => [styles.segment, branch.themeMode === 'dark' && styles.segmentActive, pressed && PRESSED_SCALE]}
+          onPress={() => setThemeMode('dark')}
+        >
           <Text style={[styles.segmentText, branch.themeMode === 'dark' && styles.segmentTextActive]}>{t.settings.dark}</Text>
-        </TouchableOpacity>
+        </Pressable>
       </View>
 
       <Text style={styles.sectionTitle}>{t.settings.blockHoursTitle}</Text>
       <Text style={styles.hint}>{t.settings.blockHoursHint}</Text>
 
       <View style={styles.chipsRow}>
-        <TouchableOpacity style={[styles.staffChip, blockStaffId === null && styles.staffChipActive]} onPress={() => setBlockStaffId(null)}>
+        <Pressable style={({ pressed }) => [styles.staffChip, blockStaffId === null && styles.staffChipActive, pressed && PRESSED_SCALE]} onPress={() => setBlockStaffId(null)}>
           <Text style={[styles.staffChipText, blockStaffId === null && styles.staffChipTextActive]}>{t.settings.allStaff}</Text>
-        </TouchableOpacity>
+        </Pressable>
         {staff.map((s) => (
-          <TouchableOpacity key={s.id} style={[styles.staffChip, blockStaffId === s.id && styles.staffChipActive]} onPress={() => setBlockStaffId(s.id)}>
+          <Pressable
+            key={s.id}
+            style={({ pressed }) => [styles.staffChip, blockStaffId === s.id && styles.staffChipActive, pressed && PRESSED_SCALE]}
+            onPress={() => setBlockStaffId(s.id)}
+          >
             <Text style={[styles.staffChipText, blockStaffId === s.id && styles.staffChipTextActive]}>{s.name}</Text>
-          </TouchableOpacity>
+          </Pressable>
         ))}
       </View>
 
@@ -165,10 +179,10 @@ export default function SettingsScreen() {
         <Text style={styles.fieldLabel}>{t.settings.dateLabel}</Text>
         <TextInput style={styles.input} value={blockDate} onChangeText={setBlockDate} placeholder="2026-09-20" placeholderTextColor={colors.textMuted} />
 
-        <TouchableOpacity style={styles.allDayRow} onPress={() => setBlockAllDay((v) => !v)}>
+        <Pressable style={({ pressed }) => [styles.allDayRow, pressed && PRESSED_SCALE]} onPress={() => setBlockAllDay((v) => !v)}>
           <View style={[styles.checkbox, blockAllDay && styles.checkboxActive]}>{blockAllDay && <Text style={styles.checkboxMark}>✓</Text>}</View>
           <Text style={styles.allDayLabel}>{t.settings.blockAllDay}</Text>
-        </TouchableOpacity>
+        </Pressable>
 
         {!blockAllDay && (
           <View style={styles.timeRow}>
@@ -180,9 +194,9 @@ export default function SettingsScreen() {
 
         <TextInput style={styles.input} value={blockReason} onChangeText={setBlockReason} placeholder={t.settings.reasonPlaceholder} placeholderTextColor={colors.textMuted} />
 
-        <TouchableOpacity style={styles.saveBtn} onPress={submitBlock}>
+        <Pressable style={({ pressed }) => [styles.saveBtn, pressed && PRESSED_SCALE]} onPress={submitBlock}>
           <Text style={styles.saveBtnText}>{t.settings.addBlock}</Text>
-        </TouchableOpacity>
+        </Pressable>
       </View>
 
       {blockedTimes.length > 0 && (
@@ -198,9 +212,9 @@ export default function SettingsScreen() {
                   {b.reason ? ` · ${b.reason}` : ''}
                 </Text>
               </View>
-              <TouchableOpacity onPress={() => removeBlock(b)}>
+              <Pressable style={({ pressed }) => pressed && PRESSED_SCALE} onPress={() => removeBlock(b)}>
                 <Text style={styles.blockRowDelete}>✕</Text>
-              </TouchableOpacity>
+              </Pressable>
             </View>
           ))}
         </View>
@@ -208,18 +222,22 @@ export default function SettingsScreen() {
 
       <Text style={styles.sectionTitle}>{t.settings.shabbatMode(branch.name)}</Text>
       {SHABBAT_MODES.map((m) => (
-        <TouchableOpacity key={m.value} style={[styles.option, branch.shabbatMode === m.value && styles.optionActive]} onPress={() => setShabbatMode(m.value)}>
+        <Pressable
+          key={m.value}
+          style={({ pressed }) => [styles.option, branch.shabbatMode === m.value && styles.optionActive, pressed && PRESSED_SCALE]}
+          onPress={() => setShabbatMode(m.value)}
+        >
           <Text style={[styles.optionLabel, branch.shabbatMode === m.value && styles.optionLabelActive]}>{m.label}</Text>
           <Text style={styles.optionHint}>{m.hint}</Text>
-        </TouchableOpacity>
+        </Pressable>
       ))}
 
       <Text style={styles.sectionTitle}>{t.settings.googleCalendar}</Text>
       <Text style={styles.hint}>{t.settings.googleCalendarHint}</Text>
       {staff.map((s) => (
-        <TouchableOpacity key={s.id} style={styles.calendarBtn} onPress={() => connectGoogleCalendar(s.id)}>
+        <Pressable key={s.id} style={({ pressed }) => [styles.calendarBtn, pressed && PRESSED_SCALE]} onPress={() => connectGoogleCalendar(s.id)}>
           <Text style={styles.calendarBtnText}>{t.settings.connectCalendar(s.name)}</Text>
-        </TouchableOpacity>
+        </Pressable>
       ))}
 
       <Text style={styles.sectionTitle}>{t.settings.systemRules}</Text>

@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, RefreshControl, Alert } from 'react-native';
+import { View, Text, ScrollView, Pressable, StyleSheet, RefreshControl, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useBranch } from '../../lib/branchContext';
-import { useTheme, type ThemeColors, RADIUS, cardShadow } from '../../lib/theme';
+import { useTheme, type ThemeColors, RADIUS, cardShadow, PRESSED_SCALE } from '../../lib/theme';
 import { getAppointmentsForDay, adminCancelAppointment, adminConfirmAppointment } from '../../lib/appointments';
 import { getStaffByBranch } from '../../lib/staff';
 import { getServicesByBranch } from '../../lib/services';
@@ -102,9 +102,9 @@ export default function AgendaScreen() {
     return (
       <View style={styles.center}>
         <Text style={styles.emptyText}>{t.agenda.needBranch}</Text>
-        <TouchableOpacity style={styles.smallBtn} onPress={() => router.push('/settings/branches')}>
+        <Pressable style={({ pressed }) => [styles.smallBtn, pressed && PRESSED_SCALE]} onPress={() => router.push('/settings/branches')}>
           <Text style={styles.smallBtnText}>{t.agenda.goToAdmin}</Text>
-        </TouchableOpacity>
+        </Pressable>
       </View>
     );
   }
@@ -124,20 +124,24 @@ export default function AgendaScreen() {
       {branches.length > 1 && (
         <View style={styles.branchRow}>
           {branches.map((b) => (
-            <TouchableOpacity key={b.id} style={[styles.branchChip, b.id === branchId && styles.branchChipActive]} onPress={() => setBranchId(b.id)}>
+            <Pressable
+              key={b.id}
+              style={({ pressed }) => [styles.branchChip, b.id === branchId && styles.branchChipActive, pressed && PRESSED_SCALE]}
+              onPress={() => setBranchId(b.id)}
+            >
               <Text style={[styles.branchChipText, b.id === branchId && styles.branchChipTextActive]}>{b.name}</Text>
-            </TouchableOpacity>
+            </Pressable>
           ))}
         </View>
       )}
 
       <View style={styles.daybar}>
-        <TouchableOpacity onPress={() => setDayOffset((d) => d + 1)}><Text style={styles.chev}>›</Text></TouchableOpacity>
+        <Pressable style={({ pressed }) => pressed && PRESSED_SCALE} onPress={() => setDayOffset((d) => d + 1)}><Text style={styles.chev}>›</Text></Pressable>
         <View style={styles.dateWrap}>
           <Text style={styles.dayNum}>{dayOffset === 0 ? t.agenda.today : dayNum}</Text>
           <Text style={styles.dayText}>{monthWeekday}</Text>
         </View>
-        <TouchableOpacity onPress={() => setDayOffset((d) => d - 1)}><Text style={styles.chev}>‹</Text></TouchableOpacity>
+        <Pressable style={({ pressed }) => pressed && PRESSED_SCALE} onPress={() => setDayOffset((d) => d - 1)}><Text style={styles.chev}>‹</Text></Pressable>
       </View>
 
       {allDayBlocks.length > 0 && (
@@ -182,13 +186,13 @@ export default function AgendaScreen() {
                     {(item.status === 'confirmed' || item.status === 'pending_deposit') && (
                       <View style={styles.chipActions}>
                         {item.status === 'pending_deposit' && (
-                          <TouchableOpacity style={styles.confirmBtn} onPress={() => confirm(item)}>
+                          <Pressable style={({ pressed }) => [styles.confirmBtn, pressed && PRESSED_SCALE]} onPress={() => confirm(item)}>
                             <Text style={styles.confirmBtnText}>{t.agenda.depositReceived}</Text>
-                          </TouchableOpacity>
+                          </Pressable>
                         )}
-                        <TouchableOpacity style={styles.cancelBtn} onPress={() => cancel(item)}>
+                        <Pressable style={({ pressed }) => [styles.cancelBtn, pressed && PRESSED_SCALE]} onPress={() => cancel(item)}>
                           <Text style={styles.cancelBtnText}>{t.agenda.cancel}</Text>
-                        </TouchableOpacity>
+                        </Pressable>
                       </View>
                     )}
                   </View>

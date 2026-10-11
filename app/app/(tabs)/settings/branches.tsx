@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, Alert } from 'react-native';
+import { View, Text, TextInput, Pressable, StyleSheet, FlatList, Alert } from 'react-native';
 import { useBranch } from '../../../lib/branchContext';
 import { addBranch, deleteBranch } from '../../../lib/branches';
-import { useTheme, type ThemeColors, RADIUS, cardShadow, accentBorder } from '../../../lib/theme';
+import { useTheme, type ThemeColors, RADIUS, cardShadow, accentBorder, PRESSED_SCALE } from '../../../lib/theme';
 import { useT } from '../../../lib/i18n';
 
 export default function BranchesScreen() {
@@ -54,9 +54,9 @@ export default function BranchesScreen() {
             <TextInput style={styles.input} value={phone} onChangeText={setPhone} placeholder="+972501234567" placeholderTextColor={colors.textMuted} keyboardType="phone-pad" />
             <Text style={styles.label}>{t.branches.geonameId}</Text>
             <TextInput style={styles.input} value={geonameId} onChangeText={setGeonameId} placeholder="293397" placeholderTextColor={colors.textMuted} />
-            <TouchableOpacity style={styles.btn} onPress={save}>
+            <Pressable style={({ pressed }) => [styles.btn, pressed && PRESSED_SCALE]} onPress={save}>
               <Text style={styles.btnText}>{t.branches.add}</Text>
-            </TouchableOpacity>
+            </Pressable>
             <Text style={styles.sectionTitle}>{t.branches.existing}</Text>
           </View>
         }
@@ -67,9 +67,9 @@ export default function BranchesScreen() {
               <Text style={styles.cardMeta}>{item.address}</Text>
               <Text style={styles.cardMeta}>{t.branches.shabbatModeLine(SHABBAT_MODE_LABEL[item.shabbatMode] ?? item.shabbatMode)}</Text>
             </View>
-            <TouchableOpacity onPress={() => remove(item.id, item.name)}>
+            <Pressable style={({ pressed }) => pressed && PRESSED_SCALE} onPress={() => remove(item.id, item.name)}>
               <Text style={styles.delete}>🗑️</Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
         )}
         contentContainerStyle={{ padding: 16 }}

@@ -7,6 +7,7 @@
  * fijo.
  */
 import { useBranch } from './branchContext';
+import type { ViewStyle } from 'react-native';
 
 export interface ThemeColors {
   bg: string;
@@ -137,3 +138,7 @@ export function coloredGlow(color: string, mode: 'light' | 'dark') {
 export function accentBorder(colors: ThemeColors) {
   return { borderWidth: 1.5, borderColor: colors.accentSoft };
 }
+
+/** Feedback táctil instantáneo al tocar (no al soltar) — se usa con
+ * Pressable en toda la app: `style={({ pressed }) => [base, pressed && PRESSED_SCALE]}`. */
+export const PRESSED_SCALE: ViewStyle = { transform: [{ scale: 0.96 }], opacity: 0.85 };

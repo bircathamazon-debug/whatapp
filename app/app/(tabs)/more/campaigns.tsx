@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, Pressable, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { useBranch } from '../../../lib/branchContext';
 import { broadcastEmptySlots } from '../../../lib/campaigns';
-import { useTheme, type ThemeColors, RADIUS, accentGlow } from '../../../lib/theme';
+import { useTheme, type ThemeColors, RADIUS, accentGlow, PRESSED_SCALE } from '../../../lib/theme';
 import { useT } from '../../../lib/i18n';
 
 export default function CampaignsScreen() {
@@ -30,9 +30,9 @@ export default function CampaignsScreen() {
     <View style={styles.container}>
       <Text style={styles.title}>{t.campaigns.title}</Text>
       <Text style={styles.subtitle}>{t.campaigns.subtitle}</Text>
-      <TouchableOpacity style={styles.btn} onPress={send} disabled={sending || !branchId}>
+      <Pressable style={({ pressed }) => [styles.btn, pressed && PRESSED_SCALE]} onPress={send} disabled={sending || !branchId}>
         {sending ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>{t.campaigns.send}</Text>}
-      </TouchableOpacity>
+      </Pressable>
       {lastResult && <Text style={styles.result}>{lastResult}</Text>}
     </View>
   );

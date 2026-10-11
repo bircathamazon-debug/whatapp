@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, FlatList, Alert, Switch } from 'react-native';
+import { View, Text, TextInput, Pressable, StyleSheet, FlatList, Alert, Switch } from 'react-native';
 import { useBranch } from '../../../lib/branchContext';
 import { getServicesByBranch, addService, deleteService } from '../../../lib/services';
-import { useTheme, type ThemeColors, RADIUS, cardShadow, accentBorder } from '../../../lib/theme';
+import { useTheme, type ThemeColors, RADIUS, cardShadow, accentBorder, PRESSED_SCALE } from '../../../lib/theme';
 import { useT } from '../../../lib/i18n';
 import type { Service } from '../../../../shared/types';
 
@@ -72,9 +72,9 @@ export default function ServicesScreen() {
                 <TextInput style={styles.input} value={depositAmount} onChangeText={setDepositAmount} keyboardType="number-pad" />
               </>
             )}
-            <TouchableOpacity style={styles.btn} onPress={save}>
+            <Pressable style={({ pressed }) => [styles.btn, pressed && PRESSED_SCALE]} onPress={save}>
               <Text style={styles.btnText}>{t.services.add}</Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
         }
         renderItem={({ item }) => (
@@ -83,9 +83,9 @@ export default function ServicesScreen() {
               <Text style={styles.cardName}>{item.name}</Text>
               <Text style={styles.cardMeta}>{t.services.meta(item.durationMinutes, item.price, item.requiresDeposit ? item.depositAmount : undefined)}</Text>
             </View>
-            <TouchableOpacity onPress={() => remove(item)}>
+            <Pressable style={({ pressed }) => pressed && PRESSED_SCALE} onPress={() => remove(item)}>
               <Text style={styles.delete}>🗑️</Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
         )}
         contentContainerStyle={{ padding: 16 }}
