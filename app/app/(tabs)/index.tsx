@@ -93,7 +93,7 @@ export default function HomeScreen() {
   return (
     <ScrollView
       style={styles.container}
-      contentContainerStyle={{ padding: 18, paddingBottom: 32 }}
+      contentContainerStyle={{ padding: 16, paddingBottom: 20 }}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
       {branches.length > 1 && (
@@ -200,7 +200,7 @@ function makeStyles(colors: ThemeColors, mode: 'light' | 'dark') {
     branchChipText: { fontSize: 12, color: colors.textMuted, fontWeight: '600' },
     branchChipTextActive: { color: '#fff' },
     dateEyebrow: { fontSize: 12, color: colors.textMuted, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.6 },
-    greeting: { fontSize: 28, fontWeight: '700', color: colors.text, letterSpacing: -0.4, marginTop: 4, marginBottom: 20 },
+    greeting: { fontSize: 24, fontWeight: '700', color: colors.text, letterSpacing: -0.4, marginTop: 2, marginBottom: 12 },
     alertCard: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -219,24 +219,24 @@ function makeStyles(colors: ThemeColors, mode: 'light' | 'dark') {
     heroCard: {
       backgroundColor: colors.surface,
       borderRadius: RADIUS.xl,
-      padding: 22,
-      marginBottom: 12,
+      padding: 16,
+      marginBottom: 8,
       ...cardShadow(mode, 'md'),
       ...accentBorder(colors),
     },
     heroIconWrap: {
-      width: 40,
-      height: 40,
+      width: 36,
+      height: 36,
       borderRadius: RADIUS.md,
       backgroundColor: colors.accent,
       alignItems: 'center',
       justifyContent: 'center',
-      marginBottom: 16,
+      marginBottom: 8,
       ...accentGlow(colors, mode),
     },
     heroLabel: { fontSize: 12, color: colors.textMuted, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 0.5 },
-    heroAmount: { fontSize: 38, fontWeight: '800', color: colors.accent, letterSpacing: -0.6, marginTop: 6 },
-    secondaryRow: { flexDirection: 'row', gap: 10, marginBottom: 6 },
+    heroAmount: { fontSize: 32, fontWeight: '800', color: colors.accent, letterSpacing: -0.6, marginTop: 2 },
+    secondaryRow: { flexDirection: 'row', gap: 10, marginBottom: 4 },
     secondaryChip: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -249,14 +249,14 @@ function makeStyles(colors: ThemeColors, mode: 'light' | 'dark') {
       ...accentBorder(colors),
     },
     secondaryChipText: { fontSize: 12.5, color: colors.text, fontWeight: '600' },
-    sectionTitle: { fontSize: 13.5, fontWeight: '700', color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 0.4, marginTop: 24, marginBottom: 10 },
+    sectionTitle: { fontSize: 12.5, fontWeight: '700', color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 0.4, marginTop: 12, marginBottom: 6 },
     nextCard: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 14,
       backgroundColor: colors.surface,
       borderRadius: RADIUS.lg,
-      padding: 16,
+      padding: 12,
       borderRightWidth: 4,
       borderRightColor: colors.accent,
       ...cardShadow(mode, 'md'),
@@ -269,10 +269,10 @@ function makeStyles(colors: ThemeColors, mode: 'light' | 'dark') {
     quickGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
     quickTile: {
       width: '47%',
-      paddingVertical: 24,
+      paddingVertical: 8,
       paddingHorizontal: 14,
       alignItems: 'center',
-      gap: 14,
+      gap: 10,
     },
     quickIconWrap: { width: 88, height: 88, borderRadius: RADIUS.pill, alignItems: 'center', justifyContent: 'center' },
     quickLabel: { fontSize: 13.5, fontWeight: '800', color: colors.text, textAlign: 'center', letterSpacing: 0.1, textTransform: 'uppercase' },
@@ -282,10 +282,10 @@ function makeStyles(colors: ThemeColors, mode: 'light' | 'dark') {
       gap: 12,
       backgroundColor: colors.surface,
       borderRadius: RADIUS.md,
-      padding: 12,
+      padding: 10,
       borderRightWidth: 3,
       borderRightColor: colors.accent,
-      marginBottom: 8,
+      marginBottom: 6,
       ...cardShadow(mode, 'sm'),
     },
     upcomingTime: { fontSize: 13, fontWeight: '800', color: colors.accent, fontVariant: ['tabular-nums'] },
