@@ -3,7 +3,7 @@ import { View, Text, ScrollView, Pressable, StyleSheet, RefreshControl } from 'r
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useBranch } from '../../lib/branchContext';
-import { useTheme, type ThemeColors, RADIUS, cardShadow, accentGlow, accentBorder, coloredGlow } from '../../lib/theme';
+import { useTheme, type ThemeColors, RADIUS, cardShadow, accentGlow, accentBorder } from '../../lib/theme';
 import { getAppointmentsForDay } from '../../lib/appointments';
 import { getServicesByBranch } from '../../lib/services';
 import { getStaffByBranch } from '../../lib/staff';
@@ -150,10 +150,12 @@ export default function HomeScreen() {
       <Text style={styles.sectionTitle}>{t.home.quickActionsTitle}</Text>
       <View style={styles.quickGrid}>
         {QUICK_ACTIONS.map((qa) => (
-          <Pressable key={qa.label} style={({ pressed }) => [styles.quickTile, pressed && styles.pressedScale]} onPress={qa.onPress}>
-            <View style={[styles.quickIconWrap, { backgroundColor: qa.color }, coloredGlow(qa.color, mode)]}>
-              <Ionicons name={qa.icon} size={36} color="#fff" />
-            </View>
+          <Pressable
+            key={qa.label}
+            style={({ pressed }) => [styles.quickTile, { backgroundColor: qa.color }, pressed && styles.pressedScale]}
+            onPress={qa.onPress}
+          >
+            <Ionicons name={qa.icon} size={28} color="#fff" />
             <Text style={styles.quickLabel}>{qa.label}</Text>
           </Pressable>
         ))}
@@ -271,16 +273,21 @@ function makeStyles(colors: ThemeColors, mode: 'light' | 'dark') {
     nextMeta: { fontSize: 12.5, color: colors.textMuted, marginTop: 2 },
     nextCardEmpty: { backgroundColor: colors.surface, borderRadius: RADIUS.lg, padding: 16, ...cardShadow(mode, 'sm') },
     emptyInlineText: { color: colors.textMuted, fontSize: 13 },
-    quickGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
-    quickTile: {
-      width: '47%',
-      paddingVertical: 8,
-      paddingHorizontal: 14,
-      alignItems: 'center',
-      gap: 10,
+    quickGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      borderRadius: RADIUS.xl,
+      overflow: 'hidden',
+      ...cardShadow(mode, 'md'),
     },
-    quickIconWrap: { width: 88, height: 88, borderRadius: RADIUS.pill, alignItems: 'center', justifyContent: 'center' },
-    quickLabel: { fontSize: 13.5, fontWeight: '800', color: colors.text, textAlign: 'center', letterSpacing: 0.1, textTransform: 'uppercase' },
+    quickTile: {
+      width: '50%',
+      aspectRatio: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+    },
+    quickLabel: { fontSize: 12.5, fontWeight: '700', color: '#fff', textAlign: 'center' },
     upcomingRow: {
       flexDirection: 'row',
       alignItems: 'center',
