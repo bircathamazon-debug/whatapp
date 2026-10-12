@@ -155,7 +155,7 @@ export default function HomeScreen() {
             style={({ pressed }) => [styles.quickTile, { backgroundColor: qa.color }, pressed && styles.pressedScale]}
             onPress={qa.onPress}
           >
-            <Ionicons name={qa.icon} size={28} color="#fff" />
+            <Ionicons name={qa.icon} size={22} color="#fff" />
             <Text style={styles.quickLabel}>{qa.label}</Text>
           </Pressable>
         ))}
@@ -273,21 +273,17 @@ function makeStyles(colors: ThemeColors, mode: 'light' | 'dark') {
     nextMeta: { fontSize: 12.5, color: colors.textMuted, marginTop: 2 },
     nextCardEmpty: { backgroundColor: colors.surface, borderRadius: RADIUS.lg, padding: 16, ...cardShadow(mode, 'sm') },
     emptyInlineText: { color: colors.textMuted, fontSize: 13 },
-    quickGrid: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      borderRadius: RADIUS.xl,
-      overflow: 'hidden',
-      ...cardShadow(mode, 'md'),
-    },
+    quickGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
     quickTile: {
-      width: '50%',
-      aspectRatio: 1,
+      width: '47%',
+      borderRadius: RADIUS.lg,
+      paddingVertical: 16,
       alignItems: 'center',
       justifyContent: 'center',
       gap: 8,
+      ...cardShadow(mode, 'sm'),
     },
-    quickLabel: { fontSize: 12.5, fontWeight: '700', color: '#fff', textAlign: 'center' },
+    quickLabel: { fontSize: 12, fontWeight: '700', color: '#fff', textAlign: 'center' },
     upcomingRow: {
       flexDirection: 'row',
       alignItems: 'center',
