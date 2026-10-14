@@ -33,7 +33,12 @@ export interface CreateAppointmentInput {
 export async function createAppointment(input: CreateAppointmentInput): Promise<Appointment> {
   const client = await getOrCreateClient(input.branch.id, input.clientPhone, input.clientName);
 
-  const needsDeposit = input.service.requiresDeposit || client.blockedForDeposit;
+  // La protección por no-shows (client.blockedForDeposit) exige depósito
+  // aunque el servicio no tenga uno configurado — sin un monto real, eso
+  // dejaba la cita trabada pidiendo "una seña de ₪0" que nunca se podía
+  // pagar (nunca se confirmaba, nunca generaba recordatorios). Si no hay
+  // un monto de depósito real configurado en el servicio, no se exige.
+  const needsDeposit = (input.service.requiresDeposit || client.blockedForDeposit) && input.service.depositAmount > 0;
   const apptRef = db.collection('appointments').doc();
 
   const appointment = await db.runTransaction(async (tx) => {
