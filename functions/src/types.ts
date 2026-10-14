@@ -59,6 +59,7 @@ export interface Client {
   name: string;
   branchId: string;
   birthday?: string;
+  notes?: string;
   noShowCount: number;
   completedCount: number;
   loyaltyRedeemedAt?: number[];

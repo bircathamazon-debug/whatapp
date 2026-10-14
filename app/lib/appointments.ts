@@ -1,4 +1,4 @@
-import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
+import { collection, getDocs, query, where, orderBy, limit } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { db, functions } from './firebase';
 import type { Appointment } from '../../shared/types';
@@ -9,6 +9,13 @@ export async function getAppointmentsForDay(branchId: string, dayStartMs: number
   const snap = await getDocs(
     query(collection(db, COL), where('branchId', '==', branchId), where('startsAt', '>=', dayStartMs), where('startsAt', '<', dayEndMs), orderBy('startsAt', 'asc'))
   );
+  return snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Appointment, 'id'>) }));
+}
+
+/** Historial de turnos de un cliente (más recientes primero), para la
+ * ficha de cliente en la pantalla "Clientes". */
+export async function getAppointmentsByClientPhone(phone: string): Promise<Appointment[]> {
+  const snap = await getDocs(query(collection(db, COL), where('clientPhone', '==', phone), orderBy('startsAt', 'desc'), limit(20)));
   return snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Appointment, 'id'>) }));
 }
 

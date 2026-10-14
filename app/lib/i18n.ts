@@ -51,6 +51,13 @@ interface Dict {
     requiresDeposit: string;
     haircuts: (count: number, mod: number, threshold: number) => string;
     noShows: (count: number) => string;
+    notesLabel: string;
+    notesPlaceholder: string;
+    saveNotes: string;
+    notesSaved: string;
+    historyTitle: string;
+    noHistory: string;
+    totalSpent: (amount: number) => string;
   };
   waitlist: {
     statusWaiting: string;
@@ -293,6 +300,13 @@ const he: Dict = {
     requiresDeposit: 'דורש מקדמה',
     haircuts: (count, mod, threshold) => `✂️ ${count} תספורות (${mod}/${threshold} לפרס הבא)`,
     noShows: (count) => `⚠️ ${count} אי-הגעות`,
+    notesLabel: 'הערות',
+    notesPlaceholder: 'הערות על הלקוח (העדפות, אלרגיות, וכו׳)',
+    saveNotes: 'שמירת הערות',
+    notesSaved: '✓ נשמר',
+    historyTitle: 'היסטוריית תורים',
+    noHistory: 'אין עדיין תורים קודמים.',
+    totalSpent: (amount) => `סה״כ הוצאה: ₪${amount}`,
   },
   waitlist: {
     statusWaiting: 'ממתין',
@@ -535,6 +549,13 @@ const en: Dict = {
     requiresDeposit: 'Requires deposit',
     haircuts: (count, mod, threshold) => `✂️ ${count} haircuts (${mod}/${threshold} to next reward)`,
     noShows: (count) => `⚠️ ${count} no-shows`,
+    notesLabel: 'Notes',
+    notesPlaceholder: 'Notes about this client (preferences, allergies, etc.)',
+    saveNotes: 'Save notes',
+    notesSaved: '✓ Saved',
+    historyTitle: 'Appointment history',
+    noHistory: 'No past appointments yet.',
+    totalSpent: (amount) => `Total spent: $${amount}`,
   },
   waitlist: {
     statusWaiting: 'Waiting',
@@ -777,6 +798,13 @@ const es: Dict = {
     requiresDeposit: 'Requiere depósito',
     haircuts: (count, mod, threshold) => `✂️ ${count} cortes (${mod}/${threshold} para el próximo premio)`,
     noShows: (count) => `⚠️ ${count} inasistencias`,
+    notesLabel: 'Observaciones',
+    notesPlaceholder: 'Observaciones sobre el cliente (preferencias, alergias, etc.)',
+    saveNotes: 'Guardar observaciones',
+    notesSaved: '✓ Guardado',
+    historyTitle: 'Historial de turnos',
+    noHistory: 'Todavía no tiene turnos anteriores.',
+    totalSpent: (amount) => `Total gastado: ₪${amount}`,
   },
   waitlist: {
     statusWaiting: 'Esperando',

@@ -38,6 +38,16 @@ async function getBranch(branchId) {
   return snap.exists ? { id: snap.id, ...snap.data() } : null;
 }
 
+/** Busca el cliente ya registrado (por sucursal+teléfono) para saber si es
+ * la primera vez que escribe (nunca completó una reserva) o ya es conocido
+ * — así solo le preguntamos el nombre una vez. */
+async function getClientRecord(branchId, phone) {
+  const snap = await db.collection('clients').where('branchId', '==', branchId).where('phone', '==', phone).limit(1).get();
+  if (snap.empty) return null;
+  const doc = snap.docs[0];
+  return { id: doc.id, ...doc.data() };
+}
+
 async function getActiveServices(branchId) {
   const snap = await db.collection('services').where('branchId', '==', branchId).get();
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
@@ -103,7 +113,6 @@ export async function handleIncomingMessage(jid, rawText, branchId, pushName) {
   }
 
   const state = await getConversation(phone);
-  if (!state.data.clientName && pushName) state.data.clientName = pushName;
 
   // Respuesta 1/2 a un recordatorio o a una oferta de lista de espera pendiente,
   // solo si el cliente no está en medio de otro flujo activo.
@@ -115,6 +124,8 @@ export async function handleIncomingMessage(jid, rawText, branchId, pushName) {
   switch (state.step) {
     case 'MAIN_MENU':
       return handleMainMenu(phone, text, branch, state);
+    case 'ASK_NAME':
+      return handleAskName(phone, text, branch, state);
     case 'BOOK_SERVICE':
       return handleBookService(phone, text, branch, state);
     case 'BOOK_STAFF':
@@ -177,11 +188,19 @@ async function handlePendingReply(phone, doc, digit, branch) {
 
 async function handleMainMenu(phone, text, branch, state) {
   if (text === '1') {
-    const services = await getActiveServices(branch.id);
-    if (services.length === 0) return [t(branch, 'noServices')];
-    await saveConversation(phone, { step: 'BOOK_SERVICE', data: { ...state.data, services: services.map((s) => s.id) } });
-    const lines = services.map((s, i) => `${i + 1}️⃣ ✂️ ${s.name} — ₪${s.price}`);
-    return [t(branch, 'chooseService'), ...lines, t(branch, 'chooseNumberHint')];
+    // Primera vez que este teléfono pide una cita (todavía no tiene ficha
+    // en "clients"): le preguntamos el nombre antes de mostrar los
+    // servicios, para poder llamarlo por su nombre de ahora en más. Si ya
+    // es un cliente conocido (con o sin nombre — pudo haber elegido no
+    // dejarlo la primera vez), no se le vuelve a preguntar nunca más.
+    const client = await getClientRecord(branch.id, phone);
+    if (!client) {
+      await saveConversation(phone, { step: 'ASK_NAME', data: { ...state.data } });
+      return [t(branch, 'askName')];
+    }
+    const isGenericName = client.name === t(branch, 'defaultClientName');
+    const greeting = isGenericName ? [] : [t(branch, 'welcomeBack', client.name)];
+    return startServiceSelection(phone, branch, state, isGenericName ? null : client.name, greeting);
   }
   if (text === '2') {
     const appts = await upcomingAppointments(phone, branch);
@@ -213,6 +232,28 @@ async function handleMainMenu(phone, text, branch, state) {
     await logUnansweredMessage(branch, phone, text, 'MAIN_MENU');
   }
   return [t(branch, 'mainMenu')];
+}
+
+/** Respuesta a "¿cuál es tu nombre?". 0️⃣ = no quiere dejarlo (usa el
+ * nombre genérico). Cualquier otra cosa se guarda como el nombre. */
+async function handleAskName(phone, text, branch, state) {
+  const skipped = text.trim() === '0';
+  const name = skipped ? t(branch, 'defaultClientName') : text.trim().slice(0, 60);
+  const greeting = skipped ? [] : [t(branch, 'nameThanks', name)];
+  return startServiceSelection(phone, branch, state, name, greeting);
+}
+
+/** Muestra la lista de servicios y pasa a BOOK_SERVICE. `greetingLines` son
+ * líneas opcionales a mostrar antes (ej. "¡un placer, Dana!" la primera
+ * vez, o "hola de nuevo, Dana!" en una reserva siguiente). */
+async function startServiceSelection(phone, branch, state, clientName, greetingLines = []) {
+  const services = await getActiveServices(branch.id);
+  if (services.length === 0) return [t(branch, 'noServices')];
+  const newData = { ...state.data, services: services.map((s) => s.id) };
+  if (clientName) newData.clientName = clientName;
+  await saveConversation(phone, { step: 'BOOK_SERVICE', data: newData });
+  const lines = services.map((s, i) => `${i + 1}️⃣ ✂️ ${s.name} — ₪${s.price}`);
+  return [...greetingLines, t(branch, 'chooseService'), ...lines, t(branch, 'chooseNumberHint')];
 }
 
 async function handleBookService(phone, text, branch, state) {

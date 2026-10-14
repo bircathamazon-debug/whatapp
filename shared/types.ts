@@ -87,6 +87,7 @@ export interface Client {
   name: string;
   branchId: string;
   birthday?: string; // 'MM-DD'
+  notes?: string; // observaciones del peluquero sobre el cliente (editable en el panel)
   noShowCount: number;
   completedCount: number; // cortes completados, para fidelidad
   loyaltyRedeemedAt?: number[]; // completedCount en el momento de canjear premio

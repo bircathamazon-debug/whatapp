@@ -63,6 +63,9 @@ const STRINGS = {
     slotTakenNoneLeft: 'נראה שהיום כבר מלא לגמרי.',
     askTalkToStaff: 'אפשר גם לדבר ישירות עם הספר:',
     maintenanceMessage: 'המערכת האוטומטית מושבתת זמנית לתחזוקה. אפשר לדבר ישירות עם הספר:',
+    askName: 'לפני שממשיכים, מה השם שלך? (אם לא רוצים לכתוב שם, אפשר לכתוב 0️⃣)',
+    welcomeBack: (name) => `שלום ${name}, טוב לראות אותך שוב!`,
+    nameThanks: (name) => `נעים להכיר, ${name}! 😊`,
   },
   en: {
     weekdays: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
@@ -122,6 +125,9 @@ const STRINGS = {
     slotTakenNoneLeft: 'Looks like today is completely full.',
     askTalkToStaff: 'You can also talk directly with the stylist:',
     maintenanceMessage: 'The automated system is temporarily paused for maintenance. You can reach the stylist directly:',
+    askName: "Before we continue, what's your name? (type 0️⃣ if you'd rather not share it)",
+    welcomeBack: (name) => `Hi ${name}, good to see you again!`,
+    nameThanks: (name) => `Nice to meet you, ${name}! 😊`,
   },
   es: {
     weekdays: ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'],
@@ -181,6 +187,9 @@ const STRINGS = {
     slotTakenNoneLeft: 'Parece que hoy ya está completo.',
     askTalkToStaff: 'También podés hablar directamente con el peluquero:',
     maintenanceMessage: 'El sistema automático está pausado temporalmente por mantenimiento. Podés hablar directo con el peluquero:',
+    askName: 'Antes de seguir, ¿cuál es tu nombre? (si preferís no dejarlo, escribí 0️⃣)',
+    welcomeBack: (name) => `¡Hola ${name}, qué bueno verte de nuevo!`,
+    nameThanks: (name) => `¡Un placer, ${name}! 😊`,
   },
 };
 
