@@ -176,7 +176,7 @@ const templatesHe: TemplateSet = {
     `תור חדש: ${clientName} — ${serviceName} בתאריך ${dateStr} בשעה ${timeStr}.`,
 
   reminder: (clientName, dateStr, timeStr) =>
-    `⏰ *תזכורת לתור שלך*\n──────────\n👤 ${clientName}\n📅 ${dateStr} | 🕐 ${timeStr}\n──────────\n1️⃣ לאישור     2️⃣ לביטול`,
+    `⏰ *תזכורת לתור שלך*\n──────────\n👤 ${clientName}\n📅 ${dateStr} | 🕐 ${timeStr}\n──────────\n*1.* לאישור     *2.* לביטול`,
 
   cancelledByClient: (clientName, dateStr, timeStr) =>
     `${clientName} ביטל/ה את התור מתאריך ${dateStr} בשעה ${timeStr}.`,
@@ -211,7 +211,7 @@ const templatesEn: TemplateSet = {
     `New booking: ${clientName} — ${serviceName} on ${dateStr} at ${timeStr}.`,
 
   reminder: (clientName, dateStr, timeStr) =>
-    `⏰ *Appointment reminder*\n──────────\n👤 ${clientName}\n📅 ${dateStr} | 🕐 ${timeStr}\n──────────\n1️⃣ Confirm     2️⃣ Cancel`,
+    `⏰ *Appointment reminder*\n──────────\n👤 ${clientName}\n📅 ${dateStr} | 🕐 ${timeStr}\n──────────\n*1.* Confirm     *2.* Cancel`,
 
   cancelledByClient: (clientName, dateStr, timeStr) =>
     `${clientName} cancelled their appointment on ${dateStr} at ${timeStr}.`,
@@ -246,7 +246,7 @@ const templatesEs: TemplateSet = {
     `Turno nuevo: ${clientName} — ${serviceName} el ${dateStr} a las ${timeStr}.`,
 
   reminder: (clientName, dateStr, timeStr) =>
-    `⏰ *Recordatorio de tu turno*\n──────────\n👤 ${clientName}\n📅 ${dateStr} | 🕐 ${timeStr}\n──────────\n1️⃣ Confirmar     2️⃣ Cancelar`,
+    `⏰ *Recordatorio de tu turno*\n──────────\n👤 ${clientName}\n📅 ${dateStr} | 🕐 ${timeStr}\n──────────\n*1.* Confirmar     *2.* Cancelar`,
 
   cancelledByClient: (clientName, dateStr, timeStr) =>
     `${clientName} canceló el turno del ${dateStr} a las ${timeStr}.`,
