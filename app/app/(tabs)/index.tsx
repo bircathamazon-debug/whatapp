@@ -86,7 +86,7 @@ export default function HomeScreen() {
   const QUICK_ACTIONS: { icon: IconName; label: string; color: string; onPress: () => void }[] = [
     { icon: 'calendar', label: t.tabs.agenda, color: colors.accent, onPress: () => router.push('/agenda') },
     { icon: 'wallet', label: t.finance.title, color: colors.success, onPress: () => router.push('/finance') },
-    { icon: 'megaphone', label: t.tabs.campaigns, color: colors.statusPending, onPress: () => router.push('/more/campaigns') },
+    { icon: 'people', label: t.tabs.clients, color: colors.statusPending, onPress: () => router.push('/more/clients') },
     { icon: 'settings', label: t.settings.title, color: colors.accent, onPress: () => router.push('/settings') },
   ];
 
