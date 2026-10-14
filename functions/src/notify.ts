@@ -170,13 +170,13 @@ export interface TemplateSet {
 
 const templatesHe: TemplateSet = {
   bookingConfirmed: (clientName, dateStr, timeStr, serviceName, staffName) =>
-    `שלום ${clientName}! התור שלך אושר:\n📅 ${dateStr} בשעה ${timeStr}\n✂️ ${serviceName} עם ${staffName}\n\nלביטול, כתבו "menu" ובחרו בביטול תור.`,
+    `✅ *התור שלך אושר*\n──────────\n👤 ${clientName}\n✂️ ${serviceName}\n💈 ${staffName}\n📅 ${dateStr} | 🕐 ${timeStr}\n──────────\nלביטול: כתבו "menu"`,
 
   staffNewBooking: (clientName, dateStr, timeStr, serviceName) =>
     `תור חדש: ${clientName} — ${serviceName} בתאריך ${dateStr} בשעה ${timeStr}.`,
 
   reminder: (clientName, dateStr, timeStr) =>
-    `שלום ${clientName}, מזכירים לך את התור שלך בתאריך ${dateStr} בשעה ${timeStr}.\nהשיבו 1 לאישור או 2 לביטול.`,
+    `⏰ *תזכורת לתור שלך*\n──────────\n👤 ${clientName}\n📅 ${dateStr} | 🕐 ${timeStr}\n──────────\n1️⃣ לאישור     2️⃣ לביטול`,
 
   cancelledByClient: (clientName, dateStr, timeStr) =>
     `${clientName} ביטל/ה את התור מתאריך ${dateStr} בשעה ${timeStr}.`,
@@ -205,13 +205,13 @@ const templatesHe: TemplateSet = {
 
 const templatesEn: TemplateSet = {
   bookingConfirmed: (clientName, dateStr, timeStr, serviceName, staffName) =>
-    `Hi ${clientName}! Your appointment is confirmed:\n📅 ${dateStr} at ${timeStr}\n✂️ ${serviceName} with ${staffName}\n\nTo cancel, type "menu" and choose cancel appointment.`,
+    `✅ *Your appointment is confirmed*\n──────────\n👤 ${clientName}\n✂️ ${serviceName}\n💈 ${staffName}\n📅 ${dateStr} | 🕐 ${timeStr}\n──────────\nTo cancel: type "menu"`,
 
   staffNewBooking: (clientName, dateStr, timeStr, serviceName) =>
     `New booking: ${clientName} — ${serviceName} on ${dateStr} at ${timeStr}.`,
 
   reminder: (clientName, dateStr, timeStr) =>
-    `Hi ${clientName}, this is a reminder about your appointment on ${dateStr} at ${timeStr}.\nReply 1 to confirm or 2 to cancel.`,
+    `⏰ *Appointment reminder*\n──────────\n👤 ${clientName}\n📅 ${dateStr} | 🕐 ${timeStr}\n──────────\n1️⃣ Confirm     2️⃣ Cancel`,
 
   cancelledByClient: (clientName, dateStr, timeStr) =>
     `${clientName} cancelled their appointment on ${dateStr} at ${timeStr}.`,
@@ -240,13 +240,13 @@ const templatesEn: TemplateSet = {
 
 const templatesEs: TemplateSet = {
   bookingConfirmed: (clientName, dateStr, timeStr, serviceName, staffName) =>
-    `¡Hola ${clientName}! Tu turno fue confirmado:\n📅 ${dateStr} a las ${timeStr}\n✂️ ${serviceName} con ${staffName}\n\nPara cancelar, escribí "menu" y elegí cancelar turno.`,
+    `✅ *Tu turno fue confirmado*\n──────────\n👤 ${clientName}\n✂️ ${serviceName}\n💈 ${staffName}\n📅 ${dateStr} | 🕐 ${timeStr}\n──────────\nPara cancelar: escribí "menu"`,
 
   staffNewBooking: (clientName, dateStr, timeStr, serviceName) =>
     `Turno nuevo: ${clientName} — ${serviceName} el ${dateStr} a las ${timeStr}.`,
 
   reminder: (clientName, dateStr, timeStr) =>
-    `Hola ${clientName}, te recordamos tu turno del ${dateStr} a las ${timeStr}.\nRespondé 1 para confirmar o 2 para cancelar.`,
+    `⏰ *Recordatorio de tu turno*\n──────────\n👤 ${clientName}\n📅 ${dateStr} | 🕐 ${timeStr}\n──────────\n1️⃣ Confirmar     2️⃣ Cancelar`,
 
   cancelledByClient: (clientName, dateStr, timeStr) =>
     `${clientName} canceló el turno del ${dateStr} a las ${timeStr}.`,
