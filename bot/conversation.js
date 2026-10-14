@@ -10,7 +10,7 @@
 import { db } from './firebaseClient.js';
 import { getAvailableSlots, getStaffServiceDuration, toEpoch } from './availability.js';
 import * as api from './botApiClient.js';
-import { t, weekdayNames, dateLocale, isGreeting, isYes } from './i18n.js';
+import { t, weekdayNames, dateLocale, isGreeting, isYes, circledNumber } from './i18n.js';
 
 const CONV_COL = 'waConversations';
 const DAYS_TO_OFFER = 6;
@@ -206,7 +206,7 @@ async function handleMainMenu(phone, text, branch, state) {
     const appts = await upcomingAppointments(phone, branch);
     if (appts.length === 0) return [t(branch, 'noUpcoming'), t(branch, 'mainMenu')];
     await saveConversation(phone, { step: 'CANCEL_SELECT', data: { ...state.data, appointmentIds: appts.map((a) => a.id) } });
-    return [t(branch, 'chooseCancelAppt'), ...appts.map((a, i) => `*${i + 1}.* ${a.label}`), t(branch, 'chooseNumberHint')];
+    return [t(branch, 'chooseCancelAppt'), ...appts.map((a, i) => `${circledNumber(i + 1)} ${a.label}`), t(branch, 'chooseNumberHint')];
   }
   if (text === '3') {
     const appts = await upcomingAppointments(phone, branch);
@@ -252,7 +252,7 @@ async function startServiceSelection(phone, branch, state, clientName, greetingL
   const newData = { ...state.data, services: services.map((s) => s.id) };
   if (clientName) newData.clientName = clientName;
   await saveConversation(phone, { step: 'BOOK_SERVICE', data: newData });
-  const lines = services.map((s, i) => `*${i + 1}.* ✂️ ${s.name} — ₪${s.price}`);
+  const lines = services.map((s, i) => `${circledNumber(i + 1)} ✂️ ${s.name} — ₪${s.price}`);
   return [...greetingLines, t(branch, 'chooseService'), ...lines, t(branch, 'chooseNumberHint')];
 }
 
@@ -268,7 +268,7 @@ async function handleBookService(phone, text, branch, state) {
   if (staff.length === 1) {
     return handleBookStaff(phone, '1', branch, { data: { ...state.data, serviceId: service.id, staffOptions: [staff[0].id] } });
   }
-  const lines = staff.map((s, i) => `*${i + 1}.* ${s.name}`);
+  const lines = staff.map((s, i) => `${circledNumber(i + 1)} ${s.name}`);
   return [t(branch, 'chooseStaff'), t(branch, 'anyStaff'), ...lines, t(branch, 'chooseNumberHint')];
 }
 
@@ -286,7 +286,7 @@ async function handleBookStaff(phone, text, branch, state) {
 
   const dateOptions = buildDateOptions(branch);
   await saveConversation(phone, { step: 'BOOK_DAY', data: { ...state.data, staffId, dateOptions } });
-  const lines = dateOptions.map((d, i) => `*${i + 1}.* ${d.label}`);
+  const lines = dateOptions.map((d, i) => `${circledNumber(i + 1)} ${d.label}`);
   return [t(branch, 'chooseDay'), ...lines, t(branch, 'chooseNumberHint')];
 }
 
@@ -325,7 +325,7 @@ async function handleBookDay(phone, text, branch, state) {
   // búsqueda por hora). occupiedAttempts arranca en 0 en cada día nuevo.
   const displaySlots = allSlots.slice(0, 8);
   await saveConversation(phone, { step: 'BOOK_TIME', data: { ...state.data, dateStr: chosen.dateStr, dateLabel: chosen.label, slots: displaySlots, allSlotsForDay: allSlots, occupiedAttempts: 0 } });
-  const lines = displaySlots.map((s, i) => `*${i + 1}.* ${formatTime(s.startsAt, branch)}${staffList.length > 1 ? ` — ${s.staffName}` : ''}`);
+  const lines = displaySlots.map((s, i) => `${circledNumber(i + 1)} ${formatTime(s.startsAt, branch)}${staffList.length > 1 ? ` — ${s.staffName}` : ''}`);
   return [
     t(branch, 'chooseTimePrompt', chosen.label),
     t(branch, 'orChooseFromList'),
@@ -350,7 +350,7 @@ async function withinWorkingHours(branch, staffList, service, dateStr, epoch) {
 async function handleBookTime(phone, text, branch, state) {
   if (text === '0') {
     await saveConversation(phone, { step: 'BOOK_DAY', data: state.data });
-    const lines = (state.data.dateOptions || []).map((d, i) => `*${i + 1}.* ${d.label}`);
+    const lines = (state.data.dateOptions || []).map((d, i) => `${circledNumber(i + 1)} ${d.label}`);
     return [t(branch, 'chooseDay'), ...lines];
   }
 
@@ -375,7 +375,7 @@ async function handleBookTime(phone, text, branch, state) {
     const staffList = state.data.staffId === 'any' ? await getActiveStaff(branch.id) : [await docById('staff', state.data.staffId)];
     const isOpen = await withinWorkingHours(branch, staffList, service, state.data.dateStr, desiredEpoch);
     if (!isOpen) {
-      const lines = (state.data.slots || []).map((s, i) => `*${i + 1}.* ${formatTime(s.startsAt, branch)}${staffList.length > 1 ? ` — ${s.staffName}` : ''}`);
+      const lines = (state.data.slots || []).map((s, i) => `${circledNumber(i + 1)} ${formatTime(s.startsAt, branch)}${staffList.length > 1 ? ` — ${s.staffName}` : ''}`);
       return [t(branch, 'outsideWorkingHours', state.data.dateLabel), ...lines, t(branch, 'chooseOtherDay')];
     }
 
@@ -418,7 +418,7 @@ async function handleOccupiedSlot(phone, branch, state, attemptedSlot) {
     .sort((a, b) => a.startsAt - b.startsAt);
 
   await saveConversation(phone, { step: 'BOOK_TIME', data: { ...state.data, occupiedAttempts: attempts, slots: nearest, allSlotsForDay: freshSlots } });
-  const lines = nearest.map((s, i) => `*${i + 1}.* ${formatTime(s.startsAt, branch)}${(state.data.staffId === 'any' && nearest.some((n) => n.staffId !== s.staffId)) ? ` — ${s.staffName}` : ''}`);
+  const lines = nearest.map((s, i) => `${circledNumber(i + 1)} ${formatTime(s.startsAt, branch)}${(state.data.staffId === 'any' && nearest.some((n) => n.staffId !== s.staffId)) ? ` — ${s.staffName}` : ''}`);
   return [t(branch, 'slotTakenRetry'), ...lines, t(branch, 'chooseOtherDay')];
 }
 
