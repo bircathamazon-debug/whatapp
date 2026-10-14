@@ -18,6 +18,12 @@ import { startNotificationsWatcher } from './notificationsWatcher.js';
 
 const BRANCH_ID = process.env.BRANCH_ID;
 
+// Número de WhatsApp dedicado al bot (la línea que hablan los clientes),
+// en formato internacional sin "+" ni espacios — se usa solo para pedir un
+// código de vinculación por texto en vez de escanear un QR (más fácil
+// cuando el QR vence antes de poder escanearlo a tiempo).
+const BOT_PHONE_NUMBER = '972533981227';
+
 // Si un cliente escribe su mensaje en varias burbujas seguidas (ej. "Hola" /
 // "quiero reservar" / "un corte para mañana"), esperamos este tiempo desde
 // el último mensaje antes de procesar, y las juntamos en una sola consulta
@@ -132,6 +138,22 @@ async function connectToWhatsApp() {
     auth: state,
     printQRInTerminal: false,
   });
+
+  // Si todavía no hay sesión vinculada, pedimos un código de texto en vez
+  // de depender del QR (que vence a los ~20 segundos y es fácil perderlo
+  // copiándolo a mano desde los logs). El código de texto dura más y se
+  // escribe directo en WhatsApp: Ajustes > Dispositivos vinculados >
+  // Vincular con número de teléfono.
+  if (!state.creds.registered) {
+    setTimeout(async () => {
+      try {
+        const code = await sock.requestPairingCode(BOT_PHONE_NUMBER);
+        console.log(`[bot] PAIRING_CODE: ${code}`);
+      } catch (err) {
+        console.error('[bot] no se pudo generar el código de vinculación', err);
+      }
+    }, 3000);
+  }
 
   sock.ev.on('creds.update', saveCreds);
 
