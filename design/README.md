@@ -8,5 +8,8 @@ a generar íconos en otro tamaño o estilo más adelante.
 ## Idea anotada para el futuro
 El usuario mencionó la posibilidad de copiar este sistema (bot +
 app + motor de reservas) para una estilista de uñas, como negocio
-separado — todavía sin arrancar, va a pasar otra foto/logo para esa
-versión cuando se retome.
+separado — todavía sin arrancar.
+
+`logo-nails-future.webp` es la imagen (misma línea gráfica, versión
+mujer) que el usuario eligió para esa futura app de uñas — guardada acá
+para cuando se retome ese proyecto.
