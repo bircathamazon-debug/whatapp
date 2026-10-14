@@ -201,13 +201,17 @@ async function handleMainMenu(phone, text, branch, state) {
   }
 
   // No coincide con ninguna opción esperada: puede ser una pregunta
-  // libre, un emoji o cualquier otra cosa. Como en este punto el
-  // cliente no está en medio de ninguna reserva, en vez de decirle
-  // "no entendí" directamente le mostramos el menú principal — así,
-  // sea lo que sea que haya escrito, siempre ve las opciones para
-  // seguir. Igual se guarda para que el peluquero lo revise en
-  // "Preguntas".
-  await logUnansweredMessage(branch, phone, text, 'MAIN_MENU');
+  // libre, un emoji, un saludo que no matcheó el regex exacto ("רוצה
+  // להזמין תור"), o cualquier otra cosa. Como en este punto el cliente
+  // no está en medio de ninguna reserva, en vez de decirle "no entendí"
+  // directamente le mostramos el menú principal — así, sea lo que sea
+  // que haya escrito, siempre ve las opciones para seguir. Solo se
+  // guarda en "Preguntas" si el mensaje tiene un signo de pregunta (es
+  // probable que sea algo que el peluquero necesite responder de
+  // verdad) — un saludo o un "quiero reservar" no necesita revisión.
+  if (text.includes('?') || text.includes('؟')) {
+    await logUnansweredMessage(branch, phone, text, 'MAIN_MENU');
+  }
   return [t(branch, 'mainMenu')];
 }
 
