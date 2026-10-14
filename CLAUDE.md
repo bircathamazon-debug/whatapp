@@ -854,6 +854,42 @@ detalle técnico completo de arquitectura y setup.
       símbolo). `FUNCTIONS_BASE_URL` es la misma que ya se usa para Stripe.
     - Ver el estudio de mercado completo (artifact "Radar Competitivo")
       para el detalle país por país.
+- ✅ **Nombre del cliente + CRM con observaciones e historial — PROGRAMADO,
+  VERIFICADO, COMMITEADO Y PUSHEADO. Falta desplegar (Railway + Firebase
+  Hosting).** Pedido explícito del usuario, de una lista de 3 cambios
+  (se le presentó antes un análisis de los 3 puntos — incluyendo que los
+  recordatorios de 30 min antes y al mes ya existían de antes, y que el
+  tono del bot ya estaba alineado con el mercado, así que no hacía falta
+  tocar nada ahí — y aprobó explícitamente "avanza con los 3 puntos").
+  - **Bot (`bot/conversation.js`, `bot/i18n.js`)**: al pedir una cita por
+    primera vez (opción 1️⃣ del menú), si el teléfono no tiene ficha
+    todavía en "clients", el bot pregunta el nombre (con 0️⃣ para no
+    dejarlo) antes de mostrar los servicios. Si el teléfono ya es un
+    cliente conocido (con o sin nombre — pudo haber elegido no dejarlo
+    la primera vez), nunca se le vuelve a preguntar: se lo saluda por su
+    nombre (si lo dejó) y va directo a la lista de servicios. Se dejó de
+    usar en silencio el nombre de WhatsApp (`pushName`) como antes.
+  - **App, pantalla "Clientes" (`app/app/(tabs)/more/clients.tsx`)**: pasó
+    de ser de solo lectura a una ficha por cliente (se toca la tarjeta
+    para expandir): observaciones editables en texto libre (preferencias,
+    alergias, lo que el peluquero quiera anotar — nuevo campo
+    `notes?: string` en `Client`, `shared/types.ts` y
+    `functions/src/types.ts`) y el historial de sus turnos (fecha,
+    servicio, estado) con el total gastado en cortes completados.
+    Nuevas funciones `updateClientNotes` (`app/lib/clients.ts`) y
+    `getAppointmentsByClientPhone` (`app/lib/appointments.ts`, reutiliza
+    un índice de Firestore que ya existía — no hizo falta agregar
+    ninguno nuevo). No hizo falta tocar `firestore.rules`: cualquier
+    usuario autenticado del panel ya podía leer/escribir "clients".
+  - Verificado con `tsc --noEmit` sin errores en `app/` y `functions/`, y
+    `node --check` sin errores en los archivos tocados de `bot/`.
+    Commiteado y pusheado a la rama. **Falta desplegar de verdad**: el
+    bot a Railway (`railway up`) y la app a Firebase Hosting
+    (`firebase deploy --only hosting:bot-para-peluqueria`) — esta sesión
+    arrancó en un contenedor nuevo sin los tokens de Railway/Firebase
+    que se usaron en sesiones anteriores, así que hace falta que el
+    usuario los vuelva a pasar (o despliegue él mismo) para que esto
+    quede funcionando en producción, no solo en el código.
 - **Ideas para el backlog (más adelante, el usuario lo aclaró
   explícitamente — no bloquean el piloto):**
   - Página web y video publicitario explicando el ahorro de tiempo/dinero
