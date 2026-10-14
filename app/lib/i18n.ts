@@ -44,6 +44,9 @@ interface Dict {
     noAppointments: string;
     depositReceived: string;
     cancel: string;
+    viewDay: string;
+    viewWeek: string;
+    viewMonth: string;
   };
   clients: {
     searchPlaceholder: string;
@@ -293,6 +296,9 @@ const he: Dict = {
     noAppointments: 'אין תורים ביום הזה.',
     depositReceived: '✓ קדמה התקבלה',
     cancel: '✕ ביטול',
+    viewDay: 'יום',
+    viewWeek: 'שבוע',
+    viewMonth: 'חודש',
   },
   clients: {
     searchPlaceholder: 'חיפוש לפי שם או טלפון',
@@ -542,6 +548,9 @@ const en: Dict = {
     noAppointments: 'No appointments this day.',
     depositReceived: '✓ Deposit received',
     cancel: '✕ Cancel',
+    viewDay: 'Day',
+    viewWeek: 'Week',
+    viewMonth: 'Month',
   },
   clients: {
     searchPlaceholder: 'Search by name or phone',
@@ -791,6 +800,9 @@ const es: Dict = {
     noAppointments: 'No hay citas este día.',
     depositReceived: '✓ Depósito recibido',
     cancel: '✕ Cancelar',
+    viewDay: 'Día',
+    viewWeek: 'Semana',
+    viewMonth: 'Mes',
   },
   clients: {
     searchPlaceholder: 'Buscar por nombre o teléfono',
