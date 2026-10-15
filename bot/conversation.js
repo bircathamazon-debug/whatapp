@@ -143,6 +143,8 @@ export async function handleIncomingMessage(jid, rawText, branchId, pushName) {
       return handleBookDay(phone, text, branch, state);
     case 'BOOK_TIME':
       return handleBookTime(phone, text, branch, state);
+    case 'BOOK_TIME_CONFIRM':
+      return handleBookTimeConfirm(phone, text, branch, state);
     case 'BOOK_WAITLIST_ASK':
       return handleWaitlistAsk(phone, text, branch, state);
     case 'CANCEL_SELECT':
@@ -370,30 +372,117 @@ async function handleBookTime(phone, text, branch, state) {
   }
 
   // No fue un número de la lista: probamos si escribió una hora directamente
-  // (ej. "9:30", "930", "17:00").
+  // (ej. "9:30", "930", "17:00", "9 30", "9.30").
   const typed = parseTimeInput(text);
   if (typed) {
-    const daySlots = state.data.allSlotsForDay || state.data.slots || [];
-    const desiredEpoch = toEpoch(state.data.dateStr, `${String(typed.h).padStart(2, '0')}:${String(typed.m).padStart(2, '0')}`, branch.timezone);
-    const exactMatch = daySlots.find((s) => s.startsAt === desiredEpoch);
-    if (exactMatch) {
-      return bookChosenSlot(phone, branch, state, exactMatch);
-    }
-
-    const service = await docById('services', state.data.serviceId);
-    const staffList = state.data.staffId === 'any' ? await getActiveStaff(branch.id) : [await docById('staff', state.data.staffId)];
-    const isOpen = await withinWorkingHours(branch, staffList, service, state.data.dateStr, desiredEpoch);
-    if (!isOpen) {
-      const lines = (state.data.slots || []).map((s, i) => `${menuNumber(i + 1)} ${formatTime(s.startsAt, branch)}${staffList.length > 1 ? ` — ${s.staffName}` : ''}`);
-      return oneMessage(t(branch, 'outsideWorkingHours', state.data.dateLabel), ...lines, t(branch, 'chooseOtherDay'));
-    }
-
-    return handleOccupiedSlot(phone, branch, state, { startsAt: desiredEpoch });
+    return resolveTypedTime(phone, branch, state, typed);
   }
 
   await logUnansweredMessage(branch, phone, text, 'BOOK_TIME');
   const talkLines = await buildTalkToStaffLines(branch);
   return [t(branch, 'didNotUnderstandTime'), t(branch, 'timeHelp'), ...(talkLines ? [t(branch, 'askTalkToStaff'), ...talkLines] : [])];
+}
+
+/** Formatea hora+minuto como "HH:MM" para pasarle a toEpoch(). */
+function hhmm(h, m) {
+  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+}
+
+/** Dado un minuto cualquiera, devuelve los candidatos de 15 en 15 más
+ * cercanos (los turnos siempre caen en :00/:15/:30/:45), ordenados del
+ * más cercano al más lejano. `hourOffset` es 1 cuando redondear para
+ * arriba cruza a la hora siguiente (ej. minuto 50 -> xx:00 de la hora
+ * que viene). */
+function quarterCandidates(m) {
+  if (m % 15 === 0) return [{ hourOffset: 0, m }];
+  const lower = Math.floor(m / 15) * 15;
+  const upperM = lower + 15;
+  const upper = upperM === 60 ? { hourOffset: 1, m: 0 } : { hourOffset: 0, m: upperM };
+  return [
+    { hourOffset: 0, m: lower, dist: m - lower },
+    { ...upper, dist: upperM - m },
+  ].sort((a, b) => a.dist - b.dist);
+}
+
+/**
+ * El cliente escribió una hora directamente (no eligió un número de la
+ * lista). Busca el turno más adecuado para lo que escribió, aunque no
+ * haya sido prolijo — tres casos que antes el bot no resolvía:
+ *  1) Separador raro o sin separador ("2 20", "2.20", "220") — ya se
+ *     interpreta igual gracias a parseTimeInput().
+ *  2) Minuto que no es múltiplo de 15 (ej. "2:20") — se ofrece el
+ *     horario libre de 15 minutos más cercano (2:15 o 2:30, el que
+ *     esté disponible).
+ *  3) Hora que puede ser de mañana o de tarde/noche (ej. "8" cuando la
+ *     sucursal solo atiende de tarde) — se prueba también la versión
+ *     +12 horas, según el horario que configuró el peluquero.
+ * En los casos 2 y 3 el bot tuvo que "adivinar", así que antes de
+ * reservar le confirma al cliente qué hora entendió, en vez de asumir
+ * directamente (caso 1 solo, con el horario exacto libre, reserva
+ * directo como siempre).
+ */
+async function resolveTypedTime(phone, branch, state, typed) {
+  const daySlots = state.data.allSlotsForDay || state.data.slots || [];
+  const service = await docById('services', state.data.serviceId);
+  const staffList = state.data.staffId === 'any' ? await getActiveStaff(branch.id) : [await docById('staff', state.data.staffId)];
+
+  const literalEpoch = toEpoch(state.data.dateStr, hhmm(typed.h, typed.m), branch.timezone);
+  const literalSlot = daySlots.find((s) => s.startsAt === literalEpoch);
+  if (literalSlot) {
+    return bookChosenSlot(phone, branch, state, literalSlot);
+  }
+
+  // Probamos la hora tal cual, y si la sucursal/peluquero no atiende a
+  // esa hora de la mañana, la misma hora +12 (de tarde/noche) — en ambos
+  // casos, con el minuto redondeado al múltiplo de 15 libre más cercano.
+  const hourCandidates = [typed.h];
+  if (typed.h >= 1 && typed.h <= 11) hourCandidates.push(typed.h + 12);
+
+  for (const h of hourCandidates) {
+    for (const q of quarterCandidates(typed.m)) {
+      const qh = (h + q.hourOffset) % 24;
+      const epoch = toEpoch(state.data.dateStr, hhmm(qh, q.m), branch.timezone);
+      if (epoch === literalEpoch) continue; // ya lo probamos arriba, no estaba libre
+      const slot = daySlots.find((s) => s.startsAt === epoch);
+      if (slot) return askTimeConfirmation(phone, branch, state, slot);
+    }
+  }
+
+  // Ningún candidato tiene hueco libre. Si la hora pedida (redondeada al
+  // múltiplo de 15 de abajo, para poder chequear el horario de atención)
+  // cae dentro de algún horario configurado, está ocupada por otra cita;
+  // si no, directamente está cerrado a esa hora.
+  for (const h of hourCandidates) {
+    const flooredM = Math.floor(typed.m / 15) * 15;
+    const openCheckEpoch = toEpoch(state.data.dateStr, hhmm(h, flooredM), branch.timezone);
+    const isOpen = await withinWorkingHours(branch, staffList, service, state.data.dateStr, openCheckEpoch);
+    if (isOpen) {
+      const attemptedEpoch = toEpoch(state.data.dateStr, hhmm(h, typed.m), branch.timezone);
+      return handleOccupiedSlot(phone, branch, state, { startsAt: attemptedEpoch });
+    }
+  }
+
+  const lines = (state.data.slots || []).map((s, i) => `${menuNumber(i + 1)} ${formatTime(s.startsAt, branch)}${staffList.length > 1 ? ` — ${s.staffName}` : ''}`);
+  return oneMessage(t(branch, 'outsideWorkingHours', state.data.dateLabel), ...lines, t(branch, 'chooseOtherDay'));
+}
+
+/** Guarda el horario candidato y le pregunta al cliente si era ese antes
+ * de reservar — se usa cuando el bot tuvo que "adivinar" algo (redondeo
+ * de 15 minutos, o mañana/tarde). */
+async function askTimeConfirmation(phone, branch, state, slot) {
+  await saveConversation(phone, { step: 'BOOK_TIME_CONFIRM', data: { ...state.data, pendingSlot: slot } });
+  return [t(branch, 'confirmGuessedTime', formatTime(slot.startsAt, branch))];
+}
+
+/** Respuesta a "¿te referís a las HH:MM?". */
+async function handleBookTimeConfirm(phone, text, branch, state) {
+  const { pendingSlot, ...rest } = state.data;
+  if (isYes(branch, text) && pendingSlot) {
+    return bookChosenSlot(phone, branch, { data: rest }, pendingSlot);
+  }
+  await saveConversation(phone, { step: 'BOOK_TIME', data: rest });
+  const lines = (rest.slots || []).map((s, i) => `${menuNumber(i + 1)} ${formatTime(s.startsAt, branch)}`);
+  return oneMessage(t(branch, 'chooseTimePrompt', rest.dateLabel), t(branch, 'orChooseFromList'), ...lines, t(branch, 'chooseOtherDay'));
 }
 
 /**
@@ -456,9 +545,11 @@ async function bookChosenSlot(phone, branch, state, slot) {
   }
 }
 
-/** Interpreta una hora escrita a mano: "9:30", "930", "9", "17:00", etc. */
+/** Interpreta una hora escrita a mano: "9:30", "930", "9", "17:00", "9 30",
+ * "9.30", etc. — acepta los dos puntos, punto, coma, espacio, o nada como
+ * separador entre hora y minutos (errores comunes al escribir rápido). */
 function parseTimeInput(text) {
-  const match = text.trim().match(/^(\d{1,2})[:.,]?(\d{2})?$/);
+  const match = text.trim().match(/^(\d{1,2})[:.,\s]?(\d{2})?$/);
   if (!match) return null;
   const h = Number(match[1]);
   const m = match[2] ? Number(match[2]) : 0;
