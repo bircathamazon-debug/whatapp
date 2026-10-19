@@ -73,5 +73,9 @@ service cloud.firestore {
     match /waConversations/{id} {
       allow read, write: if false;
     }
+
+    match /ivrSessions/{id} {
+      allow read, write: if false;
+    }
   }
 }

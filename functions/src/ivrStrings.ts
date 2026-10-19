@@ -16,12 +16,22 @@ export interface IvrStrings {
   reminderCancelled: string;
   defaultPhoneClientName: string;
   maintenanceMessage: string;
+  today: string;
+  tomorrow: string;
+  askDayIntro: string;
+  dayOption: (n: number, label: string) => string;
+  askTimeIntro: (dayLabel: string) => string;
+  timeOption: (n: number, timeStr: string) => string;
+  noSlotsThatDay: (dayLabel: string) => string;
+  scheduleResult: (dayLabel: string, times: string[]) => string;
+  slotTakenPhone: string;
 }
 
 const he: IvrStrings = {
   sayLang: 'he-IL',
   sayVoice: 'Azure.he-IL-AvriNeural',
-  greeting: 'שלום, הגעתם למספרה. לתיאום תור הקרוב ביותר הקישו 1. לביטול התור הקרוב שלכם הקישו 2. לשיחה עם המספרה הקישו 0.',
+  greeting:
+    'שלום, הגעתם למספרה. לקביעת תור הקישו 1. לביטול התור הקרוב שלכם הקישו 2. לשמיעת השעות הפנויות הקישו 3. לשיחה עם המספרה הקישו 0.',
   noChoice: 'לא התקבלה בחירה. להתראות.',
   systemError: 'שגיאה בהגדרת המערכת. אנא נסו שוב מאוחר יותר.',
   invalidChoice: 'בחירה לא תקינה. להתראות.',
@@ -34,12 +44,23 @@ const he: IvrStrings = {
   reminderCancelled: 'התור בוטל. תודה.',
   defaultPhoneClientName: 'לקוח טלפוני',
   maintenanceMessage: 'המערכת האוטומטית מושבתת זמנית לתחזוקה. מעבירים אתכם ישירות למספרה.',
+  today: 'היום',
+  tomorrow: 'מחר',
+  askDayIntro: 'באיזה יום תרצו לקבוע תור?',
+  dayOption: (n, label) => `עבור ${label}, הקישו ${n}.`,
+  askTimeIntro: (dayLabel) => `אלה השעות הפנויות עבור ${dayLabel}:`,
+  timeOption: (n, timeStr) => `לשעה ${timeStr}, הקישו ${n}.`,
+  noSlotsThatDay: (dayLabel) => `אין תורים פנויים עבור ${dayLabel}. נסו יום אחר.`,
+  scheduleResult: (dayLabel, times) =>
+    `השעות הפנויות עבור ${dayLabel} הן: ${times.join(', ')}. כדי לקבוע תור, התקשרו שוב ובחרו באפשרות הראשונה בתפריט.`,
+  slotTakenPhone: 'מצטערים, השעה הזו נתפסה הרגע. נסו שוב מאוחר יותר.',
 };
 
 const en: IvrStrings = {
   sayLang: 'en-US',
   sayVoice: 'Polly.Joanna-Neural',
-  greeting: 'Hello, you have reached the salon. To book the next available appointment, press 1. To cancel your upcoming appointment, press 2. To speak with the salon, press 0.',
+  greeting:
+    'Hello, you have reached the salon. To book an appointment, press 1. To cancel your upcoming appointment, press 2. To hear the available times, press 3. To speak with the salon, press 0.',
   noChoice: 'No option was selected. Goodbye.',
   systemError: 'There was a system configuration error. Please try again later.',
   invalidChoice: 'Invalid choice. Goodbye.',
@@ -52,12 +73,23 @@ const en: IvrStrings = {
   reminderCancelled: 'Your appointment was cancelled. Thank you.',
   defaultPhoneClientName: 'Phone client',
   maintenanceMessage: 'The automated system is temporarily paused for maintenance. Transferring you directly to the salon.',
+  today: 'today',
+  tomorrow: 'tomorrow',
+  askDayIntro: 'Which day would you like to book?',
+  dayOption: (n, label) => `For ${label}, press ${n}.`,
+  askTimeIntro: (dayLabel) => `These are the available times for ${dayLabel}:`,
+  timeOption: (n, timeStr) => `For ${timeStr}, press ${n}.`,
+  noSlotsThatDay: (dayLabel) => `There are no available appointments for ${dayLabel}. Please try another day.`,
+  scheduleResult: (dayLabel, times) =>
+    `The available times for ${dayLabel} are: ${times.join(', ')}. To book, call again and choose the first option in the menu.`,
+  slotTakenPhone: 'Sorry, that time slot was just taken. Please try again later.',
 };
 
 const es: IvrStrings = {
   sayLang: 'es-ES',
   sayVoice: 'Polly.Lucia-Neural',
-  greeting: 'Hola, se comunicó con la peluquería. Para reservar el próximo turno disponible, marque 1. Para cancelar su próximo turno, marque 2. Para hablar con la peluquería, marque 0.',
+  greeting:
+    'Hola, se comunicó con la peluquería. Para reservar un turno, marque 1. Para cancelar su próximo turno, marque 2. Para escuchar los horarios disponibles, marque 3. Para hablar con la peluquería, marque 0.',
   noChoice: 'No se recibió ninguna opción. Hasta luego.',
   systemError: 'Hubo un error de configuración del sistema. Por favor, intente de nuevo más tarde.',
   invalidChoice: 'Opción inválida. Hasta luego.',
@@ -70,6 +102,16 @@ const es: IvrStrings = {
   reminderCancelled: 'El turno fue cancelado. Gracias.',
   defaultPhoneClientName: 'Cliente telefónico',
   maintenanceMessage: 'El sistema automático está pausado temporalmente por mantenimiento. Lo transferimos directo a la peluquería.',
+  today: 'hoy',
+  tomorrow: 'mañana',
+  askDayIntro: '¿Para qué día querés el turno?',
+  dayOption: (n, label) => `Para ${label}, marque ${n}.`,
+  askTimeIntro: (dayLabel) => `Estos son los horarios disponibles para ${dayLabel}:`,
+  timeOption: (n, timeStr) => `Para las ${timeStr}, marque ${n}.`,
+  noSlotsThatDay: (dayLabel) => `No hay turnos disponibles para ${dayLabel}. Intente otro día.`,
+  scheduleResult: (dayLabel, times) =>
+    `Los horarios disponibles para ${dayLabel} son: ${times.join(', ')}. Para reservar, llame de nuevo y elija la primera opción del menú.`,
+  slotTakenPhone: 'Lo sentimos, ese horario se acaba de ocupar. Intente de nuevo más tarde.',
 };
 
 const IVR_SETS: Record<string, IvrStrings> = { he, en, es };

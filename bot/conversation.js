@@ -149,6 +149,8 @@ export async function handleIncomingMessage(jid, rawText, branchId, pushName) {
       return handleWaitlistAsk(phone, text, branch, state);
     case 'CANCEL_SELECT':
       return handleCancelSelect(phone, text, branch, state);
+    case 'AVAIL_DAY':
+      return handleAvailDay(phone, text, branch, state);
     default:
       await resetToMainMenu(phone);
       return [t(branch, 'mainMenu')];
@@ -228,6 +230,12 @@ async function handleMainMenu(phone, text, branch, state) {
     const lines = await buildTalkToStaffLines(branch);
     if (!lines) return [t(branch, 'noStaffConfigured'), t(branch, 'mainMenu')];
     return [...lines, '', t(branch, 'mainMenu')];
+  }
+  if (text === '5') {
+    const dateOptions = buildDateOptions(branch);
+    await saveConversation(phone, { step: 'AVAIL_DAY', data: { ...state.data, dateOptions } });
+    const lines = dateOptions.map((d, i) => `${menuNumber(i + 1)} ${d.label}`);
+    return oneMessage(t(branch, 'chooseDayAvailability'), ...lines, t(branch, 'chooseNumberHint'));
   }
 
   // No coincide con ninguna opción esperada: puede ser una pregunta
@@ -582,6 +590,33 @@ async function handleCancelSelect(phone, text, branch, state) {
   await api.cancelAppointment(appointmentId);
   await resetToMainMenu(phone);
   return [t(branch, 'apptCancelled'), t(branch, 'mainMenu')];
+}
+
+/** Opción 5️⃣ del menú: solo mostrar las horas libres de un día, sin
+ * reservar nada (el cliente decide después si quiere confirmar un turno,
+ * volviendo a escribir "menu" y usando la opción 1️⃣). Usa el primer
+ * servicio activo (para calcular la duración de los turnos) y todos los
+ * peluqueros activos juntos, igual que "cualquiera que esté disponible"
+ * en la reserva normal. */
+async function handleAvailDay(phone, text, branch, state) {
+  const idx = Number(text) - 1;
+  const chosen = state.data.dateOptions?.[idx];
+  if (!chosen) return [t(branch, 'invalidChoice')];
+
+  const services = await getActiveServices(branch.id);
+  if (services.length === 0) {
+    await resetToMainMenu(phone);
+    return [t(branch, 'noServices')];
+  }
+  const staffList = await getActiveStaff(branch.id);
+  const allSlots = await availableSlotsForDay(branch, staffList, services[0], chosen.dateStr);
+
+  await resetToMainMenu(phone);
+  if (allSlots.length === 0) {
+    return [t(branch, 'noSlotsThatDay', chosen.label), t(branch, 'mainMenu')];
+  }
+  const times = allSlots.map((s) => `${formatTime(s.startsAt, branch)}${staffList.length > 1 ? ` — ${s.staffName}` : ''}`);
+  return [t(branch, 'availableTimesHeader', chosen.label), ...times, '', t(branch, 'mainMenu')];
 }
 
 // --- Helpers ---

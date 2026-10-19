@@ -26,6 +26,7 @@ const STRINGS = {
       '*2* · לבטל תור',
       '*3* · לצפייה בתורים הקרובים שלי',
       '*4* · לדבר ישירות עם הספר',
+      '*5* · לראות אילו שעות פנויות',
       '',
       'כתבו את מספר האפשרות הרצויה.',
     ].join('\n'),
@@ -77,6 +78,8 @@ const STRINGS = {
     askName: 'לפני שממשיכים, מה השם שלך? (אם לא רוצים לכתוב שם, אפשר לכתוב *0*)',
     welcomeBack: (name) => `שלום ${name}, טוב לראות אותך שוב!`,
     nameThanks: (name) => `נעים להכיר, ${name}! 😊`,
+    chooseDayAvailability: 'לאיזה יום לבדוק את השעות הפנויות?',
+    availableTimesHeader: (dayLabel) => `השעות הפנויות ב-${dayLabel}:`,
   },
   en: {
     weekdays: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
@@ -89,6 +92,7 @@ const STRINGS = {
       '*2* · Cancel an appointment',
       '*3* · View my upcoming appointments',
       '*4* · Talk directly with the stylist',
+      '*5* · See available times',
       '',
       'Type the number of the option you want.',
     ].join('\n'),
@@ -140,6 +144,8 @@ const STRINGS = {
     askName: "Before we continue, what's your name? (type *0* if you'd rather not share it)",
     welcomeBack: (name) => `Hi ${name}, good to see you again!`,
     nameThanks: (name) => `Nice to meet you, ${name}! 😊`,
+    chooseDayAvailability: 'Which day would you like to check availability for?',
+    availableTimesHeader: (dayLabel) => `Available times on ${dayLabel}:`,
   },
   es: {
     weekdays: ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'],
@@ -152,6 +158,7 @@ const STRINGS = {
       '*2* · Cancelar un turno',
       '*3* · Ver mis próximos turnos',
       '*4* · Hablar directamente con el peluquero',
+      '*5* · Ver horarios disponibles',
       '',
       'Escribí el número de la opción que querés.',
     ].join('\n'),
@@ -203,6 +210,8 @@ const STRINGS = {
     askName: 'Antes de seguir, ¿cuál es tu nombre? (si preferís no dejarlo, escribí *0*)',
     welcomeBack: (name) => `¡Hola ${name}, qué bueno verte de nuevo!`,
     nameThanks: (name) => `¡Un placer, ${name}! 😊`,
+    chooseDayAvailability: '¿Para qué día querés ver los horarios disponibles?',
+    availableTimesHeader: (dayLabel) => `Horarios disponibles el ${dayLabel}:`,
   },
 };
 
