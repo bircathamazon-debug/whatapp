@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, RefreshControl, TextInput, Pressable } from 'react-native';
 import { useBranch } from '../../../lib/branchContext';
-import { getClientsByBranch, updateClientNotes } from '../../../lib/clients';
+import { getClientsByBranch, updateClientNotes, updateClientPreferredChannel } from '../../../lib/clients';
 import { getAppointmentsByClientPhone } from '../../../lib/appointments';
 import { getServicesByBranch } from '../../../lib/services';
 import { useTheme, type ThemeColors, RADIUS, cardShadow, accentBorder, PRESSED_SCALE } from '../../../lib/theme';
@@ -48,6 +48,10 @@ export default function ClientsScreen() {
     setClients((prev) => prev.map((c) => (c.id === clientId ? { ...c, notes } : c)));
   };
 
+  const onChannelChanged = (clientId: string, preferredChannel: Client['preferredChannel']) => {
+    setClients((prev) => prev.map((c) => (c.id === clientId ? { ...c, preferredChannel } : c)));
+  };
+
   return (
     <View style={styles.container}>
       <TextInput style={styles.search} placeholder={t.clients.searchPlaceholder} placeholderTextColor={colors.textMuted} value={search} onChangeText={setSearch} />
@@ -64,6 +68,7 @@ export default function ClientsScreen() {
             expanded={expandedId === item.id}
             onToggle={() => setExpandedId(expandedId === item.id ? null : item.id)}
             onSavedNotes={(notes) => onSavedNotes(item.id, notes)}
+            onChannelChanged={(channel) => onChannelChanged(item.id, channel)}
             styles={styles}
             colors={colors}
             t={t}
@@ -81,6 +86,7 @@ function ClientCard({
   expanded,
   onToggle,
   onSavedNotes,
+  onChannelChanged,
   styles,
   colors,
   t,
@@ -91,6 +97,7 @@ function ClientCard({
   expanded: boolean;
   onToggle: () => void;
   onSavedNotes: (notes: string) => void;
+  onChannelChanged: (channel: Client['preferredChannel']) => void;
   styles: ReturnType<typeof makeStyles>;
   colors: ThemeColors;
   t: ReturnType<typeof useT>;
@@ -101,6 +108,7 @@ function ClientCard({
   const [justSaved, setJustSaved] = useState(false);
   const [history, setHistory] = useState<Appointment[] | null>(null);
   const [loadingHistory, setLoadingHistory] = useState(false);
+  const [changingChannel, setChangingChannel] = useState(false);
 
   useEffect(() => { setNotes(client.notes ?? ''); }, [client.notes]);
 
@@ -147,6 +155,17 @@ function ClientCard({
     }
   };
 
+  const selectChannel = async (channel: Client['preferredChannel']) => {
+    if (channel === client.preferredChannel || changingChannel) return;
+    setChangingChannel(true);
+    try {
+      await updateClientPreferredChannel(client.id, channel);
+      onChannelChanged(channel);
+    } finally {
+      setChangingChannel(false);
+    }
+  };
+
   return (
     <View style={styles.card}>
       <Pressable style={({ pressed }) => pressed && PRESSED_SCALE} onPress={onToggle}>
@@ -163,7 +182,26 @@ function ClientCard({
 
       {expanded && (
         <View style={styles.expanded}>
-          <Text style={styles.fieldLabel}>{t.clients.notesLabel}</Text>
+          <Text style={styles.fieldLabel}>{t.clients.reminderChannelLabel}</Text>
+          <View style={styles.channelRow}>
+            {(['whatsapp', 'call'] as const).map((channel) => {
+              const active = (client.preferredChannel ?? 'whatsapp') === channel;
+              return (
+                <Pressable
+                  key={channel}
+                  style={({ pressed }) => [styles.channelPill, active && styles.channelPillActive, pressed && PRESSED_SCALE]}
+                  disabled={changingChannel}
+                  onPress={() => selectChannel(channel)}
+                >
+                  <Text style={[styles.channelPillText, active && styles.channelPillTextActive]}>
+                    {channel === 'whatsapp' ? t.clients.channelWhatsapp : t.clients.channelCall}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+
+          <Text style={[styles.fieldLabel, { marginTop: 14 }]}>{t.clients.notesLabel}</Text>
           <TextInput
             style={styles.notesInput}
             value={notes}
@@ -213,6 +251,11 @@ function makeStyles(colors: ThemeColors, mode: 'light' | 'dark') {
     noShow: { color: colors.danger },
     expanded: { marginTop: 14, paddingTop: 14, borderTopWidth: 1, borderTopColor: colors.surfaceMuted },
     fieldLabel: { fontSize: 11.5, fontWeight: '700', color: colors.textMuted, marginBottom: 6 },
+    channelRow: { flexDirection: 'row', gap: 8 },
+    channelPill: { flex: 1, borderRadius: RADIUS.pill, paddingVertical: 8, alignItems: 'center', backgroundColor: colors.surfaceMuted },
+    channelPillActive: { backgroundColor: colors.accent },
+    channelPillText: { fontSize: 12.5, fontWeight: '700', color: colors.textMuted },
+    channelPillTextActive: { color: '#fff' },
     notesInput: { backgroundColor: colors.surfaceMuted, borderRadius: RADIUS.md, padding: 10, fontSize: 13, color: colors.text, minHeight: 70, textAlignVertical: 'top' },
     saveBtn: { backgroundColor: colors.accent, borderRadius: RADIUS.md, padding: 10, alignItems: 'center', marginTop: 8 },
     saveBtnText: { color: '#fff', fontWeight: '700', fontSize: 13 },

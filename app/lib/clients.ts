@@ -1,6 +1,6 @@
 import { collection, doc, getDocs, query, where, orderBy, updateDoc } from 'firebase/firestore';
 import { db } from './firebase';
-import type { Client } from '../../shared/types';
+import type { Client, NotificationChannel } from '../../shared/types';
 
 const COL = 'clients';
 
@@ -11,4 +11,8 @@ export async function getClientsByBranch(branchId: string): Promise<Client[]> {
 
 export async function updateClientNotes(clientId: string, notes: string): Promise<void> {
   await updateDoc(doc(db, COL, clientId), { notes });
+}
+
+export async function updateClientPreferredChannel(clientId: string, preferredChannel: NotificationChannel): Promise<void> {
+  await updateDoc(doc(db, COL, clientId), { preferredChannel });
 }

@@ -61,6 +61,9 @@ interface Dict {
     historyTitle: string;
     noHistory: string;
     totalSpent: (amount: number) => string;
+    reminderChannelLabel: string;
+    channelWhatsapp: string;
+    channelCall: string;
   };
   waitlist: {
     statusWaiting: string;
@@ -313,6 +316,9 @@ const he: Dict = {
     historyTitle: 'היסטוריית תורים',
     noHistory: 'אין עדיין תורים קודמים.',
     totalSpent: (amount) => `סה״כ הוצאה: ₪${amount}`,
+    reminderChannelLabel: 'איך לשלוח תזכורות',
+    channelWhatsapp: 'וואטסאפ',
+    channelCall: 'שיחת טלפון',
   },
   waitlist: {
     statusWaiting: 'ממתין',
@@ -565,6 +571,9 @@ const en: Dict = {
     historyTitle: 'Appointment history',
     noHistory: 'No past appointments yet.',
     totalSpent: (amount) => `Total spent: $${amount}`,
+    reminderChannelLabel: 'How to send reminders',
+    channelWhatsapp: 'WhatsApp',
+    channelCall: 'Phone call',
   },
   waitlist: {
     statusWaiting: 'Waiting',
@@ -817,6 +826,9 @@ const es: Dict = {
     historyTitle: 'Historial de turnos',
     noHistory: 'Todavía no tiene turnos anteriores.',
     totalSpent: (amount) => `Total gastado: ₪${amount}`,
+    reminderChannelLabel: 'Cómo mandarle los recordatorios',
+    channelWhatsapp: 'WhatsApp',
+    channelCall: 'Llamada telefónica',
   },
   waitlist: {
     statusWaiting: 'Esperando',
