@@ -19,6 +19,7 @@ export interface IvrStrings {
   today: string;
   tomorrow: string;
   askDayIntro: string;
+  askDayIntroSchedule: string;
   dayOption: (n: number, label: string) => string;
   askTimeIntro: (dayLabel: string) => string;
   timeOption: (n: number, timeStr: string) => string;
@@ -47,6 +48,7 @@ const he: IvrStrings = {
   today: 'היום',
   tomorrow: 'מחר',
   askDayIntro: 'באיזה יום תרצו לקבוע תור?',
+  askDayIntroSchedule: 'לאיזה יום תרצו לשמוע את השעות הפנויות?',
   dayOption: (n, label) => `עבור ${label}, הקישו ${n}.`,
   askTimeIntro: (dayLabel) => `אלה השעות הפנויות עבור ${dayLabel}:`,
   timeOption: (n, timeStr) => `לשעה ${timeStr}, הקישו ${n}.`,
@@ -76,6 +78,7 @@ const en: IvrStrings = {
   today: 'today',
   tomorrow: 'tomorrow',
   askDayIntro: 'Which day would you like to book?',
+  askDayIntroSchedule: 'Which day would you like to hear the available times for?',
   dayOption: (n, label) => `For ${label}, press ${n}.`,
   askTimeIntro: (dayLabel) => `These are the available times for ${dayLabel}:`,
   timeOption: (n, timeStr) => `For ${timeStr}, press ${n}.`,
@@ -105,6 +108,7 @@ const es: IvrStrings = {
   today: 'hoy',
   tomorrow: 'mañana',
   askDayIntro: '¿Para qué día querés el turno?',
+  askDayIntroSchedule: '¿Para qué día querés escuchar los horarios disponibles?',
   dayOption: (n, label) => `Para ${label}, marque ${n}.`,
   askTimeIntro: (dayLabel) => `Estos son los horarios disponibles para ${dayLabel}:`,
   timeOption: (n, timeStr) => `Para las ${timeStr}, marque ${n}.`,

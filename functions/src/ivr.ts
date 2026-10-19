@@ -118,7 +118,8 @@ export const ivrMenu = onRequest(async (req, res) => {
     await saveIvrSession(callSid, { branchId, data: { intent: digit === '1' ? 'book' : 'schedule', clientPhone: from, dateOptions } });
 
     const base = process.env.FUNCTIONS_BASE_URL ?? '';
-    const daySpeech = [s.askDayIntro, ...dateOptions.map((d, i) => s.dayOption(i + 1, d.label))].join(' ');
+    const intro = digit === '1' ? s.askDayIntro : s.askDayIntroSchedule;
+    const daySpeech = [intro, ...dateOptions.map((d, i) => s.dayOption(i + 1, d.label))].join(' ');
     res.send(`<?xml version="1.0" encoding="UTF-8"?>
 <Response>
   <Gather numDigits="1" action="${base}/ivrDay?branchId=${branchId}" method="POST" timeout="8">
