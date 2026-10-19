@@ -20,7 +20,7 @@ export interface IvrStrings {
 
 const he: IvrStrings = {
   sayLang: 'he-IL',
-  sayVoice: 'Azure.he-IL-HilaNeural',
+  sayVoice: 'Azure.he-IL-AvriNeural',
   greeting: 'שלום, הגעתם למספרה. לתיאום תור הקרוב ביותר הקישו 1. לביטול התור הקרוב שלכם הקישו 2. לשיחה עם המספרה הקישו 0.',
   noChoice: 'לא התקבלה בחירה. להתראות.',
   systemError: 'שגיאה בהגדרת המערכת. אנא נסו שוב מאוחר יותר.',
