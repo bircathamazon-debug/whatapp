@@ -1,8 +1,8 @@
-// Textos hablados por el IVR de Twilio (<Say>), por idioma (branch.language).
+// Textos hablados por el IVR de Telnyx (TeXML <Say>), por idioma (branch.language).
 
 export interface IvrStrings {
-  twilioLang: string; // código de voz que espera Twilio <Say language="...">
-  twilioVoice: string; // voz neuronal (más natural que la robótica por defecto) para <Say voice="...">
+  sayLang: string; // atributo <Say language="..."> (TeXML lo ignora salvo con voice="alice"; se deja por si cambia)
+  sayVoice: string; // voz neuronal (más natural que la robótica por defecto) para <Say voice="...">: Azure para hebreo (Telnyx no tiene voces de Google), Polly para inglés/español
   greeting: string;
   noChoice: string;
   systemError: string;
@@ -19,8 +19,8 @@ export interface IvrStrings {
 }
 
 const he: IvrStrings = {
-  twilioLang: 'he-IL',
-  twilioVoice: 'Google.he-IL-Wavenet-C',
+  sayLang: 'he-IL',
+  sayVoice: 'Azure.he-IL-HilaNeural',
   greeting: 'שלום, הגעתם למספרה. לתיאום תור הקרוב ביותר הקישו 1. לביטול התור הקרוב שלכם הקישו 2. לשיחה עם המספרה הקישו 0.',
   noChoice: 'לא התקבלה בחירה. להתראות.',
   systemError: 'שגיאה בהגדרת המערכת. אנא נסו שוב מאוחר יותר.',
@@ -37,8 +37,8 @@ const he: IvrStrings = {
 };
 
 const en: IvrStrings = {
-  twilioLang: 'en-US',
-  twilioVoice: 'Polly.Joanna-Neural',
+  sayLang: 'en-US',
+  sayVoice: 'Polly.Joanna-Neural',
   greeting: 'Hello, you have reached the salon. To book the next available appointment, press 1. To cancel your upcoming appointment, press 2. To speak with the salon, press 0.',
   noChoice: 'No option was selected. Goodbye.',
   systemError: 'There was a system configuration error. Please try again later.',
@@ -55,8 +55,8 @@ const en: IvrStrings = {
 };
 
 const es: IvrStrings = {
-  twilioLang: 'es-ES',
-  twilioVoice: 'Polly.Lucia-Neural',
+  sayLang: 'es-ES',
+  sayVoice: 'Polly.Lucia-Neural',
   greeting: 'Hola, se comunicó con la peluquería. Para reservar el próximo turno disponible, marque 1. Para cancelar su próximo turno, marque 2. Para hablar con la peluquería, marque 0.',
   noChoice: 'No se recibió ninguna opción. Hasta luego.',
   systemError: 'Hubo un error de configuración del sistema. Por favor, intente de nuevo más tarde.',

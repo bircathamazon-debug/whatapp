@@ -4,16 +4,20 @@ import type { Appointment, Branch, BlockedTime, Client, Service, Staff } from '.
 import { createAppointment, confirmAppointment, cancelAppointment, formatDate, formatTime } from './booking';
 import { getAvailableSlots, getStaffServiceDuration } from './availability';
 import { getIvrStrings } from './ivrStrings';
+import { getTelnyxConfig } from './telnyx';
 
 /**
- * IVR telefónico con Twilio (<Gather> + <Say>, en el idioma de la sucursal)
+ * IVR telefónico con Telnyx (TeXML: mismas etiquetas <Gather>/<Say>/<Dial> que
+ * TwiML de Twilio, Telnyx las traduce igual) en el idioma de la sucursal,
  * para clientes con teléfono kasher que no pueden usar WhatsApp. Flujo:
  *  1 = agendar la próxima hora libre con cualquier peluquero
  *  2 = cancelar mi próxima cita
  *  0 = hablar con la peluquería (transferencia a la línea directa)
  *
- * Configurar en Twilio: "A CALL COMES IN" -> Webhook ->
- * https://<region>-<project>.cloudfunctions.net/ivrIncomingCall
+ * Configurar en el portal de Telnyx: crear una "TeXML Application" con
+ * Voice Method = POST y la URL del webhook ->
+ * https://<region>-<project>.cloudfunctions.net/ivrIncomingCall, y asignarle
+ * el número comprado en la pestaña "Numbers" de esa misma aplicación.
  */
 export const ivrIncomingCall = onRequest(async (req, res) => {
   const branchId = String(req.query.branchId ?? req.body.branchId ?? '');
@@ -28,8 +32,8 @@ export const ivrIncomingCall = onRequest(async (req, res) => {
   if (branch?.maintenanceMode) {
     res.send(`<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Say language="${s.twilioLang}" voice="${s.twilioVoice}">${s.maintenanceMessage}</Say>
-  <Dial>${branch.phone}</Dial>
+  <Say language="${s.sayLang}" voice="${s.sayVoice}">${s.maintenanceMessage}</Say>
+  <Dial callerId="${callerId()}">${branch.phone}</Dial>
 </Response>`);
     return;
   }
@@ -37,9 +41,9 @@ export const ivrIncomingCall = onRequest(async (req, res) => {
   res.send(`<?xml version="1.0" encoding="UTF-8"?>
 <Response>
   <Gather numDigits="1" action="/ivrMenu?branchId=${branchId}" method="POST" timeout="8">
-    <Say language="${s.twilioLang}" voice="${s.twilioVoice}">${s.greeting}</Say>
+    <Say language="${s.sayLang}" voice="${s.sayVoice}">${s.greeting}</Say>
   </Gather>
-  <Say language="${s.twilioLang}" voice="${s.twilioVoice}">${s.noChoice}</Say>
+  <Say language="${s.sayLang}" voice="${s.sayVoice}">${s.noChoice}</Say>
 </Response>`);
 });
 
@@ -54,42 +58,42 @@ export const ivrMenu = onRequest(async (req, res) => {
   const branch = branchSnap.exists ? (branchSnap.data() as Branch) : null;
   const s = getIvrStrings(branch?.language);
   if (!branch) {
-    res.send(sayAndHangup(s.twilioLang, s.twilioVoice, s.systemError));
+    res.send(sayAndHangup(s.sayLang, s.sayVoice, s.systemError));
     return;
   }
 
   if (digit === '0') {
-    res.send(`<?xml version="1.0" encoding="UTF-8"?><Response><Dial>${branch.phone}</Dial></Response>`);
+    res.send(`<?xml version="1.0" encoding="UTF-8"?><Response><Dial callerId="${callerId()}">${branch.phone}</Dial></Response>`);
     return;
   }
 
   if (digit === '2') {
     const next = await findNextAppointment(from);
     if (!next) {
-      res.send(sayAndHangup(s.twilioLang, s.twilioVoice, s.noAppointmentFound));
+      res.send(sayAndHangup(s.sayLang, s.sayVoice, s.noAppointmentFound));
       return;
     }
     await cancelAppointment(next.id, 'client');
-    res.send(sayAndHangup(s.twilioLang, s.twilioVoice, s.appointmentCancelled));
+    res.send(sayAndHangup(s.sayLang, s.sayVoice, s.appointmentCancelled));
     return;
   }
 
   if (digit === '1') {
     const booked = await bookNextAvailableSlot(branch, from);
     if (!booked) {
-      res.send(sayAndHangup(s.twilioLang, s.twilioVoice, s.noSlotsAvailable));
+      res.send(sayAndHangup(s.sayLang, s.sayVoice, s.noSlotsAvailable));
       return;
     }
     const dateStr = formatDate(booked.startsAt, branch.timezone);
     const timeStr = formatTime(booked.startsAt, branch.timezone);
-    res.send(sayAndHangup(s.twilioLang, s.twilioVoice, s.appointmentBooked(dateStr, timeStr)));
+    res.send(sayAndHangup(s.sayLang, s.sayVoice, s.appointmentBooked(dateStr, timeStr)));
     return;
   }
 
-  res.send(sayAndHangup(s.twilioLang, s.twilioVoice, s.invalidChoice));
+  res.send(sayAndHangup(s.sayLang, s.sayVoice, s.invalidChoice));
 });
 
-/** Llamada saliente (reminders.ts la usa a través de notify.dispatchTwilio) al presionar 1/2 en la llamada de recordatorio. */
+/** Llamada saliente (crons.ts la usa a través de notify.dispatchTelnyx) al presionar 1/2 en la llamada de recordatorio. */
 export const ivrReminderResponse = onRequest(async (req, res) => {
   const digit = String(req.body.Digits ?? '');
   const appointmentId = String(req.query.appointmentId ?? '');
@@ -97,18 +101,18 @@ export const ivrReminderResponse = onRequest(async (req, res) => {
   res.set('Content-Type', 'text/xml');
 
   if (!appointmentId) {
-    res.send(sayAndHangup(s.twilioLang, s.twilioVoice, s.reminderError));
+    res.send(sayAndHangup(s.sayLang, s.sayVoice, s.reminderError));
     return;
   }
 
   if (digit === '1') {
     await confirmAppointment(appointmentId);
-    res.send(sayAndHangup(s.twilioLang, s.twilioVoice, s.reminderConfirmed));
+    res.send(sayAndHangup(s.sayLang, s.sayVoice, s.reminderConfirmed));
   } else if (digit === '2') {
     await cancelAppointment(appointmentId, 'client');
-    res.send(sayAndHangup(s.twilioLang, s.twilioVoice, s.reminderCancelled));
+    res.send(sayAndHangup(s.sayLang, s.sayVoice, s.reminderCancelled));
   } else {
-    res.send(sayAndHangup(s.twilioLang, s.twilioVoice, s.invalidChoice));
+    res.send(sayAndHangup(s.sayLang, s.sayVoice, s.invalidChoice));
   }
 });
 
@@ -168,6 +172,11 @@ function sayAndHangup(lang: string, voice: string, text: string): string {
   return `<?xml version="1.0" encoding="UTF-8"?><Response><Say language="${lang}" voice="${voice}">${text}</Say><Hangup/></Response>`;
 }
 
-function normalizePhone(twilioFrom: string): string {
-  return twilioFrom; // Twilio ya entrega el From en formato E.164
+function normalizePhone(from: string): string {
+  return from; // Telnyx ya entrega el From en formato E.164
+}
+
+/** Caller ID para transferencias (<Dial>): el número de Telnyx, si está configurado. */
+function callerId(): string {
+  return getTelnyxConfig()?.phoneNumber ?? '';
 }

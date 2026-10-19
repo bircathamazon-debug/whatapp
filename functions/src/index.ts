@@ -2,7 +2,7 @@ export {
   sendReminders,
   markNoShows,
   releaseDeposits,
-  flushDelayedTwilio,
+  flushDelayedTelnyx,
   sendBirthdayMessages,
   generateRecurringAppointments,
   sendComebackReminders,

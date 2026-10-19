@@ -1,5 +1,5 @@
 import { db } from './admin';
-import { getTwilioClient } from './twilio';
+import { getTelnyxConfig, createTelnyxCall, sendTelnyxSms } from './telnyx';
 import { isShabbatNow, nextHavdalah } from './shabbat';
 import { getIvrStrings } from './ivrStrings';
 import type { NotificationChannel, Branch } from './types';
@@ -26,7 +26,7 @@ interface SendArgs {
 /**
  * Punto único de salida de mensajes. WhatsApp se encola en Firestore y lo
  * envía el proceso del bot (Baileys, requiere sesión persistente). SMS y
- * llamadas salen directo por la API REST de Twilio.
+ * llamadas salen directo por la API REST de Telnyx.
  */
 export async function sendNotification(args: SendArgs): Promise<void> {
   const now = Date.now();
@@ -58,9 +58,9 @@ export async function sendNotification(args: SendArgs): Promise<void> {
   }
 
   if (deliverAfter > now) {
-    // Twilio no soporta "enviar más tarde" nativamente para SMS/voz de forma
+    // Telnyx no soporta "enviar más tarde" nativamente para SMS/voz de forma
     // sencilla: para respetar el modo silencioso encolamos igual y un cron
-    // (flushDelayedTwilio) lo despacha cuando toca.
+    // (flushDueTelnyxNotifications) lo despacha cuando toca.
     await db.collection('notifications').add({
       channel: args.channel,
       to: args.to,
@@ -80,10 +80,10 @@ export async function sendNotification(args: SendArgs): Promise<void> {
     return;
   }
 
-  await dispatchTwilio(args.channel, args.to, args.text, args.relatedAppointmentId, args.awaitingReply, args.branch.language);
+  await dispatchTelnyx(args.channel, args.to, args.text, args.relatedAppointmentId, args.awaitingReply, args.branch.language);
 }
 
-export async function dispatchTwilio(
+export async function dispatchTelnyx(
   channel: 'sms' | 'call',
   to: string,
   text: string,
@@ -91,40 +91,35 @@ export async function dispatchTwilio(
   awaitingReply?: 'confirm_cancel' | 'waitlist_offer' | null,
   language?: string
 ): Promise<void> {
-  const client = getTwilioClient();
-  if (!client) {
-    console.warn('[notify] Twilio no configurado; se omite envío real', { channel, to, text });
-    return;
-  }
-  const from = process.env.TWILIO_PHONE_NUMBER;
-  if (!from) {
-    console.warn('[notify] TWILIO_PHONE_NUMBER no configurado; se omite envío real', { channel, to });
+  const config = getTelnyxConfig();
+  if (!config) {
+    console.warn('[notify] Telnyx no configurado; se omite envío real', { channel, to, text });
     return;
   }
   if (channel === 'sms') {
-    await client.messages.create({ to, from, body: text });
+    await sendTelnyxSms(config, to, text);
     return;
   }
 
-  // Llamada con texto a voz en el idioma de la sucursal (Twilio Say soporta
-  // varios locales vía Polly). Si esperamos respuesta (confirmar/cancelar),
-  // se agrega un <Gather> que redirige a ivrReminderResponse para procesar
-  // el dígito presionado, pasándole el idioma para que responda igual.
+  // Llamada con texto a voz en el idioma de la sucursal (Say soporta varios
+  // locales vía Polly/Azure). Si esperamos respuesta (confirmar/cancelar), se
+  // agrega un <Gather> que redirige a ivrReminderResponse para procesar el
+  // dígito presionado, pasándole el idioma para que responda igual.
   const s = getIvrStrings(language);
-  const base = process.env.TWILIO_IVR_BASE_URL;
-  let twiml: string;
+  const base = process.env.FUNCTIONS_BASE_URL;
+  let texml: string;
   if (awaitingReply === 'confirm_cancel' && relatedAppointmentId && base) {
-    twiml = `<Response><Gather numDigits="1" action="${base}/ivrReminderResponse?appointmentId=${relatedAppointmentId}&amp;lang=${language ?? 'he'}" method="POST" timeout="8"><Say language="${s.twilioLang}" voice="${s.twilioVoice}">${escapeXml(
+    texml = `<Response><Gather numDigits="1" action="${base}/ivrReminderResponse?appointmentId=${relatedAppointmentId}&amp;lang=${language ?? 'he'}" method="POST" timeout="8"><Say language="${s.sayLang}" voice="${s.sayVoice}">${escapeXml(
       text
-    )}</Say></Gather><Say language="${s.twilioLang}" voice="${s.twilioVoice}">${s.noChoice}</Say></Response>`;
+    )}</Say></Gather><Say language="${s.sayLang}" voice="${s.sayVoice}">${s.noChoice}</Say></Response>`;
   } else {
-    twiml = `<Response><Say language="${s.twilioLang}" voice="${s.twilioVoice}">${escapeXml(text)}</Say></Response>`;
+    texml = `<Response><Say language="${s.sayLang}" voice="${s.sayVoice}">${escapeXml(text)}</Say></Response>`;
   }
-  await client.calls.create({ to, from, twiml });
+  await createTelnyxCall(config, to, texml);
 }
 
-/** Cron: despacha por Twilio los mensajes sms/call cuya deliverAfter ya llegó. */
-export async function flushDueTwilioNotifications(): Promise<number> {
+/** Cron: despacha por Telnyx los mensajes sms/call cuya deliverAfter ya llegó. */
+export async function flushDueTelnyxNotifications(): Promise<number> {
   const now = Date.now();
   const snap = await db
     .collection('notifications')
@@ -138,7 +133,7 @@ export async function flushDueTwilioNotifications(): Promise<number> {
   for (const doc of snap.docs) {
     const data = doc.data();
     try {
-      await dispatchTwilio(data.channel, data.to, data.text, data.relatedAppointmentId, data.awaitingReply, data.language);
+      await dispatchTelnyx(data.channel, data.to, data.text, data.relatedAppointmentId, data.awaitingReply, data.language);
       await doc.ref.update({ status: 'sent', sentAt: now });
       sent++;
     } catch (err: any) {

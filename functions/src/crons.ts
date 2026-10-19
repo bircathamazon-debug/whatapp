@@ -2,7 +2,7 @@ import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { db } from './admin';
 import type { Appointment, Branch, Client, RecurringBooking, Staff } from './types';
 import { REMINDER_WINDOWS_HOURS } from './types';
-import { sendNotification, getTemplates, flushDueTwilioNotifications } from './notify';
+import { sendNotification, getTemplates, flushDueTelnyxNotifications } from './notify';
 import { markNoShow, releaseExpiredDepositHolds, formatDate, formatTime, createAppointment } from './booking';
 import { toEpoch, getStaffServiceDuration } from './availability';
 import { chargeTranzilaToken } from './tranzila';
@@ -62,8 +62,8 @@ export const releaseDeposits = onSchedule({ schedule: 'every 30 minutes' }, asyn
 });
 
 /** Cada 15 minutos: despacha SMS/llamadas que quedaron retenidos por modo Shabat silencioso. */
-export const flushDelayedTwilio = onSchedule({ schedule: 'every 15 minutes' }, async () => {
-  await flushDueTwilioNotifications();
+export const flushDelayedTelnyx = onSchedule({ schedule: 'every 15 minutes' }, async () => {
+  await flushDueTelnyxNotifications();
 });
 
 /** Diario 09:00 hora de Israel: felicitaciones de cumpleaños con descuento. */

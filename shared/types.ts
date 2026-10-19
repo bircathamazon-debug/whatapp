@@ -19,7 +19,7 @@ export interface Branch {
   /** 'off' = nunca cierra por Shabat, 'closed' = no acepta reservas durante Shabat,
    *  'silent' = acepta reservas pero no notifica al peluquero hasta Motzaei Shabat */
   shabbatMode: 'off' | 'closed' | 'silent';
-  phone: string; // número de teléfono para el IVR (Twilio)
+  phone: string; // número de teléfono para el IVR (Telnyx)
   whatsappJid?: string; // JID del número de WhatsApp del bot para esta sucursal
   themeMode?: 'light' | 'dark'; // tema de la app del peluquero; sin definir = claro
   language?: 'he' | 'en' | 'es'; // idioma del bot, el IVR y la app; sin definir = hebreo
