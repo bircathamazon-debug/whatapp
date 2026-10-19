@@ -38,9 +38,10 @@ export const ivrIncomingCall = onRequest(async (req, res) => {
     return;
   }
 
+  const base = process.env.FUNCTIONS_BASE_URL ?? '';
   res.send(`<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-  <Gather numDigits="1" action="/ivrMenu?branchId=${branchId}" method="POST" timeout="8">
+  <Gather numDigits="1" action="${base}/ivrMenu?branchId=${branchId}" method="POST" timeout="8">
     <Say language="${s.sayLang}" voice="${s.sayVoice}">${s.greeting}</Say>
   </Gather>
   <Say language="${s.sayLang}" voice="${s.sayVoice}">${s.noChoice}</Say>
