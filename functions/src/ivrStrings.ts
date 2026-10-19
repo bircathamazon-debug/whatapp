@@ -16,13 +16,14 @@ export interface IvrStrings {
   reminderCancelled: string;
   defaultPhoneClientName: string;
   maintenanceMessage: string;
-  today: string;
-  tomorrow: string;
+  /** Domingo primero (índice 0), igual que Date.getDay(). */
+  weekdays: string[];
   askDayIntro: string;
   askDayIntroSchedule: string;
   dayOption: (n: number, label: string) => string;
-  askTimeIntro: (dayLabel: string) => string;
-  timeOption: (n: number, timeStr: string) => string;
+  askTimeTypedIntro: (dayLabel: string) => string;
+  invalidTimeEntry: string;
+  confirmBooking: (dayLabel: string, timeStr: string) => string;
   noSlotsThatDay: (dayLabel: string) => string;
   scheduleResult: (dayLabel: string, times: string[]) => string;
   slotTakenPhone: string;
@@ -45,16 +46,17 @@ const he: IvrStrings = {
   reminderCancelled: 'התור בוטל. תודה.',
   defaultPhoneClientName: 'לקוח טלפוני',
   maintenanceMessage: 'המערכת האוטומטית מושבתת זמנית לתחזוקה. מעבירים אתכם ישירות למספרה.',
-  today: 'היום',
-  tomorrow: 'מחר',
+  weekdays: ['יום ראשון', 'יום שני', 'יום שלישי', 'יום רביעי', 'יום חמישי', 'יום שישי', 'שבת'],
   askDayIntro: 'באיזה יום תרצו לקבוע תור?',
   askDayIntroSchedule: 'לאיזה יום תרצו לשמוע את השעות הפנויות?',
-  dayOption: (n, label) => `עבור ${label}, הקישו ${n}.`,
-  askTimeIntro: (dayLabel) => `אלה השעות הפנויות עבור ${dayLabel}:`,
-  timeOption: (n, timeStr) => `לשעה ${timeStr}, הקישו ${n}.`,
-  noSlotsThatDay: (dayLabel) => `אין תורים פנויים עבור ${dayLabel}. נסו יום אחר.`,
+  dayOption: (n, label) => `ל${label}, הקישו ${n}.`,
+  askTimeTypedIntro: (dayLabel) =>
+    `באיזו שעה תרצו תור ב${dayLabel}? הקישו את השעה ולאחריה סולמית. לדוגמה, לשעה תשע ושלושים הקישו 9, 3, 0, וסולמית.`,
+  invalidTimeEntry: 'לא הצלחנו להבין את השעה שהוקשה.',
+  confirmBooking: (dayLabel, timeStr) => `${dayLabel} בשעה ${timeStr}. לאישור הקישו 1. לניסיון שעה אחרת הקישו 2.`,
+  noSlotsThatDay: (dayLabel) => `אין תורים פנויים ב${dayLabel}. נסו יום אחר.`,
   scheduleResult: (dayLabel, times) =>
-    `השעות הפנויות עבור ${dayLabel} הן: ${times.join(', ')}. כדי לקבוע תור, התקשרו שוב ובחרו באפשרות הראשונה בתפריט.`,
+    `השעות הפנויות ב${dayLabel} הן: ${times.join(', ')}. כדי לקבוע תור, התקשרו שוב ובחרו באפשרות הראשונה בתפריט.`,
   slotTakenPhone: 'מצטערים, השעה הזו נתפסה הרגע. נסו שוב מאוחר יותר.',
 };
 
@@ -75,16 +77,17 @@ const en: IvrStrings = {
   reminderCancelled: 'Your appointment was cancelled. Thank you.',
   defaultPhoneClientName: 'Phone client',
   maintenanceMessage: 'The automated system is temporarily paused for maintenance. Transferring you directly to the salon.',
-  today: 'today',
-  tomorrow: 'tomorrow',
+  weekdays: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
   askDayIntro: 'Which day would you like to book?',
   askDayIntroSchedule: 'Which day would you like to hear the available times for?',
   dayOption: (n, label) => `For ${label}, press ${n}.`,
-  askTimeIntro: (dayLabel) => `These are the available times for ${dayLabel}:`,
-  timeOption: (n, timeStr) => `For ${timeStr}, press ${n}.`,
-  noSlotsThatDay: (dayLabel) => `There are no available appointments for ${dayLabel}. Please try another day.`,
+  askTimeTypedIntro: (dayLabel) =>
+    `What time would you like on ${dayLabel}? Enter the time followed by the pound key. For example, for 9:30, press 9, 3, 0, then pound.`,
+  invalidTimeEntry: "We couldn't understand that time.",
+  confirmBooking: (dayLabel, timeStr) => `${dayLabel} at ${timeStr}. Press 1 to confirm. Press 2 to try a different time.`,
+  noSlotsThatDay: (dayLabel) => `There are no available appointments on ${dayLabel}. Please try another day.`,
   scheduleResult: (dayLabel, times) =>
-    `The available times for ${dayLabel} are: ${times.join(', ')}. To book, call again and choose the first option in the menu.`,
+    `The available times on ${dayLabel} are: ${times.join(', ')}. To book, call again and choose the first option in the menu.`,
   slotTakenPhone: 'Sorry, that time slot was just taken. Please try again later.',
 };
 
@@ -105,16 +108,17 @@ const es: IvrStrings = {
   reminderCancelled: 'El turno fue cancelado. Gracias.',
   defaultPhoneClientName: 'Cliente telefónico',
   maintenanceMessage: 'El sistema automático está pausado temporalmente por mantenimiento. Lo transferimos directo a la peluquería.',
-  today: 'hoy',
-  tomorrow: 'mañana',
+  weekdays: ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'],
   askDayIntro: '¿Para qué día querés el turno?',
   askDayIntroSchedule: '¿Para qué día querés escuchar los horarios disponibles?',
-  dayOption: (n, label) => `Para ${label}, marque ${n}.`,
-  askTimeIntro: (dayLabel) => `Estos son los horarios disponibles para ${dayLabel}:`,
-  timeOption: (n, timeStr) => `Para las ${timeStr}, marque ${n}.`,
-  noSlotsThatDay: (dayLabel) => `No hay turnos disponibles para ${dayLabel}. Intente otro día.`,
+  dayOption: (n, label) => `Para el ${label}, marque ${n}.`,
+  askTimeTypedIntro: (dayLabel) =>
+    `¿A qué hora querés el turno el ${dayLabel}? Marcá la hora seguida de la tecla numeral. Por ejemplo, para las 9:30, marque 9, 3, 0, y numeral.`,
+  invalidTimeEntry: 'No pudimos entender esa hora.',
+  confirmBooking: (dayLabel, timeStr) => `${dayLabel} a las ${timeStr}. Marque 1 para confirmar. Marque 2 para probar otra hora.`,
+  noSlotsThatDay: (dayLabel) => `No hay turnos disponibles el ${dayLabel}. Intente otro día.`,
   scheduleResult: (dayLabel, times) =>
-    `Los horarios disponibles para ${dayLabel} son: ${times.join(', ')}. Para reservar, llame de nuevo y elija la primera opción del menú.`,
+    `Los horarios disponibles el ${dayLabel} son: ${times.join(', ')}. Para reservar, llame de nuevo y elija la primera opción del menú.`,
   slotTakenPhone: 'Lo sentimos, ese horario se acaba de ocupar. Intente de nuevo más tarde.',
 };
 
