@@ -883,13 +883,13 @@ detalle técnico completo de arquitectura y setup.
     usuario autenticado del panel ya podía leer/escribir "clients".
   - Verificado con `tsc --noEmit` sin errores en `app/` y `functions/`, y
     `node --check` sin errores en los archivos tocados de `bot/`.
-    Commiteado y pusheado a la rama. **Falta desplegar de verdad**: el
-    bot a Railway (`railway up`) y la app a Firebase Hosting
-    (`firebase deploy --only hosting:bot-para-peluqueria`) — esta sesión
-    arrancó en un contenedor nuevo sin los tokens de Railway/Firebase
-    que se usaron en sesiones anteriores, así que hace falta que el
-    usuario los vuelva a pasar (o despliegue él mismo) para que esto
-    quede funcionando en producción, no solo en el código.
+    Commiteado y pusheado a la rama.
+  - ✅ **Desplegado de verdad** (sesión posterior, ya con acceso a
+    Railway y Firebase): bot redesplegado en Railway (reconectó a
+    WhatsApp solo, sin pedir QR nuevo) y app redesplegada en Firebase
+    Hosting (`https://bot-para-peluqueria.web.app`, verificado que
+    responde). El CRM de clientes (nombre al reservar, notas e
+    historial en la ficha) ya está en producción.
 - 🐛 **Bug real encontrado y corregido de raíz: Google Calendar se
   desconectaba solo cada 7 días (`invalid_grant`).** Se encontró en los
   logs mientras se investigaba otro tema (lentitud del IVR). Causa: el
