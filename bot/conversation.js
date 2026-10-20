@@ -11,6 +11,7 @@ import { db } from './firebaseClient.js';
 import { getAvailableSlots, getStaffServiceDuration, toEpoch } from './availability.js';
 import * as api from './botApiClient.js';
 import { t, weekdayNames, dateLocale, isGreeting, isYes, menuNumber } from './i18n.js';
+import { interpretFreeText } from './nlu.js';
 
 const CONV_COL = 'waConversations';
 const DAYS_TO_OFFER = 6;
@@ -238,19 +239,119 @@ async function handleMainMenu(phone, text, branch, state) {
     return oneMessage(t(branch, 'chooseDayAvailability'), ...lines, t(branch, 'chooseNumberHint'));
   }
 
-  // No coincide con ninguna opción esperada: puede ser una pregunta
-  // libre, un emoji, un saludo que no matcheó el regex exacto ("רוצה
-  // להזמין תור"), o cualquier otra cosa. Como en este punto el cliente
-  // no está en medio de ninguna reserva, en vez de decirle "no entendí"
-  // directamente le mostramos el menú principal — así, sea lo que sea
-  // que haya escrito, siempre ve las opciones para seguir. Solo se
-  // guarda en "Preguntas" si el mensaje tiene un signo de pregunta (es
-  // probable que sea algo que el peluquero necesite responder de
-  // verdad) — un saludo o un "quiero reservar" no necesita revisión.
+  // No coincide con ninguna opción esperada (ni número, ni comando exacto):
+  // puede ser un pedido en lenguaje natural, escrito o transcripto de una
+  // nota de voz ("quiero una cita el jueves a las 3"). Antes de rendirnos,
+  // probamos interpretarlo con IA — si entendemos una intención clara, lo
+  // llevamos directo ahí en vez de mostrarle el menú sin más.
+  const nlu = await interpretFreeText(text);
+  if (nlu?.intent === 'cancel') return handleMainMenu(phone, '2', branch, state);
+  if (nlu?.intent === 'talk_to_human') return handleMainMenu(phone, '4', branch, state);
+  if (nlu?.intent === 'book') {
+    const client = await getClientRecord(branch.id, phone);
+    if (!client) {
+      await saveConversation(phone, { step: 'ASK_NAME', data: { ...state.data, pendingNlu: nlu } });
+      return [t(branch, 'askName')];
+    }
+    const isGenericName = client.name === t(branch, 'defaultClientName');
+    const greeting = isGenericName ? [] : [t(branch, 'welcomeBack', client.name)];
+    return continueBookingFastTrack(phone, branch, state, isGenericName ? null : client.name, greeting, nlu);
+  }
+
+  // Tampoco es algo que la IA haya entendido con una intención clara:
+  // puede ser una pregunta libre, un emoji, o cualquier otra cosa. Como en
+  // este punto el cliente no está en medio de ninguna reserva, en vez de
+  // decirle "no entendí" directamente le mostramos el menú principal —
+  // así, sea lo que sea que haya escrito, siempre ve las opciones para
+  // seguir. Solo se guarda en "Preguntas" si el mensaje tiene un signo de
+  // pregunta (es probable que sea algo que el peluquero necesite
+  // responder de verdad) — un saludo o un "quiero reservar" no necesita
+  // revisión.
   if (text.includes('?') || text.includes('؟')) {
     await logUnansweredMessage(branch, phone, text, 'MAIN_MENU');
   }
   return [t(branch, 'mainMenu')];
+}
+
+/** Cuando ya sabemos el nombre del cliente (porque ya era conocido, o
+ * porque recién nos lo dijo), sigue el pedido en lenguaje natural
+ * (`nlu`, de interpretFreeText) todo lo lejos que se pueda sin volver a
+ * preguntar lo que ya entendimos: servicio (si hay uno solo o se pudo
+ * identificar), peluquero (el único activo, o "cualquiera" si hay
+ * varios), día (si se mencionó) y hora (si se mencionó). Lo que no se
+ * pudo resolver solo, se le sigue preguntando normalmente — nunca
+ * reserva nada sin que el cliente confirme un horario concreto. */
+async function continueBookingFastTrack(phone, branch, state, clientName, greetingLines, nlu) {
+  const services = await getActiveServices(branch.id);
+  if (services.length === 0) return [t(branch, 'noServices')];
+
+  let service = services[0];
+  if (services.length > 1) {
+    const hint = (nlu.serviceHint || '').toLowerCase().trim();
+    const matched = hint && services.find((s) => {
+      const name = s.name.toLowerCase();
+      return name.includes(hint) || hint.includes(name);
+    });
+    if (!matched) {
+      // Ambiguo entre varios servicios: mejor preguntar normalmente que
+      // adivinar mal cuál quiso decir.
+      return startServiceSelection(phone, branch, state, clientName, greetingLines);
+    }
+    service = matched;
+  }
+
+  const staffList = await getActiveStaff(branch.id);
+  const staffId = staffList.length === 1 ? staffList[0].id : 'any';
+
+  const dateOptions = buildDateOptions(branch);
+  let chosen = null;
+  if (nlu.relativeDay === 'today') chosen = dateOptions[0];
+  else if (nlu.relativeDay === 'tomorrow') chosen = dateOptions[1];
+  else if (nlu.weekday) chosen = dateOptions.find((d) => englishWeekday(d.dateStr) === nlu.weekday);
+
+  const baseData = { ...state.data, serviceId: service.id, staffId, dateOptions };
+  if (clientName) baseData.clientName = clientName;
+
+  if (!chosen) {
+    // Entendimos que quiere reservar, pero no un día concreto: seguimos
+    // como el flujo normal, preguntando qué día — ya sin tener que elegir
+    // servicio/peluquero si se pudieron resolver solos.
+    await saveConversation(phone, { step: 'BOOK_DAY', data: baseData });
+    const lines = dateOptions.map((d, i) => `${menuNumber(i + 1)} ${d.label}`);
+    return oneMessage(...greetingLines, ...(greetingLines.length ? [''] : []), t(branch, 'chooseDay'), ...lines, t(branch, 'chooseNumberHint'));
+  }
+
+  const dayView = await enterDayTimeSelection(phone, branch, { data: baseData }, chosen, greetingLines);
+
+  const typed = parseNluTime(nlu.time);
+  if (!typed) return dayView;
+
+  // Si enterDayTimeSelection encontró huecos ese día, guardó el estado en
+  // BOOK_TIME con todo lo necesario para resolveTypedTime (la misma
+  // función que ya usa el flujo de "escribí la hora directamente") — la
+  // reusamos así la hora pedida se busca/confirma exactamente igual.
+  const freshState = await getConversation(phone);
+  if (freshState.step !== 'BOOK_TIME') return dayView; // ese día no había huecos (ya se ofreció lista de espera)
+  return resolveTypedTime(phone, branch, freshState, typed);
+}
+
+/** "HH:MM" (lo que devuelve la IA) a {h, m}, o null si no vino o es inválido. */
+function parseNluTime(timeStr) {
+  const match = /^(\d{2}):(\d{2})$/.exec(timeStr || '');
+  if (!match) return null;
+  const h = Number(match[1]);
+  const m = Number(match[2]);
+  if (h > 23 || m > 59) return null;
+  return { h, m };
+}
+
+const ENGLISH_WEEKDAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+
+/** Día de la semana de un "dateStr" (YYYY-MM-DD) en inglés fijo, sin
+ * depender del idioma de la sucursal — para comparar contra lo que
+ * devuelve la IA (interpretFreeText siempre contesta en inglés). */
+function englishWeekday(dateStr) {
+  return ENGLISH_WEEKDAYS[new Date(`${dateStr}T00:00:00Z`).getUTCDay()];
 }
 
 /** Respuesta a "¿cuál es tu nombre?". 0️⃣ = no quiere dejarlo (usa el
@@ -259,6 +360,14 @@ async function handleAskName(phone, text, branch, state) {
   const skipped = text.trim() === '0';
   const name = skipped ? t(branch, 'defaultClientName') : text.trim().slice(0, 60);
   const greeting = skipped ? [] : [t(branch, 'nameThanks', name)];
+
+  // Si llegamos acá porque la IA ya había entendido un pedido de reserva
+  // (ej. una nota de voz) y solo faltaba preguntar el nombre, seguimos
+  // ese pedido en vez de mostrar la lista de servicios desde cero.
+  if (state.data.pendingNlu) {
+    const { pendingNlu, ...rest } = state.data;
+    return continueBookingFastTrack(phone, branch, { data: rest }, name, greeting, pendingNlu);
+  }
   return startServiceSelection(phone, branch, state, name, greeting);
 }
 
@@ -328,14 +437,22 @@ async function handleBookDay(phone, text, branch, state) {
   const idx = Number(text) - 1;
   const chosen = state.data.dateOptions?.[idx];
   if (!chosen) return [t(branch, 'invalidChoice')];
+  return enterDayTimeSelection(phone, branch, state, chosen);
+}
 
+/** Dado un día ya elegido (`chosen`: {dateStr, label}), calcula los huecos
+ * libres y muestra la lista de horarios (o pasa a lista de espera si no
+ * queda nada). Compartido entre elegir el día a mano (handleBookDay) y el
+ * pedido en lenguaje natural ya resuelto (continueBookingFastTrack) —
+ * `greetingLines` opcionales van antes del mensaje (ej. "¡un placer, Dana!"). */
+async function enterDayTimeSelection(phone, branch, state, chosen, greetingLines = []) {
   const service = await docById('services', state.data.serviceId);
   const staffList = state.data.staffId === 'any' ? await getActiveStaff(branch.id) : [await docById('staff', state.data.staffId)];
   const allSlots = await availableSlotsForDay(branch, staffList, service, chosen.dateStr);
 
   if (allSlots.length === 0) {
     await saveConversation(phone, { step: 'BOOK_WAITLIST_ASK', data: { ...state.data, dateStr: chosen.dateStr, dateLabel: chosen.label } });
-    return [t(branch, 'noSlotsThatDay', chosen.label), t(branch, 'askWaitlist')];
+    return oneMessage(...greetingLines, ...(greetingLines.length ? [''] : []), t(branch, 'noSlotsThatDay', chosen.label), t(branch, 'askWaitlist'));
   }
 
   // allSlotsForDay: lista completa del día (para buscar "la hora más cercana"
@@ -346,6 +463,8 @@ async function handleBookDay(phone, text, branch, state) {
   await saveConversation(phone, { step: 'BOOK_TIME', data: { ...state.data, dateStr: chosen.dateStr, dateLabel: chosen.label, slots: displaySlots, allSlotsForDay: allSlots, occupiedAttempts: 0 } });
   const lines = displaySlots.map((s, i) => `${menuNumber(i + 1)} ${formatTime(s.startsAt, branch)}${staffList.length > 1 ? ` — ${s.staffName}` : ''}`);
   return oneMessage(
+    ...greetingLines,
+    ...(greetingLines.length ? [''] : []),
     t(branch, 'chooseTimePrompt', chosen.label),
     t(branch, 'orChooseFromList'),
     ...lines,

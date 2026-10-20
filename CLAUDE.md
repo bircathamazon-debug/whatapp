@@ -962,21 +962,48 @@ detalle técnico completo de arquitectura y setup.
     usuario: ¿alertas por mail/WhatsApp al propio peluquero o al
     desarrollador?, ¿qué tan rápido hay que reaccionar?, ¿alcanza con los
     logs de Firebase/Railway o conviene un servicio de monitoreo aparte?
-  - ⬜ **Bot: entender un pedido de cita en lenguaje natural, no solo
-    números** (hallazgo real, encontrado diagnosticando un reporte del
-    usuario — todavía sin arrancar). Hoy, si un cliente escribe una
-    frase normal como "hola, ¿me podés hacer una cita?" en vez de tocar
-    un número del menú, el bot no la entiende — solo reconoce mensajes
-    que son exactamente una palabra de saludo (`menu`/`hola`/`hi`, ver
-    `greetingRegex` en `bot/i18n.js`) o un número suelto. Hoy en ese
-    caso igual responde "no entendí" y le muestra el menú a
-    continuación, así que el cliente puede seguir desde ahí — no se
-    pierde el pedido, pero no es lo más natural para alguien que
-    escribe como le hablaría a una persona (probablemente el caso más
-    común de cómo un cliente real arranca la conversación). Pensar con
-    el usuario si conviene, por ejemplo, reconocer "quiero/necesito
-    una cita" además del saludo exacto, o llevar el primer mensaje de
-    cualquier conversación nueva directo al menú sin importar el texto.
+  - ✅ **RESUELTO — Bot: entender un pedido de cita en lenguaje natural
+    (texto o nota de voz) — PROGRAMADO, PROBADO Y DESPLEGADO.** Se
+    retomó porque el usuario probó la transcripción de audio real ("רוצה
+    לעשות הזמנה ביום חמישי בשעה 3") y el bot solo le mostró el menú — la
+    transcripción funcionaba bien, pero el bot no entendía frases
+    completas, solo números/saludos exactos (con voz esto importa mucho
+    más: casi nadie dice "uno" hablando natural).
+    - `bot/nlu.js` (nuevo): le pasa el texto a un modelo de OpenAI
+      (`gpt-4o-mini`, barato — fracciones de centavo por mensaje) que
+      devuelve JSON estricto: intención (reservar/cancelar/hablar con el
+      peluquero/otra cosa), día (nombre del día de semana o "hoy"/
+      "mañana" — a propósito el modelo NO calcula la fecha, evita que
+      se equivoque con la cuenta; el código la resuelve a partir de
+      hoy) y hora. Si no hay `OPENAI_API_KEY` o la llamada falla,
+      devuelve `null` y el bot se comporta exactamente como antes (cae
+      al menú) — no rompe nada si algún día se queda sin la clave.
+    - `bot/conversation.js`: al principio de una conversación (no
+      interrumpe una reserva ya empezada — mismo límite ya acordado
+      antes con el usuario), si el mensaje no es un número ni un
+      comando exacto, ahora se lo pasa a `interpretFreeText` antes de
+      mostrar el menú. Según lo que entienda: "cancelar" → va directo a
+      elegir qué cita cancelar; "hablar con el peluquero" → le pasa el
+      contacto directo; "reservar" → entra directo a elegir
+      servicio/peluquero/día/hora, saltándose cualquier paso que ya se
+      haya podido resolver solo (si hay un solo servicio y un solo
+      peluquero activos — como en esta peluquería hoy — y entendió el
+      día y la hora, prácticamente no hace falta tocar nada más que
+      confirmar). Si el pedido es ambiguo en algo (ej. varios servicios
+      y no quedó claro cuál), sigue preguntando normalmente en vez de
+      adivinar. Nunca reserva sin que el cliente llegue a un horario
+      concreto — reusa exactamente la misma función que ya validaba
+      horas escritas a mano (`resolveTypedTime`), así que una hora
+      pedida por voz se busca/confirma igual que si la hubiera tecleado.
+    - Probado antes de desplegar con el mensaje real del usuario
+      (entendió correctamente "jueves a las 15:00") y varios casos más
+      (cancelar, hablar con el peluquero, pedido vago sin día/hora,
+      un saludo random que no es una intención real, y en inglés) — 
+      todos clasificados bien.
+    - ✅ **Desplegado** en Railway, reconectado a WhatsApp sin pedir QR
+      nuevo. **Falta que el usuario pruebe de nuevo con una nota de voz
+      real** para confirmar en producción (antes falló por esto mismo,
+      ya debería andar).
   - ✅ **RESUELTO — pedido explícito del usuario, PROGRAMADO Y
     DESPLEGADO.** Antes de tocar el código se le preguntó el alcance
     exacto (¿solo al arrancar la charla, o también interrumpiendo una
