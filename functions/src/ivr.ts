@@ -30,6 +30,13 @@ import { getTelnyxConfig } from './telnyx';
  * `CallSid` lo manda Telnyx solo en cada pedido, no hace falta pasarlo a
  * mano por la URL.
  *
+ * Todas las funciones del IVR usan `minInstances: 1` — se mantienen siempre
+ * "despiertas" en vez de apagarse cuando no se usan. Sin esto, cada paso de
+ * una llamada real (incluso el saludo inicial) tardaba varios segundos de
+ * más esperando a que la función arrancara de cero (hallazgo real,
+ * confirmado en los logs: más de 25 segundos de demora acumulada en una
+ * sola llamada de prueba) — inaceptable en una llamada de voz en vivo.
+ *
  * El día se identifica siempre con el mismo número en cualquier llamada:
  * domingo=1, lunes=2, martes=3, miércoles=4, jueves=5, viernes=6, sábado=7
  * (igual que en hebreo los días de la semana ya se nombran así — "יום
@@ -68,7 +75,7 @@ interface IvrSession {
   data: IvrSessionData;
 }
 
-export const ivrIncomingCall = onRequest(async (req, res) => {
+export const ivrIncomingCall = onRequest({ minInstances: 1 }, async (req, res) => {
   const branchId = String(req.query.branchId ?? req.body.branchId ?? '');
   const branchSnap = branchId ? await db.collection('branches').doc(branchId).get() : null;
   const branch = branchSnap?.exists ? (branchSnap.data() as Branch) : null;
@@ -97,7 +104,7 @@ export const ivrIncomingCall = onRequest(async (req, res) => {
 </Response>`);
 });
 
-export const ivrMenu = onRequest(async (req, res) => {
+export const ivrMenu = onRequest({ minInstances: 1 }, async (req, res) => {
   const digit = String(req.body.Digits ?? '');
   const from = normalizePhone(String(req.body.From ?? ''));
   const callSid = String(req.body.CallSid ?? '');
@@ -153,7 +160,7 @@ export const ivrMenu = onRequest(async (req, res) => {
  * siempre por el mismo número de día de semana). Si la llamada venía de
  * la opción "escuchar horarios" (3), lee la lista y cuelga; si venía de
  * "reservar" (1), pide que escriban la hora con el teclado. */
-export const ivrDay = onRequest(async (req, res) => {
+export const ivrDay = onRequest({ minInstances: 1 }, async (req, res) => {
   const digit = String(req.body.Digits ?? '');
   const callSid = String(req.body.CallSid ?? '');
   const branchId = String(req.query.branchId ?? '');
@@ -207,7 +214,7 @@ export const ivrDay = onRequest(async (req, res) => {
  * lógica que usa el bot de WhatsApp cuando el cliente escribe una hora a
  * mano (ver resolveTypedTime en bot/conversation.js). Si encuentra un
  * horario, pide confirmación antes de reservar. */
-export const ivrTimeTyped = onRequest(async (req, res) => {
+export const ivrTimeTyped = onRequest({ minInstances: 1 }, async (req, res) => {
   const digits = String(req.body.Digits ?? '');
   const callSid = String(req.body.CallSid ?? '');
   const branchId = String(req.query.branchId ?? '');
@@ -260,7 +267,7 @@ export const ivrTimeTyped = onRequest(async (req, res) => {
 /** Confirma (1) o descarta (cualquier otra tecla) el día+hora leídos por
  * ivrTimeTyped. Confirmar crea la cita de verdad (misma transacción
  * anti-doble-reserva que usan WhatsApp y el panel — ver booking.ts). */
-export const ivrConfirm = onRequest(async (req, res) => {
+export const ivrConfirm = onRequest({ minInstances: 1 }, async (req, res) => {
   const digit = String(req.body.Digits ?? '');
   const callSid = String(req.body.CallSid ?? '');
   const branchId = String(req.query.branchId ?? '');
@@ -314,7 +321,7 @@ export const ivrConfirm = onRequest(async (req, res) => {
 });
 
 /** Llamada saliente (crons.ts la usa a través de notify.dispatchTelnyx) al presionar 1/2 en la llamada de recordatorio. */
-export const ivrReminderResponse = onRequest(async (req, res) => {
+export const ivrReminderResponse = onRequest({ minInstances: 1 }, async (req, res) => {
   const digit = String(req.body.Digits ?? '');
   const appointmentId = String(req.query.appointmentId ?? '');
   const s = getIvrStrings(req.query.lang as string | undefined);
