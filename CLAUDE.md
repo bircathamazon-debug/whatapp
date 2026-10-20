@@ -1031,6 +1031,57 @@ detalle técnico completo de arquitectura y setup.
     un número válido, no lo saca del flujo) — eso no se tocó.
     Verificado con `node --check`, desplegado en Railway, reconectado a
     WhatsApp sin pedir QR nuevo.
+  - ✅ **RESUELTO — pedido explícito del usuario: citas "completadas"
+    automáticas + corrección manual + historial mensual de Finanzas —
+    PROGRAMADO Y DESPLEGADO.** Pedido: que una cita quede marcada sola
+    como "vino" (y cuente como ingreso), y que solo haga falta tocar algo
+    a mano si el cliente no vino o si él mismo canceló; un botón para
+    corregir un caso puntual; y una tabla con el ingreso de cada mes.
+    - 🐛 **Hallazgo real mientras se investigaba**: el sistema tenía una
+      función automática (`markNoShows`, cada 15 min) que hacía
+      exactamente lo contrario de lo pedido — marcaba **sola** como
+      "no vino" cualquier cita 20 minutos después de la hora de inicio.
+      Y lo más importante: **nunca existió, ni automático ni manual,
+      ningún camino para que una cita llegara a "completada"** — por
+      eso la pantalla de Finanzas, construida hace tiempo, siempre
+      mostró ₪0 (no era un error de cálculo, el estado que necesitaba
+      nunca se usaba). De paso esto también significa que el premio de
+      fidelidad cada 10 cortes (`onAppointmentCompletedUpdateLoyalty`)
+      tampoco se había disparado nunca en la práctica — con este
+      arreglo debería empezar a funcionar solo.
+    - ✅ `functions/src/crons.ts`: la función que corría cada 15 min se
+      dio vuelta — ahora se llama `autoCompleteAppointments` y marca
+      **"completada"** (no "no vino") a una cita confirmada una vez que
+      pasaron 10 minutos de su hora de **fin** (antes miraba la hora de
+      *inicio*, lo cual marcaba una cita como terminada mientras el
+      corte todavía podía estar en curso).
+    - ✅ `functions/src/api.ts`: dos funciones nuevas para la Agenda —
+      `adminMarkNoShow` (marcar que no vino) y `adminMarkCompleted`
+      (revertir a completada) — con un ajuste en `markNoShow()`
+      (`booking.ts`) para permitir corregir una cita ya "completada" a
+      "no vino" (antes lo bloqueaba).
+    - ✅ `app/app/(tabs)/agenda.tsx`: en cada cita confirmada aparece un
+      botón **"marcar que no vino"** junto al de cancelar; en una ya
+      "completada" o "no vino" aparece el botón para revertirlo — ese es
+      el "botón para corregir algo puntual" que pediste.
+    - ✅ Un turno cancelado por el mismo cliente (ya funciona desde
+      antes, vía WhatsApp o el panel) sigue aparte, sin tocar nada —
+      nunca pasa a "completada" ni cuenta como ingreso.
+    - ✅ `app/app/(tabs)/finance.tsx`: nueva tabla **"Historial mensual"**
+      con los 5 meses anteriores (ingresos, gastos y neto de cada uno) —
+      "hoy" y "este mes" arriba ya se recalculan solos cada mes porque
+      se filtran por fecha, no hacía falta ningún botón de "resetear".
+    - Nuevo índice compuesto en Firestore (`status` + `endsAt`) para que
+      la consulta de `autoCompleteAppointments` funcione — agregado a
+      `firestore.indexes.json` y desplegado (tarda unos minutos en
+      terminar de construirse solo la primera vez).
+    - Verificado con `tsc --noEmit` sin errores en `functions/` y `app/`,
+      y `expo export --platform web` sin errores. Desplegado: Cloud
+      Functions (se borró `markNoShows` antes de desplegar, por el
+      cambio de nombre) y Firebase Hosting del panel.
+    - ⬜ Falta ver en una cita real, dentro de unos días, que la
+      "completada" automática funcione sola (no bloquea nada, es el
+      paso normal de verificación).
   - ⬜ **Cobro automático real del depósito (hallazgo de la comparación
     con la competencia)** — el usuario dijo explícitamente "lo hacemos
     más adelante", queda anotado, todavía sin arrancar. Hoy el bot le

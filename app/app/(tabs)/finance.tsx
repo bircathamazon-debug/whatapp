@@ -31,6 +31,18 @@ function startOfNextMonth(): number {
   return d.getTime();
 }
 
+/** Primer día del mes actual +/- `offset` meses (0 = este mes, -1 = el
+ * anterior, etc.) — para el historial mensual de Finanzas. */
+function startOfMonthOffset(offset: number): number {
+  const d = new Date();
+  d.setDate(1);
+  d.setHours(0, 0, 0, 0);
+  d.setMonth(d.getMonth() + offset);
+  return d.getTime();
+}
+
+const MONTHLY_HISTORY_MONTHS = 5; // cuántos meses anteriores mostrar en la tabla
+
 function todayStr(): string {
   return new Intl.DateTimeFormat('en-CA').format(Date.now());
 }
@@ -55,7 +67,9 @@ export default function FinanceScreen() {
 
   const [services, setServices] = useState<Service[]>([]);
   const [todayAppts, setTodayAppts] = useState<Appointment[]>([]);
-  const [monthAppts, setMonthAppts] = useState<Appointment[]>([]);
+  // Cubre el mes actual + los MONTHLY_HISTORY_MONTHS anteriores, en una sola
+  // consulta — de acá salen tanto "este mes" como la tabla de historial.
+  const [historyAppts, setHistoryAppts] = useState<Appointment[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [subscribing, setSubscribing] = useState(false);
 
@@ -66,15 +80,15 @@ export default function FinanceScreen() {
 
   const load = useCallback(async () => {
     if (!branchId) return;
-    const [serviceList, todayList, monthList, expenseList] = await Promise.all([
+    const [serviceList, todayList, historyList, expenseList] = await Promise.all([
       getServicesByBranch(branchId),
       getAppointmentsForDay(branchId, startOfDay(0), startOfDay(1)),
-      getAppointmentsForDay(branchId, startOfMonth(), startOfNextMonth()),
+      getAppointmentsForDay(branchId, startOfMonthOffset(-MONTHLY_HISTORY_MONTHS), startOfNextMonth()),
       getExpensesByBranch(branchId),
     ]);
     setServices(serviceList);
     setTodayAppts(todayList);
-    setMonthAppts(monthList);
+    setHistoryAppts(historyList);
     setExpenses(expenseList);
   }, [branchId]);
 
@@ -87,12 +101,32 @@ export default function FinanceScreen() {
     return { count: completed.length, total };
   };
   const todayRevenue = revenueOf(todayAppts);
+  const monthAppts = historyAppts.filter((a) => a.startsAt >= startOfMonth() && a.startsAt < startOfNextMonth());
   const monthRevenue = revenueOf(monthAppts);
 
   const monthPrefix = todayStr().slice(0, 7);
   const monthExpenses = expenses.filter((e) => e.date.startsWith(monthPrefix));
   const monthExpensesTotal = monthExpenses.reduce((sum, e) => sum + e.amount, 0);
   const netThisMonth = monthRevenue.total - monthExpensesTotal;
+
+  // Historial de los meses anteriores (el actual ya se ve arriba, en las
+  // tarjetas de "hoy"/"este mes") — más reciente primero.
+  const monthlyHistory = Array.from({ length: MONTHLY_HISTORY_MONTHS }, (_, i) => {
+    const offset = -(i + 1);
+    const mStart = startOfMonthOffset(offset);
+    const mEnd = startOfMonthOffset(offset + 1);
+    const apptsInMonth = historyAppts.filter((a) => a.startsAt >= mStart && a.startsAt < mEnd);
+    const rev = revenueOf(apptsInMonth);
+    const key = new Intl.DateTimeFormat('en-CA').format(mStart).slice(0, 7);
+    const expensesTotal = expenses.filter((e) => e.date.startsWith(key)).reduce((sum, e) => sum + e.amount, 0);
+    return {
+      key,
+      label: new Intl.DateTimeFormat(dateLocale, { month: 'long', year: 'numeric' }).format(mStart),
+      income: rev.total,
+      expenses: expensesTotal,
+      net: rev.total - expensesTotal,
+    };
+  });
 
   const submitExpense = async () => {
     if (!branchId) return;
@@ -267,6 +301,17 @@ export default function FinanceScreen() {
           </Pressable>
         </View>
       ))}
+
+      <Text style={styles.sectionTitle}>{t.finance.monthlyHistoryTitle}</Text>
+      {monthlyHistory.map((m) => (
+        <View key={m.key} style={styles.historyRow}>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.historyRowTitle}>{m.label}</Text>
+            <Text style={styles.historyRowSub}>{t.finance.monthlyHistoryRowSub(m.income, m.expenses)}</Text>
+          </View>
+          <Text style={[styles.historyRowNet, m.net >= 0 ? styles.netPositiveText : styles.netNegativeText]}>₪{m.net}</Text>
+        </View>
+      ))}
     </ScrollView>
   );
 }
@@ -287,6 +332,12 @@ function makeStyles(colors: ThemeColors, mode: 'light' | 'dark') {
     netNegative: { backgroundColor: colors.dangerSoft },
     netLabel: { fontSize: 12, color: colors.textMuted, fontWeight: '600' },
     netAmount: { fontSize: 22, fontWeight: '800', color: colors.text, marginTop: 6 },
+    historyRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, borderRadius: RADIUS.lg, padding: 12, marginTop: 8, gap: 10, ...cardShadow(mode, 'sm'), ...accentBorder(colors) },
+    historyRowTitle: { fontSize: 12.5, fontWeight: '700', color: colors.text, textTransform: 'capitalize' },
+    historyRowSub: { fontSize: 11, color: colors.textMuted, marginTop: 2 },
+    historyRowNet: { fontSize: 14, fontWeight: '800' },
+    netPositiveText: { color: colors.success },
+    netNegativeText: { color: colors.danger },
     subscriptionCard: { backgroundColor: colors.surface, borderRadius: RADIUS.lg, padding: 14, gap: 10, ...cardShadow(mode, 'sm'), ...accentBorder(colors) },
     subscriptionStatus: { fontSize: 13, color: colors.text, lineHeight: 19 },
     chipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 10 },

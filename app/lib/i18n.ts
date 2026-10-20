@@ -47,6 +47,11 @@ interface Dict {
     viewDay: string;
     viewWeek: string;
     viewMonth: string;
+    markNoShow: string;
+    markNoShowTitle: string;
+    markNoShowMessage: (name: string) => string;
+    markNoShowConfirm: string;
+    markCompleted: string;
   };
   clients: {
     searchPlaceholder: string;
@@ -265,6 +270,8 @@ interface Dict {
     cancelSubscriptionTitle: string;
     cancelSubscriptionConfirm: string;
     cancelSubscriptionConfirmBtn: string;
+    monthlyHistoryTitle: string;
+    monthlyHistoryRowSub: (income: number, expenses: number) => string;
   };
 }
 
@@ -302,6 +309,11 @@ const he: Dict = {
     viewDay: 'יום',
     viewWeek: 'שבוע',
     viewMonth: 'חודש',
+    markNoShow: 'סמן כלא הגיע',
+    markNoShowTitle: 'סימון כלא הגיע',
+    markNoShowMessage: (name) => `לסמן שהלקוח ${name} לא הגיע?`,
+    markNoShowConfirm: 'כן, לא הגיע',
+    markCompleted: 'סמן כהושלם',
   },
   clients: {
     searchPlaceholder: 'חיפוש לפי שם או טלפון',
@@ -520,6 +532,8 @@ const he: Dict = {
     cancelSubscriptionTitle: 'ביטול המנוי',
     cancelSubscriptionConfirm: 'לבטל את המנוי? החיוב החודשי הבא לא יתבצע.',
     cancelSubscriptionConfirmBtn: 'ביטול המנוי',
+    monthlyHistoryTitle: 'היסטוריה חודשית',
+    monthlyHistoryRowSub: (income, expenses) => `הכנסות ₪${income} · הוצאות ₪${expenses}`,
   },
 };
 
@@ -557,6 +571,11 @@ const en: Dict = {
     viewDay: 'Day',
     viewWeek: 'Week',
     viewMonth: 'Month',
+    markNoShow: 'Mark as no-show',
+    markNoShowTitle: 'Mark as no-show',
+    markNoShowMessage: (name) => `Mark ${name} as a no-show?`,
+    markNoShowConfirm: 'Yes, no-show',
+    markCompleted: 'Mark as completed',
   },
   clients: {
     searchPlaceholder: 'Search by name or phone',
@@ -775,6 +794,8 @@ const en: Dict = {
     cancelSubscriptionTitle: 'Cancel subscription',
     cancelSubscriptionConfirm: "Cancel the subscription? The next monthly charge won't happen.",
     cancelSubscriptionConfirmBtn: 'Cancel subscription',
+    monthlyHistoryTitle: 'Monthly history',
+    monthlyHistoryRowSub: (income, expenses) => `Income ₪${income} · Expenses ₪${expenses}`,
   },
 };
 
@@ -812,6 +833,11 @@ const es: Dict = {
     viewDay: 'Día',
     viewWeek: 'Semana',
     viewMonth: 'Mes',
+    markNoShow: 'Marcar que no vino',
+    markNoShowTitle: 'Marcar que no vino',
+    markNoShowMessage: (name) => `¿Marcar que ${name} no vino?`,
+    markNoShowConfirm: 'Sí, no vino',
+    markCompleted: 'Marcar como completada',
   },
   clients: {
     searchPlaceholder: 'Buscar por nombre o teléfono',
@@ -1030,6 +1056,8 @@ const es: Dict = {
     cancelSubscriptionTitle: 'Cancelar suscripción',
     cancelSubscriptionConfirm: '¿Cancelar la suscripción? El próximo cobro mensual no se va a hacer.',
     cancelSubscriptionConfirmBtn: 'Cancelar suscripción',
+    monthlyHistoryTitle: 'Historial mensual',
+    monthlyHistoryRowSub: (income, expenses) => `Ingresos ₪${income} · Gastos ₪${expenses}`,
   },
 };
 

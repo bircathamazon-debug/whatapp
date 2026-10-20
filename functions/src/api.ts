@@ -2,7 +2,7 @@ import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { db } from './admin';
 import type { Appointment, Branch, BlockedTime, Service, Staff } from './types';
 import { getAvailableSlots, getStaffServiceDuration } from './availability';
-import { createAppointment, cancelAppointment, confirmAppointment } from './booking';
+import { createAppointment, cancelAppointment, confirmAppointment, markNoShow, markCompleted } from './booking';
 
 /** Callable: huecos libres de un peluquero en un día dado (usado por bot e IVR vía import directo, y por la app admin vía HTTPS). */
 export const getAvailability = onCall(async (request) => {
@@ -76,6 +76,24 @@ export const adminCancelAppointment = onCall(async (request) => {
   if (!request.auth) throw new HttpsError('unauthenticated', 'Requiere sesión.');
   const { appointmentId } = request.data as { appointmentId: string };
   await cancelAppointment(appointmentId, 'staff');
+  return { ok: true };
+});
+
+/** Corrección manual desde la Agenda: el cliente no vino (o se revierte una
+ * "completada" marcada por error automático). */
+export const adminMarkNoShow = onCall(async (request) => {
+  if (!request.auth) throw new HttpsError('unauthenticated', 'Requiere sesión.');
+  const { appointmentId } = request.data as { appointmentId: string };
+  await markNoShow(appointmentId);
+  return { ok: true };
+});
+
+/** Corrección manual desde la Agenda: revertir un "no vino" marcado por
+ * error — el cliente sí vino. */
+export const adminMarkCompleted = onCall(async (request) => {
+  if (!request.auth) throw new HttpsError('unauthenticated', 'Requiere sesión.');
+  const { appointmentId } = request.data as { appointmentId: string };
+  await markCompleted(appointmentId);
   return { ok: true };
 });
 

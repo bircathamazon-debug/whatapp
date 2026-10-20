@@ -3,7 +3,7 @@ import { db } from './admin';
 import type { Appointment, Branch, Client, RecurringBooking, Staff } from './types';
 import { REMINDER_WINDOWS_HOURS } from './types';
 import { sendNotification, getTemplates, flushDueTelnyxNotifications } from './notify';
-import { markNoShow, releaseExpiredDepositHolds, formatDate, formatTime, createAppointment } from './booking';
+import { markCompleted, releaseExpiredDepositHolds, formatDate, formatTime, createAppointment } from './booking';
 import { toEpoch, getStaffServiceDuration } from './availability';
 import { chargeTranzilaToken } from './tranzila';
 
@@ -47,12 +47,21 @@ export const sendReminders = onSchedule({ schedule: 'every 15 minutes', timeZone
   }
 });
 
-/** Cada 15 minutos: marca no-show a citas confirmadas cuya hora ya pasó sin check-in/cancelación. */
-export const markNoShows = onSchedule({ schedule: 'every 15 minutes', timeZone: 'Asia/Jerusalem' }, async () => {
-  const cutoff = Date.now() - 20 * 60000; // 20 min de gracia tras la hora de la cita
-  const snap = await db.collection('appointments').where('status', '==', 'confirmed').where('startsAt', '<', cutoff).limit(100).get();
+/**
+ * Cada 15 minutos: una vez que terminó la hora de una cita confirmada, se
+ * da por hecho que el cliente vino y se marca "completada" sola — así
+ * aparece el ingreso en Finanzas sin que el peluquero tenga que hacer
+ * nada. Si el cliente realmente no vino, el peluquero lo corrige a mano
+ * desde la Agenda (`adminMarkNoShow`). Antes era al revés (esta misma
+ * función marcaba "no vino" sola a los 20 minutos de la hora de inicio),
+ * lo que significaba que ninguna cita llegaba nunca a "completada" — por
+ * eso Finanzas siempre mostraba ₪0, no era un error de cálculo.
+ */
+export const autoCompleteAppointments = onSchedule({ schedule: 'every 15 minutes', timeZone: 'Asia/Jerusalem' }, async () => {
+  const cutoff = Date.now() - 10 * 60000; // 10 min de gracia tras el fin de la cita
+  const snap = await db.collection('appointments').where('status', '==', 'confirmed').where('endsAt', '<', cutoff).limit(100).get();
   for (const doc of snap.docs) {
-    await markNoShow(doc.id);
+    await markCompleted(doc.id);
   }
 });
 

@@ -46,3 +46,13 @@ export async function adminConfirmAppointment(appointmentId: string): Promise<vo
   const fn = httpsCallable(functions, 'adminConfirmAppointment');
   await fn({ appointmentId });
 }
+
+export async function adminMarkNoShow(appointmentId: string): Promise<void> {
+  const fn = httpsCallable(functions, 'adminMarkNoShow');
+  await fn({ appointmentId });
+}
+
+export async function adminMarkCompleted(appointmentId: string): Promise<void> {
+  const fn = httpsCallable(functions, 'adminMarkCompleted');
+  await fn({ appointmentId });
+}

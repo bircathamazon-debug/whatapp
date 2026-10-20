@@ -1,6 +1,6 @@
 export {
   sendReminders,
-  markNoShows,
+  autoCompleteAppointments,
   releaseDeposits,
   flushDelayedTelnyx,
   sendBirthdayMessages,
@@ -14,7 +14,7 @@ export { onAppointmentCompletedUpdateLoyalty } from './loyalty';
 export { broadcastEmptySlots } from './campaigns';
 export { ivrIncomingCall, ivrMenu, ivrDay, ivrTimeTyped, ivrConfirm, ivrReminderResponse } from './ivr';
 export { googleCalendarConnect, googleCalendarCallback } from './oauth';
-export { getAvailability, adminCreateAppointment, adminCancelAppointment, adminConfirmAppointment } from './api';
+export { getAvailability, adminCreateAppointment, adminCancelAppointment, adminConfirmAppointment, adminMarkNoShow, adminMarkCompleted } from './api';
 export {
   botGetAvailability,
   botCreateAppointment,

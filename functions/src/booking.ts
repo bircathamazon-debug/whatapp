@@ -167,7 +167,11 @@ export async function markNoShow(appointmentId: string): Promise<void> {
   const snap = await ref.get();
   if (!snap.exists) return;
   const appt = snap.data() as Appointment;
-  if (appt.status === 'no_show' || appt.status === 'cancelled' || appt.status === 'completed') return;
+  // No se toca una cita cancelada (el cliente canceló activamente, es otra
+  // categoría) ni una que ya está marcada "no vino". Sí se permite pasar de
+  // "completada" a "no vino" — corrección manual desde la Agenda, para
+  // cuando el peluquero marca a mano que en realidad el cliente no vino.
+  if (appt.status === 'no_show' || appt.status === 'cancelled') return;
 
   await ref.update({ status: 'no_show', updatedAt: Date.now() });
 

@@ -3,7 +3,7 @@ import { View, Text, ScrollView, Pressable, StyleSheet, RefreshControl, Alert } 
 import { useRouter } from 'expo-router';
 import { useBranch } from '../../lib/branchContext';
 import { useTheme, type ThemeColors, RADIUS, cardShadow, PRESSED_SCALE } from '../../lib/theme';
-import { getAppointmentsForDay, adminCancelAppointment, adminConfirmAppointment } from '../../lib/appointments';
+import { getAppointmentsForDay, adminCancelAppointment, adminConfirmAppointment, adminMarkNoShow, adminMarkCompleted } from '../../lib/appointments';
 import { getStaffByBranch } from '../../lib/staff';
 import { getServicesByBranch } from '../../lib/services';
 import { getBlockedTimesByBranch } from '../../lib/blockedTimes';
@@ -127,6 +127,22 @@ export default function AgendaScreen() {
 
   const confirm = async (appt: Appointment) => {
     await adminConfirmAppointment(appt.id);
+    await load();
+  };
+
+  /** Corrección manual: el cliente no vino (las citas se marcan "completada"
+   * solas al pasar la hora — ver nota en autoCompleteAppointments). También
+   * sirve para revertir una "completada" marcada por error. */
+  const markNoShow = (appt: Appointment) => {
+    Alert.alert(t.agenda.markNoShowTitle, t.agenda.markNoShowMessage(appt.clientName), [
+      { text: t.agenda.back, style: 'cancel' },
+      { text: t.agenda.markNoShowConfirm, style: 'destructive', onPress: async () => { await adminMarkNoShow(appt.id); await load(); } },
+    ]);
+  };
+
+  /** Corrección manual: revertir un "no vino" marcado por error — el cliente sí vino. */
+  const markCompleted = async (appt: Appointment) => {
+    await adminMarkCompleted(appt.id);
     await load();
   };
 
@@ -263,8 +279,28 @@ export default function AgendaScreen() {
                               <Text style={styles.confirmBtnText}>{t.agenda.depositReceived}</Text>
                             </Pressable>
                           )}
+                          {item.status === 'confirmed' && (
+                            <Pressable style={({ pressed }) => [styles.cancelBtn, pressed && PRESSED_SCALE]} onPress={() => markNoShow(item)}>
+                              <Text style={styles.cancelBtnText}>{t.agenda.markNoShow}</Text>
+                            </Pressable>
+                          )}
                           <Pressable style={({ pressed }) => [styles.cancelBtn, pressed && PRESSED_SCALE]} onPress={() => cancel(item)}>
                             <Text style={styles.cancelBtnText}>{t.agenda.cancel}</Text>
+                          </Pressable>
+                        </View>
+                      )}
+                      {/* Correcciones puntuales: revertir una cita ya marcada "completada" o "no vino" si se equivocaron. */}
+                      {item.status === 'completed' && (
+                        <View style={styles.chipActions}>
+                          <Pressable style={({ pressed }) => [styles.cancelBtn, pressed && PRESSED_SCALE]} onPress={() => markNoShow(item)}>
+                            <Text style={styles.cancelBtnText}>{t.agenda.markNoShow}</Text>
+                          </Pressable>
+                        </View>
+                      )}
+                      {item.status === 'no_show' && (
+                        <View style={styles.chipActions}>
+                          <Pressable style={({ pressed }) => [styles.confirmBtn, pressed && PRESSED_SCALE]} onPress={() => markCompleted(item)}>
+                            <Text style={styles.confirmBtnText}>{t.agenda.markCompleted}</Text>
                           </Pressable>
                         </View>
                       )}
