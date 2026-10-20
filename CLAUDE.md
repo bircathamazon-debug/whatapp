@@ -890,6 +890,44 @@ detalle técnico completo de arquitectura y setup.
     que se usaron en sesiones anteriores, así que hace falta que el
     usuario los vuelva a pasar (o despliegue él mismo) para que esto
     quede funcionando en producción, no solo en el código.
+- 🐛 **Bug real encontrado y corregido de raíz: Google Calendar se
+  desconectaba solo cada 7 días (`invalid_grant`).** Se encontró en los
+  logs mientras se investigaba otro tema (lentitud del IVR). Causa: el
+  proyecto de Google Cloud ("BOT PARA PELUQUERIA") seguía en modo
+  **"Prueba" (Testing)** en la pantalla de OAuth — en ese modo, Google
+  hace vencer el permiso de cada usuario a los 7 días sin excepción, sin
+  importar si se usa seguido. Por eso cada tanto dejaba de sincronizar
+  las citas al Google Calendar de יעקב hasta que alguien volvía a
+  conectar a mano.
+  - ✅ **Resuelto de raíz**: se publicó la app ("Publish app") para
+    pasarla a modo **"En producción"** — en ese modo los permisos ya no
+    vencen solos. Pasos hechos:
+    1. Se creó y desplegó una página pública de política de privacidad
+       (`website/privacy.html`, exigida por Google para publicar la
+       app) — **https://peluqueria-yaacob.web.app/privacy**.
+    2. En Google Cloud Console → Google Auth Platform → Información de
+       la marca: se cargó el link de la página principal
+       (`https://peluqueria-yaacob.web.app`), el link de la política de
+       privacidad de arriba, y se agregó `peluqueria-yaacob.web.app`
+       como dominio autorizado (el dominio de las Cloud Functions ya
+       estaba).
+    3. En la pestaña "Público": se tocó "Publicar la aplicación" → quedó
+       **"Estado de publicación: En producción"**.
+    4. Se reconectó el Google Calendar de יעקב אמסלם una vez más desde
+       Ajustes (para generar un permiso nuevo, ya bajo el modo
+       producción) — el usuario confirmó que quedó conectado.
+  - Nota para el futuro: como la app todavía no pasó la **verificación
+    completa de Google** (opcional, solo hace falta si algún día la usan
+    más de 100 cuentas de Google distintas — hoy usa 1), al conectar
+    puede seguir apareciendo el aviso "Google no verificó esta app"; hay
+    que tocar "Avanzado" → "Ir a ... (no seguro)" para continuar, es
+    normal y no afecta el funcionamiento. Si en el futuro se vende a
+    muchas peluquerías con cuentas de Google distintas, ahí sí conviene
+    completar la verificación formal (Centro de verificación, en el
+    mismo menú).
+  - ⬜ Falta confirmar con una reserva de prueba real que la cita se
+    siga sincronizando sola al calendario (paso normal de verificación,
+    no bloquea nada — el reconectar ya funcionó).
 - **Ideas para el backlog (más adelante, el usuario lo aclaró
   explícitamente — no bloquean el piloto):**
   - Página web y video publicitario explicando el ahorro de tiempo/dinero
