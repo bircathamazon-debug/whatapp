@@ -91,6 +91,7 @@ interface Dict {
     discountSave: string;
     discountSaved: string;
     discountSendBtn: string;
+    discountSendHint: string;
     discountDisabledError: string;
   };
   questions: {
@@ -362,6 +363,7 @@ const he: Dict = {
     discountSave: 'שמירה',
     discountSaved: 'נשמר.',
     discountSendBtn: 'שליחת הודעת מבצע ללקוחות',
+    discountSendHint: 'נשלח בוואטסאפ רק ללקוחות שלא הגיעו ב-30 הימים האחרונים (או שמעולם לא הגיעו).',
     discountDisabledError: 'קודם צריך להפעיל את ההנחה למעלה.',
   },
   questions: {
@@ -633,6 +635,7 @@ const en: Dict = {
     discountSave: 'Save',
     discountSaved: 'Saved.',
     discountSendBtn: 'Send promo message to clients',
+    discountSendHint: "Sent over WhatsApp only to clients who haven't come in the last 30 days (or never have).",
     discountDisabledError: 'Turn the discount on above first.',
   },
   questions: {
@@ -904,6 +907,7 @@ const es: Dict = {
     discountSave: 'Guardar',
     discountSaved: 'Guardado.',
     discountSendBtn: 'Enviar mensaje de promoción a los clientes',
+    discountSendHint: 'Se manda por WhatsApp solo a los clientes que hace más de 30 días que no vienen (o que nunca vinieron).',
     discountDisabledError: 'Primero activá el descuento arriba.',
   },
   questions: {

@@ -1132,6 +1132,17 @@ detalle técnico completo de arquitectura y setup.
     - ⬜ Falta que el usuario configure el descuento de verdad (días +
       %, prenderlo) desde Campañas y pruebe una reserva en uno de esos
       días para confirmar que el precio sale con el descuento aplicado.
+    - 🎯 **Pedido del usuario al probar, ya implementado**: el mensaje
+      promocional no debía mandarse a los últimos 50 clientes sin más,
+      sino solo a los que **hace más de 30 días que no vienen** (o que
+      nunca vinieron) — para atraer justamente a los que se alejaron,
+      siempre por WhatsApp (único canal que se usa por ahora). Nueva
+      función `lastVisitOf()` en `functions/src/campaigns.ts`: busca el
+      último turno realmente completado de cada cliente (reusa el
+      índice `clientPhone + status + startsAt` que ya existía) y
+      descarta a quien vino hace menos de 30 días. La pantalla de
+      Campañas ahora avisa este criterio arriba del botón de enviar.
+      Verificado con `tsc --noEmit`, desplegado.
   - ⬜ **Cobro automático real del depósito (hallazgo de la comparación
     con la competencia)** — el usuario dijo explícitamente "lo hacemos
     más adelante", queda anotado, todavía sin arrancar. Hoy el bot le

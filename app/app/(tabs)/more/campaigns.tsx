@@ -118,6 +118,7 @@ export default function CampaignsScreen() {
         </Pressable>
       </View>
 
+      <Text style={styles.sendHint}>{t.campaigns.discountSendHint}</Text>
       <Pressable style={({ pressed }) => [styles.btn, pressed && PRESSED_SCALE]} onPress={sendDiscountPromo} disabled={sendingDiscount || !branchId}>
         {sendingDiscount ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>{t.campaigns.discountSendBtn}</Text>}
       </Pressable>
@@ -134,6 +135,7 @@ function makeStyles(colors: ThemeColors, mode: 'light' | 'dark') {
     btn: { backgroundColor: colors.accent, borderRadius: RADIUS.xl, padding: 16, alignItems: 'center', ...accentGlow(colors, mode) },
     btnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
     result: { marginTop: 16, color: colors.success, fontSize: 13, lineHeight: 18 },
+    sendHint: { fontSize: 12, color: colors.textMuted, marginBottom: 10, lineHeight: 17 },
     divider: { height: 1, backgroundColor: colors.surfaceMuted, marginVertical: 28 },
     card: { backgroundColor: colors.surface, borderRadius: RADIUS.lg, padding: 16, gap: 10, marginBottom: 16, ...cardShadow(mode, 'sm'), ...accentBorder(colors) },
     fieldLabel: { fontSize: 11.5, fontWeight: '700', color: colors.textMuted, marginTop: 6 },

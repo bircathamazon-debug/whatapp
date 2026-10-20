@@ -66,11 +66,29 @@ export const broadcastEmptySlots = onCall(async (request) => {
   return { sentTo, message: text };
 });
 
+const WIN_BACK_DAYS = 30;
+
+/** Último turno "venido de verdad" (completado) de un cliente, o null si
+ * nunca tuvo uno. Reusa el índice `clientPhone + status + startsAt` que
+ * ya existía para el historial del cliente en el panel. */
+async function lastVisitOf(clientPhone: string): Promise<number | null> {
+  const snap = await db
+    .collection('appointments')
+    .where('clientPhone', '==', clientPhone)
+    .where('status', '==', 'completed')
+    .orderBy('startsAt', 'desc')
+    .limit(1)
+    .get();
+  return snap.empty ? null : (snap.docs[0].data() as Appointment).startsAt;
+}
+
 /**
  * Llamada desde la app: manda el mensaje de la campaña de "días flojos"
- * (el descuento configurado en `branch.weekdayDiscount`) a los últimos 50
- * clientes de la sucursal. El descuento en sí ya se aplica solo al
- * reservar (ver `priceForAppointment` en booking.ts) — esto solo avisa.
+ * (el descuento configurado en `branch.weekdayDiscount`) a los clientes
+ * que hace más de 30 días que no vienen (o que nunca vinieron) — para
+ * eso sirve la campaña, traerlos de vuelta en un día flojo. El descuento
+ * en sí ya se aplica solo al reservar (ver `priceForAppointment` en
+ * booking.ts) — esto solo avisa, siempre por WhatsApp.
  */
 export const broadcastWeekdayDiscount = onCall(async (request) => {
   if (!request.auth) throw new HttpsError('unauthenticated', 'Solo el personal autenticado puede lanzar campañas.');
@@ -98,10 +116,14 @@ export const broadcastWeekdayDiscount = onCall(async (request) => {
 
   const text = getTemplates(branch.language).weekdayDiscountCampaign(discount.percent, daysLabel);
 
-  const clientsSnap = await db.collection('clients').where('branchId', '==', branchId).orderBy('createdAt', 'desc').limit(50).get();
+  const clientsSnap = await db.collection('clients').where('branchId', '==', branchId).limit(500).get();
+  const cutoff = Date.now() - WIN_BACK_DAYS * 86400000;
+
   let sentTo = 0;
   for (const doc of clientsSnap.docs) {
     const client = doc.data() as Client;
+    const lastVisit = await lastVisitOf(client.phone);
+    if (lastVisit !== null && lastVisit >= cutoff) continue; // vino hace menos de 30 días, no es a quien hay que traer de vuelta
     await sendNotification({ channel: 'whatsapp', to: client.phone, branch, template: 'weekdayDiscountCampaign', text });
     sentTo++;
   }
