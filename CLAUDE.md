@@ -925,9 +925,13 @@ detalle técnico completo de arquitectura y setup.
     muchas peluquerías con cuentas de Google distintas, ahí sí conviene
     completar la verificación formal (Centro de verificación, en el
     mismo menú).
-  - ⬜ Falta confirmar con una reserva de prueba real que la cita se
-    siga sincronizando sola al calendario (paso normal de verificación,
-    no bloquea nada — el reconectar ya funcionó).
+  - ✅ **Confirmado con una reserva real.** El usuario probó y al
+    principio "no aparecía" — se verificó directo con la API de Google
+    (usando el token guardado) que el evento **sí se había creado bien**
+    ("תספורת — Menahem Azulay", miércoles 21/10 13:30, en el calendario
+    de `flowsivan613@gmail.com`) — no era un problema del sistema, sino
+    que el usuario estaba viendo otra cuenta de Google en la app de
+    Calendar de su teléfono. Cambió de cuenta y ya lo vio. **Cerrado.**
 - **Ideas para el backlog (más adelante, el usuario lo aclaró
   explícitamente — no bloquean el piloto):**
   - Página web y video publicitario explicando el ahorro de tiempo/dinero
