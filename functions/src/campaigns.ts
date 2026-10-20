@@ -4,6 +4,7 @@ import type { Appointment, Branch, Client, Staff } from './types';
 import { sendNotification, getTemplates } from './notify';
 import { getAvailableSlots } from './availability';
 import { formatDate, formatTime } from './booking';
+import { getIvrStrings } from './ivrStrings';
 
 /**
  * Llamada desde la app de administración: "Hoy quedó libre un turno a las
@@ -60,6 +61,57 @@ export const broadcastEmptySlots = onCall(async (request) => {
     message: text,
     sentTo,
     createdAt: now,
+  });
+
+  return { sentTo, message: text };
+});
+
+/**
+ * Llamada desde la app: manda el mensaje de la campaña de "días flojos"
+ * (el descuento configurado en `branch.weekdayDiscount`) a los últimos 50
+ * clientes de la sucursal. El descuento en sí ya se aplica solo al
+ * reservar (ver `priceForAppointment` en booking.ts) — esto solo avisa.
+ */
+export const broadcastWeekdayDiscount = onCall(async (request) => {
+  if (!request.auth) throw new HttpsError('unauthenticated', 'Solo el personal autenticado puede lanzar campañas.');
+
+  const branchId = request.data?.branchId as string;
+  if (!branchId) throw new HttpsError('invalid-argument', 'branchId es requerido.');
+
+  const branchSnap = await db.collection('branches').doc(branchId).get();
+  if (!branchSnap.exists) throw new HttpsError('not-found', 'Sucursal no encontrada.');
+  const branch = branchSnap.data() as Branch;
+
+  const discount = branch.weekdayDiscount;
+  if (!discount?.enabled || discount.weekdays.length === 0) {
+    throw new HttpsError('failed-precondition', 'La campaña de días flojos no está activada.');
+  }
+
+  const weekdayNames = getIvrStrings(branch.language).weekdays; // domingo=0..sábado=6
+  const locale = { he: 'he-IL', en: 'en-US', es: 'es-ES' }[branch.language ?? 'he'] ?? 'he-IL';
+  const daysLabel = new Intl.ListFormat(locale, { type: 'conjunction' }).format(
+    discount.weekdays
+      .slice()
+      .sort((a, b) => a - b)
+      .map((d) => weekdayNames[d])
+  );
+
+  const text = getTemplates(branch.language).weekdayDiscountCampaign(discount.percent, daysLabel);
+
+  const clientsSnap = await db.collection('clients').where('branchId', '==', branchId).orderBy('createdAt', 'desc').limit(50).get();
+  let sentTo = 0;
+  for (const doc of clientsSnap.docs) {
+    const client = doc.data() as Client;
+    await sendNotification({ channel: 'whatsapp', to: client.phone, branch, template: 'weekdayDiscountCampaign', text });
+    sentTo++;
+  }
+
+  await db.collection('campaigns').add({
+    branchId,
+    type: 'weekday_discount',
+    message: text,
+    sentTo,
+    createdAt: Date.now(),
   });
 
   return { sentTo, message: text };

@@ -141,7 +141,7 @@ function ClientCard({
       case 'no_show': return colors.statusNoShow;
     }
   };
-  const totalSpent = (history ?? []).filter((a) => a.status === 'completed').reduce((sum, a) => sum + (priceById.get(a.serviceId) ?? 0), 0);
+  const totalSpent = (history ?? []).filter((a) => a.status === 'completed').reduce((sum, a) => sum + (a.price ?? priceById.get(a.serviceId) ?? 0), 0);
 
   const saveNotes = async () => {
     setSaving(true);

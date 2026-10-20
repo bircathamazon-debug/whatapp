@@ -95,9 +95,13 @@ export default function FinanceScreen() {
   useEffect(() => { load(); }, [load]);
 
   const priceById = new Map(services.map((s) => [s.id, s.price]));
+  // `a.price` es el precio ya cobrado (con el descuento de días flojos
+  // aplicado si correspondía) — las citas de antes de que existiera este
+  // campo no lo tienen, así que se usa el precio del servicio como
+  // respaldo.
   const revenueOf = (appts: Appointment[]) => {
     const completed = appts.filter((a) => a.status === 'completed');
-    const total = completed.reduce((sum, a) => sum + (priceById.get(a.serviceId) ?? 0), 0);
+    const total = completed.reduce((sum, a) => sum + (a.price ?? priceById.get(a.serviceId) ?? 0), 0);
     return { count: completed.length, total };
   };
   const todayRevenue = revenueOf(todayAppts);

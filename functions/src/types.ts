@@ -26,6 +26,14 @@ export interface Branch {
     tranzilaToken?: string;
     tranzilaExpDate?: string;
   };
+  /** Campaña de días flojos (ej. domingo/lunes después de Shabat):
+   *  descuento automático en el precio de los servicios reservados esos
+   *  días. El peluquero la prende/apaga y ajusta desde Campañas. */
+  weekdayDiscount?: {
+    enabled: boolean;
+    weekdays: number[]; // 0=domingo..6=sábado
+    percent: number; // 1-100
+  };
 }
 
 export interface WeeklyHours {
@@ -86,6 +94,13 @@ export interface Appointment {
   confirmedAt?: number | null;
   depositPaid: boolean;
   googleCalendarEventId?: string | null;
+  /** Precio final cobrado (ya con el descuento de días flojos aplicado si
+   *  correspondía) — guardado al reservar, no se recalcula después aunque
+   *  cambie el precio del servicio o el descuento. Citas de antes de este
+   *  campo no lo tienen; hay que usar el precio del servicio como
+   *  respaldo (ver `priceOf()` en cada pantalla que muestra ingresos). */
+  price?: number;
+  discountPercent?: number | null;
   createdAt: number;
   updatedAt: number;
 }

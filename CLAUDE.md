@@ -1082,6 +1082,56 @@ detalle técnico completo de arquitectura y setup.
     - ⬜ Falta ver en una cita real, dentro de unos días, que la
       "completada" automática funcione sola (no bloquea nada, es el
       paso normal de verificación).
+  - ✅ **RESUELTO — pedido explícito del usuario: campaña de "días
+    flojos" (domingo/lunes) con descuento — PROGRAMADO Y DESPLEGADO.**
+    Pedido: como la mayoría se corta el pelo antes de Shabat (viernes), el
+    domingo y el lunes suelen quedar vacíos — poder armar una campaña con
+    10% (o el % que elija) esos días, configurable/prendible desde
+    Campañas. Antes de programar se le preguntaron 3 cosas al usuario
+    (confirmadas): (1) el descuento se aplica **de verdad** en el sistema
+    (no es solo un cartel — el precio se calcula solo y ya se ve así en
+    Finanzas), (2) el mensaje a los clientes se manda **a mano** con un
+    botón (no automático todas las semanas), (3) sin la idea de "regalo"
+    aparte — solo un número de porcentaje configurable.
+    - `branch.weekdayDiscount` (nuevo, en `shared/types.ts` y
+      `functions/src/types.ts`): `{ enabled, weekdays: number[]
+      (0=domingo..6=sábado), percent }` — se prende/apaga y se ajusta
+      desde la pantalla de Campañas.
+    - `functions/src/booking.ts`: nueva `priceForAppointment()` — si el
+      descuento está prendido y el día de la cita (en el huso horario de
+      la sucursal) es uno de los elegidos, calcula el precio con el %
+      aplicado; si no, el precio normal del servicio. Se guarda en la
+      cita (`Appointment.price` + `discountPercent`, campos nuevos) al
+      momento de reservar — es una "foto" del precio cobrado, no se
+      recalcula después aunque cambie el precio del servicio o se
+      apague el descuento más adelante (así el historial no se altera
+      solo). Se aplica automáticamente sin importar por dónde se
+      reserve (WhatsApp, panel, recurrentes), porque todas pasan por la
+      misma función.
+    - `app/(tabs)/finance.tsx`, `app/(tabs)/index.tsx`,
+      `app/(tabs)/more/clients.tsx`: los 3 lugares que suman ingresos
+      ahora usan `appointment.price` (el precio ya cobrado) en vez de
+      recalcular siempre el precio de lista del servicio — con respaldo
+      al precio del servicio para citas de antes de este cambio, que no
+      tienen ese campo guardado.
+    - `functions/src/campaigns.ts`: nueva función `broadcastWeekdayDiscount`
+      — solo manda el mensaje si el descuento está prendido (si no, avisa
+      que hay que activarlo primero); arma el texto con los días
+      (ej. "domingo y lunes") usando `Intl.ListFormat` para que quede
+      bien redactado en los 3 idiomas, y lo manda por WhatsApp a los
+      últimos 50 clientes — mismo patrón que la campaña de "turno libre
+      hoy" que ya existía.
+    - `app/app/(tabs)/more/campaigns.tsx`: nueva sección "Campaña de días
+      flojos" debajo de la campaña existente — interruptor ON/OFF, chips
+      para elegir los días (domingo-sábado, reutiliza los nombres que ya
+      existían para la pantalla de Horarios), campo de porcentaje,
+      botón Guardar, y botón para mandar el mensaje promocional.
+    - Verificado con `tsc --noEmit` sin errores en `functions/` y `app/`,
+      y `expo export --platform web` sin errores. Desplegado: Cloud
+      Functions y Firebase Hosting del panel.
+    - ⬜ Falta que el usuario configure el descuento de verdad (días +
+      %, prenderlo) desde Campañas y pruebe una reserva en uno de esos
+      días para confirmar que el precio sale con el descuento aplicado.
   - ⬜ **Cobro automático real del depósito (hallazgo de la comparación
     con la competencia)** — el usuario dijo explícitamente "lo hacemos
     más adelante", queda anotado, todavía sin arrancar. Hoy el bot le

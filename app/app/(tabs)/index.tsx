@@ -73,7 +73,7 @@ export default function HomeScreen() {
 
   const active = appointments.filter((a) => a.status !== 'cancelled');
   const completed = appointments.filter((a) => a.status === 'completed');
-  const todayRevenue = completed.reduce((sum, a) => sum + (priceById.get(a.serviceId) ?? 0), 0);
+  const todayRevenue = completed.reduce((sum, a) => sum + (a.price ?? priceById.get(a.serviceId) ?? 0), 0);
 
   const now = Date.now();
   const upcoming = active

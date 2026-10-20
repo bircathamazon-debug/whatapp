@@ -12,6 +12,21 @@ export class SlotTakenError extends Error {
 
 const DEPOSIT_HOLD_MINUTES = 30;
 
+/** Precio final a cobrar por esta cita: el del servicio, o con el
+ * descuento de "días flojos" aplicado si la sucursal lo tiene activado
+ * y el día de la cita (en su huso horario) es uno de los elegidos. */
+function priceForAppointment(branch: Branch, service: Service, startsAt: number): { price: number; discountPercent: number | null } {
+  const discount = branch.weekdayDiscount;
+  if (!discount?.enabled || discount.weekdays.length === 0) return { price: service.price, discountPercent: null };
+
+  const dateStr = new Intl.DateTimeFormat('en-CA', { timeZone: branch.timezone }).format(startsAt);
+  const weekday = new Date(`${dateStr}T00:00:00Z`).getUTCDay(); // 0=domingo..6=sábado
+  if (!discount.weekdays.includes(weekday)) return { price: service.price, discountPercent: null };
+
+  const discounted = Math.round(service.price * (1 - discount.percent / 100));
+  return { price: discounted, discountPercent: discount.percent };
+}
+
 export interface CreateAppointmentInput {
   branch: Branch;
   staff: Staff;
@@ -56,6 +71,7 @@ export async function createAppointment(input: CreateAppointmentInput): Promise<
     if (overlaps) throw new SlotTakenError();
 
     const now = Date.now();
+    const { price, discountPercent } = priceForAppointment(input.branch, input.service, input.startsAt);
     const appt: Appointment = {
       id: apptRef.id,
       branchId: input.branch.id,
@@ -74,6 +90,8 @@ export async function createAppointment(input: CreateAppointmentInput): Promise<
       confirmedAt: needsDeposit ? null : Date.now(),
       depositPaid: false,
       googleCalendarEventId: null,
+      price,
+      discountPercent,
       createdAt: now,
       updatedAt: now,
     };

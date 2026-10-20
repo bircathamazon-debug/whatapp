@@ -159,6 +159,7 @@ export interface TemplateSet {
   birthday: (clientName: string) => string;
   loyaltyReward: (clientName: string) => string;
   emptySlotCampaign: (dateStr: string, timeStr: string) => string;
+  weekdayDiscountCampaign: (percent: number, daysLabel: string) => string;
   noShowWarning: (clientName: string) => string;
   comebackReminder: (clientName: string) => string;
 }
@@ -190,6 +191,9 @@ const templatesHe: TemplateSet = {
 
   emptySlotCampaign: (dateStr, timeStr) =>
     `התפנה תור היום בשעה ${timeStr} (${dateStr}). כתבו "menu" כדי לקבוע.`,
+
+  weekdayDiscountCampaign: (percent, daysLabel) =>
+    `✂️ ${percent}% הנחה ב${daysLabel}! כתבו "menu" כדי לקבוע תור.`,
 
   noShowWarning: (clientName) =>
     `${clientName} לא הגיע/ה לתור. מעכשיו יידרש מקדמה כדי לקבוע תור.`,
@@ -226,6 +230,9 @@ const templatesEn: TemplateSet = {
   emptySlotCampaign: (dateStr, timeStr) =>
     `A slot opened up today at ${timeStr} (${dateStr}). Type "menu" to book it.`,
 
+  weekdayDiscountCampaign: (percent, daysLabel) =>
+    `✂️ ${percent}% off on ${daysLabel}! Type "menu" to book an appointment.`,
+
   noShowWarning: (clientName) =>
     `${clientName} didn't show up for their appointment. A deposit will now be required to book.`,
 
@@ -260,6 +267,9 @@ const templatesEs: TemplateSet = {
 
   emptySlotCampaign: (dateStr, timeStr) =>
     `Se liberó un turno hoy a las ${timeStr} (${dateStr}). Escribí "menu" para reservarlo.`,
+
+  weekdayDiscountCampaign: (percent, daysLabel) =>
+    `✂️ ¡${percent}% de descuento los ${daysLabel}! Escribí "menu" para reservar tu turno.`,
 
   noShowWarning: (clientName) =>
     `${clientName} no se presentó al turno. De ahora en más va a necesitar seña para reservar.`,

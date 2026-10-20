@@ -83,6 +83,15 @@ interface Dict {
     sentTo: (count: number, message: string) => string;
     error: string;
     errorGeneric: string;
+    discountTitle: string;
+    discountHint: string;
+    discountEnableLabel: string;
+    discountPercentLabel: string;
+    discountDaysLabel: string;
+    discountSave: string;
+    discountSaved: string;
+    discountSendBtn: string;
+    discountDisabledError: string;
   };
   questions: {
     empty: string;
@@ -345,6 +354,15 @@ const he: Dict = {
     sentTo: (count, message) => `נשלח ל-${count} לקוחות: "${message}"`,
     error: 'שגיאה',
     errorGeneric: 'לא ניתן היה לשלוח את הקמפיין.',
+    discountTitle: 'קמפיין לימים חלשים',
+    discountHint: 'בדרך כלל יום ראשון ושני חלשים אחרי שבת — אפשר להגדיר הנחה אוטומטית לימים שתבחרו, שתחול לבד כשמישהו קובע תור.',
+    discountEnableLabel: 'הפעלת ההנחה',
+    discountPercentLabel: 'אחוז הנחה',
+    discountDaysLabel: 'באילו ימים',
+    discountSave: 'שמירה',
+    discountSaved: 'נשמר.',
+    discountSendBtn: 'שליחת הודעת מבצע ללקוחות',
+    discountDisabledError: 'קודם צריך להפעיל את ההנחה למעלה.',
   },
   questions: {
     empty: 'אין שאלות שהבוט לא ידע לענות עליהן. מעולה!',
@@ -607,6 +625,15 @@ const en: Dict = {
     sentTo: (count, message) => `Sent to ${count} clients: "${message}"`,
     error: 'Error',
     errorGeneric: 'Could not send the campaign.',
+    discountTitle: 'Slow-day campaign',
+    discountHint: 'Sundays and Mondays are often quiet after Shabbat — set an automatic discount for the days you pick; it applies on its own when someone books.',
+    discountEnableLabel: 'Turn discount on',
+    discountPercentLabel: 'Discount percent',
+    discountDaysLabel: 'Which days',
+    discountSave: 'Save',
+    discountSaved: 'Saved.',
+    discountSendBtn: 'Send promo message to clients',
+    discountDisabledError: 'Turn the discount on above first.',
   },
   questions: {
     empty: "No unanswered questions right now. Great!",
@@ -869,6 +896,15 @@ const es: Dict = {
     sentTo: (count, message) => `Enviado a ${count} clientes: "${message}"`,
     error: 'Error',
     errorGeneric: 'No se pudo enviar la campaña.',
+    discountTitle: 'Campaña de días flojos',
+    discountHint: 'Domingo y lunes suelen quedar vacíos después de Shabat — configurá un descuento automático para los días que elijas; se aplica solo cuando alguien reserva.',
+    discountEnableLabel: 'Activar descuento',
+    discountPercentLabel: 'Porcentaje de descuento',
+    discountDaysLabel: 'Qué días',
+    discountSave: 'Guardar',
+    discountSaved: 'Guardado.',
+    discountSendBtn: 'Enviar mensaje de promoción a los clientes',
+    discountDisabledError: 'Primero activá el descuento arriba.',
   },
   questions: {
     empty: '¡No hay preguntas sin responder por ahora!',
