@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>מדיניות פרטיות | המספרה של יעקב</title>
+<meta name="description" content="מדיניות הפרטיות של מערכת קביעת התורים של המספרה של יעקב." />
+<style>
+  :root {
+    --bg: #f8f6f2;
+    --surface: #ffffff;
+    --surface-muted: #f0ece4;
+    --border: #e7e1d6;
+    --text: #211d19;
+    --text-muted: #8a8276;
+    --accent: #00b4d8;
+    --accent-soft: #dcf4f8;
+    --success: #0fa568;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.65;
+  }
+  .shell {
+    max-width: 640px;
+    margin: 0 auto;
+    min-height: 100vh;
+    background: var(--bg);
+    box-shadow: 0 0 40px rgba(0,0,0,0.06);
+  }
+  header {
+    padding: 40px 24px 24px;
+    text-align: center;
+  }
+  .badge {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 14px;
+    border-radius: 24px;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    box-shadow: 0 10px 24px rgba(0,180,216,0.35);
+  }
+  h1 {
+    font-size: 22px;
+    font-weight: 800;
+    margin: 0 0 4px;
+    letter-spacing: -0.3px;
+  }
+  .subtitle {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin: 0;
+  }
+  main {
+    padding: 0 20px 40px;
+  }
+  section {
+    background: var(--surface);
+    border-radius: 18px;
+    padding: 18px 20px;
+    margin-bottom: 14px;
+    border: 1.5px solid var(--accent-soft);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+  }
+  section h2 {
+    font-size: 15px;
+    font-weight: 700;
+    margin: 0 0 8px;
+    color: var(--text);
+  }
+  section p, section li {
+    font-size: 14.5px;
+    color: var(--text);
+    margin: 0 0 6px;
+  }
+  section ul { margin: 0; padding-inline-start: 20px; }
+  a { color: var(--accent); font-weight: 600; text-decoration: none; }
+  .divider {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 12px;
+    margin: 28px 0 16px;
+  }
+  .en {
+    direction: ltr;
+    text-align: left;
+  }
+  footer {
+    text-align: center;
+    padding: 24px;
+    color: var(--text-muted);
+    font-size: 12px;
+  }
+</style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <div class="badge">🔒</div>
+      <h1>מדיניות פרטיות</h1>
+      <p class="subtitle">המספרה של יעקב — מערכת קביעת תורים</p>
+    </header>
+
+    <main>
+      <section>
+        <h2>איזה מידע אנחנו אוספים</h2>
+        <p>כשלקוח קובע תור בוואטסאפ או בטלפון, אנחנו שומרים: שם, מספר טלפון, היסטוריית תורים (תאריך, שעה, שירות) ותאריך יום הולדת (אופציונלי, לאיחולים). המידע נשמר במסד נתונים מאובטח (Google Firebase/Firestore).</p>
+      </section>
+
+      <section>
+        <h2>למה אנחנו משתמשים במידע</h2>
+        <ul>
+          <li>קביעת תורים וניהול היומן של בית העסק.</li>
+          <li>שליחת תזכורות לפני התור (בוואטסאפ או בטלפון, לפי בחירת הלקוח).</li>
+          <li>זיהוי לקוחות קיימים (כדי לא לשאול שם בכל פעם) והטבות נאמנות.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>סנכרון עם Google Calendar</h2>
+        <p>הספר (בעל בית העסק) יכול, אם הוא בוחר בכך, לחבר את יומן הגוגל האישי שלו. במקרה הזה, המערכת מוסיפה ומוחקת באופן אוטומטי רק את האירועים של התורים שנקבעו במערכת — היומן האישי שלו (תוכן קיים, אירועים אחרים) לא נקרא ולא משותף לאף גורם אחר. ניתן לבטל את החיבור בכל עת.</p>
+      </section>
+
+      <section>
+        <h2>שירותי צד שלישי שבהם אנחנו משתמשים</h2>
+        <ul>
+          <li><strong>Google Firebase</strong> — אחסון המידע ותפעול המערכת.</li>
+          <li><strong>Telnyx</strong> — תפעול הטלפון האוטומטי (IVR) לקביעת תורים.</li>
+          <li><strong>OpenAI (Whisper)</strong> — תמלול הודעות קוליות שנשלחות בוואטסאפ, רק לצורך הבנת הבקשה.</li>
+          <li><strong>Google Calendar</strong> — רק אם הספר מחבר את חשבונו, כמפורט מעלה.</li>
+        </ul>
+        <p>המידע לא נמכר ולא משותף לצרכי שיווק של גורמים אחרים.</p>
+      </section>
+
+      <section>
+        <h2>שמירה ומחיקת מידע</h2>
+        <p>המידע נשמר כל עוד הלקוח פעיל במערכת. לקוח שמעוניין למחוק את המידע שלו יכול לפנות אלינו בכתובת שבתחתית העמוד.</p>
+      </section>
+
+      <section>
+        <h2>יצירת קשר</h2>
+        <p>שאלות על פרטיות המידע: <a href="mailto:flowsivan613@gmail.com">flowsivan613@gmail.com</a></p>
+      </section>
+
+      <div class="divider">— English —</div>
+
+      <section class="en">
+        <h2>What information we collect</h2>
+        <p>When a client books an appointment via WhatsApp or phone, we store: name, phone number, appointment history (date, time, service) and birthday (optional, for greetings). Data is stored in a secure database (Google Firebase/Firestore).</p>
+      </section>
+
+      <section class="en">
+        <h2>How we use the information</h2>
+        <ul>
+          <li>Scheduling and managing the business's appointment calendar.</li>
+          <li>Sending appointment reminders (via WhatsApp or phone call, per the client's choice).</li>
+          <li>Recognizing returning clients and managing loyalty rewards.</li>
+        </ul>
+      </section>
+
+      <section class="en">
+        <h2>Google Calendar sync</h2>
+        <p>The business owner (stylist) may optionally connect their personal Google Calendar. If they do, the system automatically creates and removes only the appointment events it books — it does not read or share any other content of their personal calendar. The connection can be revoked at any time.</p>
+      </section>
+
+      <section class="en">
+        <h2>Third-party services we use</h2>
+        <ul>
+          <li><strong>Google Firebase</strong> — data storage and app infrastructure.</li>
+          <li><strong>Telnyx</strong> — automated phone booking (IVR).</li>
+          <li><strong>OpenAI (Whisper)</strong> — transcribing WhatsApp voice notes, solely to understand the request.</li>
+          <li><strong>Google Calendar</strong> — only if the stylist connects their account, as described above.</li>
+        </ul>
+        <p>We do not sell personal data or share it with third parties for their own marketing purposes.</p>
+      </section>
+
+      <section class="en">
+        <h2>Data retention &amp; deletion</h2>
+        <p>Data is kept while the client remains active in the system. Clients may request deletion of their data by contacting us below.</p>
+      </section>
+
+      <section class="en">
+        <h2>Contact</h2>
+        <p>Privacy questions: <a href="mailto:flowsivan613@gmail.com">flowsivan613@gmail.com</a></p>
+      </section>
+    </main>
+
+    <footer>
+      המספרה של יעקב · ירושלים
+    </footer>
+  </div>
+</body>
+</html>
