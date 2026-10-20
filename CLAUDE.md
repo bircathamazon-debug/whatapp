@@ -1000,10 +1000,9 @@ detalle técnico completo de arquitectura y setup.
       (cancelar, hablar con el peluquero, pedido vago sin día/hora,
       un saludo random que no es una intención real, y en inglés) — 
       todos clasificados bien.
-    - ✅ **Desplegado** en Railway, reconectado a WhatsApp sin pedir QR
-      nuevo. **Falta que el usuario pruebe de nuevo con una nota de voz
-      real** para confirmar en producción (antes falló por esto mismo,
-      ya debería andar).
+    - ✅ **Desplegado y confirmado por el usuario en vivo** — probó de
+      nuevo con una nota de voz real y esta vez entendió el pedido
+      correctamente (antes fallaba por esto mismo).
     - 🎯 **Pedido del usuario al probar, ya implementado**: el mensaje
       final de "cita confirmada" (tanto reservando paso a paso como con
       el pedido en lenguaje natural) solo decía la fecha y la hora
