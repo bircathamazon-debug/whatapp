@@ -1004,6 +1004,14 @@ detalle técnico completo de arquitectura y setup.
       nuevo. **Falta que el usuario pruebe de nuevo con una nota de voz
       real** para confirmar en producción (antes falló por esto mismo,
       ya debería andar).
+    - 🎯 **Pedido del usuario al probar, ya implementado**: el mensaje
+      final de "cita confirmada" (tanto reservando paso a paso como con
+      el pedido en lenguaje natural) solo decía la fecha y la hora
+      ("23/10/2026 15:00") — faltaba el día de la semana. Nueva función
+      `formatDateWithWeekday()` en `bot/conversation.js`, usada en
+      `bookChosenSlot` — ahora dice, por ejemplo, "jueves, 23/10/2026 a
+      las 15:00" (en el idioma de la sucursal). Desplegado en Railway,
+      reconectado a WhatsApp sin pedir QR nuevo.
   - ✅ **RESUELTO — pedido explícito del usuario, PROGRAMADO Y
     DESPLEGADO.** Antes de tocar el código se le preguntó el alcance
     exacto (¿solo al arrancar la charla, o también interrumpiendo una

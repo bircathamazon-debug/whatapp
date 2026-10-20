@@ -661,7 +661,8 @@ async function bookChosenSlot(phone, branch, state, slot) {
       source: 'whatsapp',
     });
     await resetToMainMenu(phone);
-    return [t(branch, 'appointmentConfirmed', formatDate(slot.startsAt, branch), formatTime(slot.startsAt, branch))];
+    const dateLabel = formatDateWithWeekday(state.data.dateStr, slot.startsAt, branch);
+    return [t(branch, 'appointmentConfirmed', dateLabel, formatTime(slot.startsAt, branch))];
   } catch (err) {
     if (err.code === 'slot_taken') {
       return handleOccupiedSlot(phone, branch, state, slot);
@@ -789,6 +790,16 @@ function buildDateOptions(branch) {
 
 function formatDate(epochMs, branch) {
   return new Intl.DateTimeFormat(dateLocale(branch), { timeZone: branch.timezone, day: '2-digit', month: '2-digit', year: 'numeric' }).format(epochMs);
+}
+
+/** Fecha + día de la semana en el idioma de la sucursal, para la
+ * confirmación final de una cita (ej. "jueves, 23/10/2026") — `dateStr`
+ * (YYYY-MM-DD) es el día ya elegido en la conversación, para no
+ * recalcularlo del epoch (mismo truco que ya usa buildDateOptions). */
+function formatDateWithWeekday(dateStr, epochMs, branch) {
+  const weekdays = weekdayNames(branch);
+  const weekday = weekdays[new Date(`${dateStr}T00:00:00Z`).getUTCDay()];
+  return `${weekday}, ${formatDate(epochMs, branch)}`;
 }
 
 function formatTime(epochMs, branch) {
