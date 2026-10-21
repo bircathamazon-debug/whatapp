@@ -208,9 +208,12 @@ async function handleMainMenu(phone, text, branch, state) {
     // en "clients"): le preguntamos el nombre antes de mostrar los
     // servicios, para poder llamarlo por su nombre de ahora en más. Si ya
     // es un cliente conocido (con o sin nombre — pudo haber elegido no
-    // dejarlo la primera vez), no se le vuelve a preguntar nunca más.
+    // dejarlo la primera vez), no se le vuelve a preguntar nunca más. Si
+    // el único registro que tiene es el genérico que le puso el IVR
+    // (llamó por teléfono antes de escribirle al bot), tampoco cuenta
+    // como "ya eligió no decir su nombre" — se le pregunta igual.
     const client = await getClientRecord(branch.id, phone);
-    if (!client) {
+    if (!client || client.name === t(branch, 'defaultPhoneClientName')) {
       await saveConversation(phone, { step: 'ASK_NAME', data: { ...state.data } });
       return [t(branch, 'askName')];
     }
@@ -251,7 +254,7 @@ async function handleMainMenu(phone, text, branch, state) {
   if (nlu?.intent === 'talk_to_human') return handleMainMenu(phone, '4', branch, state);
   if (nlu?.intent === 'book') {
     const client = await getClientRecord(branch.id, phone);
-    if (!client) {
+    if (!client || client.name === t(branch, 'defaultPhoneClientName')) {
       await saveConversation(phone, { step: 'ASK_NAME', data: { ...state.data, pendingNlu: nlu } });
       return [t(branch, 'askName')];
     }
@@ -377,6 +380,18 @@ async function handleAskName(phone, text, branch, state) {
   const skipped = text.trim() === '0';
   const name = skipped ? t(branch, 'defaultClientName') : text.trim().slice(0, 60);
   const greeting = skipped ? [] : [t(branch, 'nameThanks', name)];
+
+  // Si este teléfono ya tiene ficha en "clients" porque llamó antes por
+  // teléfono (el IVR lo archiva con el nombre genérico de llamada), hay
+  // que actualizar esa ficha con el nombre real recién dado — si no, la
+  // ficha se queda con el genérico para siempre, porque crear una cita
+  // nunca pisa el nombre de un cliente que ya existe.
+  if (!skipped) {
+    const existing = await getClientRecord(branch.id, phone);
+    if (existing && existing.name === t(branch, 'defaultPhoneClientName')) {
+      await db.collection('clients').doc(existing.id).update({ name });
+    }
+  }
 
   // Si llegamos acá porque la IA ya había entendido un pedido de reserva
   // (ej. una nota de voz) y solo faltaba preguntar el nombre, seguimos
