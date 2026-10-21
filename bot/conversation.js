@@ -499,8 +499,13 @@ async function handleBookTime(phone, text, branch, state) {
   }
 
   // No fue un número de la lista: probamos si escribió una hora directamente
-  // (ej. "9:30", "930", "17:00", "9 30", "9.30").
-  const typed = parseTimeInput(text);
+  // (ej. "9:30", "930", "17:00", "9 30", "9.30"). Si no, puede ser un
+  // segundo intento hablado/natural (nota de voz transcripta, ej. "probá
+  // de nuevo a las 3") — lo probamos con la misma IA del menú principal
+  // para sacarle la hora, así un reintento por voz entra al mismo camino
+  // (resolveTypedTime → handleOccupiedSlot) que ya sabe ofrecer los 3
+  // horarios libres más cercanos desde el segundo intento seguido.
+  const typed = parseTimeInput(text) || (await nluTimeFallback(text));
   if (typed) {
     return resolveTypedTime(phone, branch, state, typed);
   }
@@ -508,6 +513,14 @@ async function handleBookTime(phone, text, branch, state) {
   await logUnansweredMessage(branch, phone, text, 'BOOK_TIME');
   const talkLines = await buildTalkToStaffLines(branch);
   return [t(branch, 'didNotUnderstandTime'), t(branch, 'timeHelp'), ...(talkLines ? [t(branch, 'askTalkToStaff'), ...talkLines] : [])];
+}
+
+/** Intenta sacar una hora de un mensaje libre (hablado o escrito en varias
+ * palabras) usando la IA de interpretFreeText — devuelve null si no
+ * encontró una hora clara, para que el llamador caiga en "no entendí". */
+async function nluTimeFallback(text) {
+  const nlu = await interpretFreeText(text);
+  return parseNluTime(nlu?.time);
 }
 
 /** Formatea hora+minuto como "HH:MM" para pasarle a toEpoch(). */
