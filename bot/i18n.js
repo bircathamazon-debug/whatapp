@@ -80,6 +80,7 @@ const STRINGS = {
     nameThanks: (name) => `נעים להכיר, ${name}! 😊`,
     chooseDayAvailability: 'לאיזה יום לבדוק את השעות הפנויות?',
     availableTimesHeader: (dayLabel) => `השעות הפנויות ב-${dayLabel}:`,
+    chooseVariant: (serviceName) => `איזה סוג ${serviceName} תרצו?`,
   },
   en: {
     weekdays: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
@@ -146,6 +147,7 @@ const STRINGS = {
     nameThanks: (name) => `Nice to meet you, ${name}! 😊`,
     chooseDayAvailability: 'Which day would you like to check availability for?',
     availableTimesHeader: (dayLabel) => `Available times on ${dayLabel}:`,
+    chooseVariant: (serviceName) => `What type of ${serviceName} would you like?`,
   },
   es: {
     weekdays: ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'],
@@ -212,6 +214,7 @@ const STRINGS = {
     nameThanks: (name) => `¡Un placer, ${name}! 😊`,
     chooseDayAvailability: '¿Para qué día querés ver los horarios disponibles?',
     availableTimesHeader: (dayLabel) => `Horarios disponibles el ${dayLabel}:`,
+    chooseVariant: (serviceName) => `¿Qué tipo de ${serviceName} querés?`,
   },
 };
 

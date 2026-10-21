@@ -34,10 +34,11 @@ export const getAvailability = onCall(async (request) => {
 /** Callable: la app admin crea una cita manualmente (walk-in, teléfono anotado a mano, etc). */
 export const adminCreateAppointment = onCall(async (request) => {
   if (!request.auth) throw new HttpsError('unauthenticated', 'Requiere sesión.');
-  const { branchId, staffId, serviceId, clientPhone, clientName, startsAt } = request.data as {
+  const { branchId, staffId, serviceId, variantId, clientPhone, clientName, startsAt } = request.data as {
     branchId: string;
     staffId: string;
     serviceId: string;
+    variantId?: string | null;
     clientPhone: string;
     clientName: string;
     startsAt: number;
@@ -54,12 +55,14 @@ export const adminCreateAppointment = onCall(async (request) => {
   const branch = branchSnap.data() as Branch;
   const staff = staffSnap.data() as Staff;
   const service = serviceSnap.data() as Service;
+  const variant = variantId ? (service.variants ?? []).find((v) => v.id === variantId) ?? null : null;
 
   try {
     const appt = await createAppointment({
       branch,
       staff,
       service,
+      variant,
       clientPhone,
       clientName,
       startsAt,

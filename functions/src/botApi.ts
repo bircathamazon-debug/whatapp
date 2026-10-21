@@ -55,10 +55,11 @@ export const botCreateAppointment = onRequest(async (req, res) => {
     res.status(401).json({ error: 'unauthorized' });
     return;
   }
-  const { branchId, staffId, serviceId, clientPhone, clientName, startsAt, source } = req.body as {
+  const { branchId, staffId, serviceId, variantId, clientPhone, clientName, startsAt, source } = req.body as {
     branchId: string;
     staffId: string;
     serviceId: string;
+    variantId?: string | null;
     clientPhone: string;
     clientName: string;
     startsAt: number;
@@ -78,11 +79,13 @@ export const botCreateAppointment = onRequest(async (req, res) => {
     const branch = branchSnap.data() as Branch;
     const staff = staffSnap.data() as Staff;
     const service = serviceSnap.data() as Service;
+    const variant = variantId ? (service.variants ?? []).find((v) => v.id === variantId) ?? null : null;
 
     const appt = await createAppointment({
       branch,
       staff,
       service,
+      variant,
       clientPhone,
       clientName,
       startsAt,

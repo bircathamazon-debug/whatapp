@@ -27,6 +27,8 @@ export interface IvrStrings {
   noSlotsThatDay: (dayLabel: string) => string;
   scheduleResult: (dayLabel: string, times: string[]) => string;
   slotTakenPhone: string;
+  askVariantIntro: (serviceName: string) => string;
+  variantOption: (n: number, name: string, price: number) => string;
 }
 
 const he: IvrStrings = {
@@ -58,6 +60,8 @@ const he: IvrStrings = {
   scheduleResult: (dayLabel, times) =>
     `השעות הפנויות ב${dayLabel} הן: ${times.join(', ')}. כדי לקבוע תור, התקשרו שוב ובחרו באפשרות הראשונה בתפריט.`,
   slotTakenPhone: 'מצטערים, השעה הזו נתפסה הרגע. נסו שוב מאוחר יותר.',
+  askVariantIntro: (serviceName) => `איזה סוג ${serviceName} תרצו?`,
+  variantOption: (n, name, price) => `ל${name}, ${price} שקלים, הקישו ${n}.`,
 };
 
 const en: IvrStrings = {
@@ -89,6 +93,8 @@ const en: IvrStrings = {
   scheduleResult: (dayLabel, times) =>
     `The available times on ${dayLabel} are: ${times.join(', ')}. To book, call again and choose the first option in the menu.`,
   slotTakenPhone: 'Sorry, that time slot was just taken. Please try again later.',
+  askVariantIntro: (serviceName) => `What type of ${serviceName} would you like?`,
+  variantOption: (n, name, price) => `For ${name}, ${price} shekels, press ${n}.`,
 };
 
 const es: IvrStrings = {
@@ -120,6 +126,8 @@ const es: IvrStrings = {
   scheduleResult: (dayLabel, times) =>
     `Los horarios disponibles el ${dayLabel} son: ${times.join(', ')}. Para reservar, llame de nuevo y elija la primera opción del menú.`,
   slotTakenPhone: 'Lo sentimos, ese horario se acaba de ocupar. Intente de nuevo más tarde.',
+  askVariantIntro: (serviceName) => `¿Qué tipo de ${serviceName} querés?`,
+  variantOption: (n, name, price) => `Para ${name}, ${price} shékels, marque ${n}.`,
 };
 
 const IVR_SETS: Record<string, IvrStrings> = { he, en, es };

@@ -51,6 +51,12 @@ export interface Staff {
   serviceDurations?: Record<string, number>;
 }
 
+export interface ServiceVariant {
+  id: string;
+  name: string;
+  price: number;
+}
+
 export interface Service {
   id: string;
   branchId: string;
@@ -59,6 +65,7 @@ export interface Service {
   price: number;
   requiresDeposit: boolean;
   depositAmount: number;
+  variants?: ServiceVariant[];
 }
 
 export interface Client {
@@ -81,6 +88,8 @@ export interface Appointment {
   branchId: string;
   staffId: string;
   serviceId: string;
+  variantId?: string | null;
+  variantName?: string | null;
   clientId: string;
   clientPhone: string;
   clientName: string;

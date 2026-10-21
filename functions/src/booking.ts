@@ -1,5 +1,5 @@
 import { db } from './admin';
-import type { Appointment, Branch, Client, Service, Staff } from './types';
+import type { Appointment, Branch, Client, Service, ServiceVariant, Staff } from './types';
 import { NO_SHOW_DEPOSIT_THRESHOLD } from './types';
 import { sendNotification, getTemplates } from './notify';
 import { syncAppointmentToGoogleCalendar, removeAppointmentFromGoogleCalendar } from './googleCalendar';
@@ -12,18 +12,20 @@ export class SlotTakenError extends Error {
 
 const DEPOSIT_HOLD_MINUTES = 30;
 
-/** Precio final a cobrar por esta cita: el del servicio, o con el
- * descuento de "días flojos" aplicado si la sucursal lo tiene activado
- * y el día de la cita (en su huso horario) es uno de los elegidos. */
-function priceForAppointment(branch: Branch, service: Service, startsAt: number): { price: number; discountPercent: number | null } {
+/** Precio final a cobrar por esta cita: el de la variante elegida (si el
+ * servicio tiene variantes) o el del servicio, con el descuento de "días
+ * flojos" aplicado encima si la sucursal lo tiene activado y el día de la
+ * cita (en su huso horario) es uno de los elegidos. */
+function priceForAppointment(branch: Branch, service: Service, variant: ServiceVariant | null | undefined, startsAt: number): { price: number; discountPercent: number | null } {
+  const basePrice = variant ? variant.price : service.price;
   const discount = branch.weekdayDiscount;
-  if (!discount?.enabled || discount.weekdays.length === 0) return { price: service.price, discountPercent: null };
+  if (!discount?.enabled || discount.weekdays.length === 0) return { price: basePrice, discountPercent: null };
 
   const dateStr = new Intl.DateTimeFormat('en-CA', { timeZone: branch.timezone }).format(startsAt);
   const weekday = new Date(`${dateStr}T00:00:00Z`).getUTCDay(); // 0=domingo..6=sábado
-  if (!discount.weekdays.includes(weekday)) return { price: service.price, discountPercent: null };
+  if (!discount.weekdays.includes(weekday)) return { price: basePrice, discountPercent: null };
 
-  const discounted = Math.round(service.price * (1 - discount.percent / 100));
+  const discounted = Math.round(basePrice * (1 - discount.percent / 100));
   return { price: discounted, discountPercent: discount.percent };
 }
 
@@ -31,6 +33,9 @@ export interface CreateAppointmentInput {
   branch: Branch;
   staff: Staff;
   service: Service;
+  /** Variante elegida, si el servicio tiene (null/undefined = sin
+   *  variantes, se cobra el precio plano del servicio como siempre). */
+  variant?: ServiceVariant | null;
   clientPhone: string;
   clientName: string;
   startsAt: number;
@@ -71,12 +76,14 @@ export async function createAppointment(input: CreateAppointmentInput): Promise<
     if (overlaps) throw new SlotTakenError();
 
     const now = Date.now();
-    const { price, discountPercent } = priceForAppointment(input.branch, input.service, input.startsAt);
+    const { price, discountPercent } = priceForAppointment(input.branch, input.service, input.variant, input.startsAt);
     const appt: Appointment = {
       id: apptRef.id,
       branchId: input.branch.id,
       staffId: input.staff.id,
       serviceId: input.service.id,
+      variantId: input.variant?.id ?? null,
+      variantName: input.variant?.name ?? null,
       clientId: client.id,
       clientPhone: client.phone,
       clientName: client.name,

@@ -138,6 +138,8 @@ export async function handleIncomingMessage(jid, rawText, branchId, pushName) {
       return handleAskName(phone, text, branch, state);
     case 'BOOK_SERVICE':
       return handleBookService(phone, text, branch, state);
+    case 'BOOK_VARIANT':
+      return handleBookVariant(phone, text, branch, state);
     case 'BOOK_STAFF':
       return handleBookStaff(phone, text, branch, state);
     case 'BOOK_DAY':
@@ -300,6 +302,21 @@ async function continueBookingFastTrack(phone, branch, state, clientName, greeti
     service = matched;
   }
 
+  let variant = null;
+  if (hasVariants(service)) {
+    const hint = (nlu.serviceHint || '').toLowerCase().trim();
+    variant = (hint && service.variants.find((v) => {
+      const name = v.name.toLowerCase();
+      return name.includes(hint) || hint.includes(name);
+    })) || null;
+    if (!variant) {
+      // No se pudo identificar sola qué variante quiso decir (ej. "corte"
+      // sin aclarar adulto/niño): mejor preguntar que adivinar mal.
+      const dataWithName = clientName ? { ...state.data, clientName } : state.data;
+      return startVariantSelection(phone, branch, { data: dataWithName }, service, greetingLines);
+    }
+  }
+
   const staffList = await getActiveStaff(branch.id);
   const staffId = staffList.length === 1 ? staffList[0].id : 'any';
 
@@ -309,7 +326,7 @@ async function continueBookingFastTrack(phone, branch, state, clientName, greeti
   else if (nlu.relativeDay === 'tomorrow') chosen = dateOptions[1];
   else if (nlu.weekday) chosen = dateOptions.find((d) => englishWeekday(d.dateStr) === nlu.weekday);
 
-  const baseData = { ...state.data, serviceId: service.id, staffId, dateOptions };
+  const baseData = { ...state.data, serviceId: service.id, variantId: variant?.id ?? null, variantName: variant?.name ?? null, staffId, dateOptions };
   if (clientName) baseData.clientName = clientName;
 
   if (!chosen) {
@@ -380,8 +397,15 @@ async function startServiceSelection(phone, branch, state, clientName, greetingL
   const newData = { ...state.data, services: services.map((s) => s.id) };
   if (clientName) newData.clientName = clientName;
   await saveConversation(phone, { step: 'BOOK_SERVICE', data: newData });
-  const lines = services.map((s, i) => `${menuNumber(i + 1)} ✂️ ${s.name} — ₪${s.price}`);
+  // Un servicio con variantes (ej. "Corte" con "Adulto"/"Niño") no tiene un
+  // precio único, así que no se muestra acá — se ve recién al elegir la
+  // variante.
+  const lines = services.map((s, i) => `${menuNumber(i + 1)} ✂️ ${s.name}${hasVariants(s) ? '' : ` — ₪${s.price}`}`);
   return oneMessage(...greetingLines, ...(greetingLines.length ? [''] : []), t(branch, 'chooseService'), ...lines, t(branch, 'chooseNumberHint'));
+}
+
+function hasVariants(service) {
+  return Array.isArray(service.variants) && service.variants.length > 0;
 }
 
 async function handleBookService(phone, text, branch, state) {
@@ -390,11 +414,36 @@ async function handleBookService(phone, text, branch, state) {
   const service = services[idx];
   if (!service) return [t(branch, 'invalidChoiceService')];
 
+  if (hasVariants(service)) {
+    return startVariantSelection(phone, branch, state, service);
+  }
+  return proceedToStaffSelection(phone, branch, { data: { ...state.data, serviceId: service.id, variantId: null, variantName: null } });
+}
+
+/** Lista las variantes del servicio elegido (ej. "Adulto — ₪60",
+ * "Niño — ₪40") y pasa a BOOK_VARIANT. `greetingLines` opcionales, igual
+ * que en startServiceSelection (ej. cuando viene de un pedido en
+ * lenguaje natural de un cliente nuevo recién saludado). */
+async function startVariantSelection(phone, branch, state, service, greetingLines = []) {
+  await saveConversation(phone, { step: 'BOOK_VARIANT', data: { ...state.data, serviceId: service.id, variantOptions: service.variants.map((v) => v.id) } });
+  const lines = service.variants.map((v, i) => `${menuNumber(i + 1)} ${v.name} — ₪${v.price}`);
+  return oneMessage(...greetingLines, ...(greetingLines.length ? [''] : []), t(branch, 'chooseVariant', service.name), ...lines, t(branch, 'chooseNumberHint'));
+}
+
+async function handleBookVariant(phone, text, branch, state) {
+  const service = await docById('services', state.data.serviceId);
+  const variantId = state.data.variantOptions?.[Number(text) - 1];
+  const variant = (service?.variants ?? []).find((v) => v.id === variantId);
+  if (!variant) return [t(branch, 'invalidChoiceService')];
+  return proceedToStaffSelection(phone, branch, { data: { ...state.data, variantId: variant.id, variantName: variant.name } });
+}
+
+async function proceedToStaffSelection(phone, branch, state) {
   const staff = await getActiveStaff(branch.id);
-  await saveConversation(phone, { step: 'BOOK_STAFF', data: { ...state.data, serviceId: service.id, staffOptions: staff.map((s) => s.id) } });
+  await saveConversation(phone, { step: 'BOOK_STAFF', data: { ...state.data, staffOptions: staff.map((s) => s.id) } });
 
   if (staff.length === 1) {
-    return handleBookStaff(phone, '1', branch, { data: { ...state.data, serviceId: service.id, staffOptions: [staff[0].id] } });
+    return handleBookStaff(phone, '1', branch, { data: { ...state.data, staffOptions: [staff[0].id] } });
   }
   const lines = staff.map((s, i) => `${menuNumber(i + 1)} ${s.name}`);
   return oneMessage(t(branch, 'chooseStaff'), t(branch, 'anyStaff'), ...lines, t(branch, 'chooseNumberHint'));
@@ -668,6 +717,7 @@ async function bookChosenSlot(phone, branch, state, slot) {
       branchId: branch.id,
       staffId: slot.staffId,
       serviceId: service.id,
+      variantId: state.data.variantId || null,
       clientPhone: phone,
       clientName: state.data.clientName || t(branch, 'defaultClientName'),
       startsAt: slot.startsAt,

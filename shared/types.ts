@@ -79,14 +79,29 @@ export interface Staff {
   } | null;
 }
 
+/** Variante dentro de un servicio (ej. el servicio "Corte" puede tener las
+ *  variantes "Adulto"/"Niño"/"Con barba", cada una con su propio precio) —
+ *  para no tener que crear un servicio suelto por cada combinación. La
+ *  duración sigue siendo la del servicio (`Service.durationMinutes`),
+ *  compartida por todas sus variantes. */
+export interface ServiceVariant {
+  id: string;
+  name: string;
+  price: number;
+}
+
 export interface Service {
   id: string;
   branchId: string;
-  name: string;
+  name: string; // nombre de la categoría si tiene variantes (ej. "Corte"), o el nombre completo si no
   durationMinutes: number;
-  price: number;
+  price: number; // precio "plano" — solo se usa si el servicio NO tiene variantes
   requiresDeposit: boolean;
   depositAmount: number;
+  /** Si tiene 1 o más variantes, el cliente elige una (con su propio
+   *  precio) en vez de reservar el servicio directamente con `price`. Sin
+   *  variantes (undefined o []), funciona exactamente como antes. */
+  variants?: ServiceVariant[];
 }
 
 export interface Client {
@@ -109,6 +124,12 @@ export interface Appointment {
   branchId: string;
   staffId: string;
   serviceId: string;
+  /** Variante elegida dentro del servicio, si tenía (ej. "Adulto"). Se
+   *  guarda también el nombre (`variantName`) para mostrarlo en Agenda/
+   *  historial sin tener que ir a buscar el servicio, por si la variante
+   *  se borra o se renombra después. */
+  variantId?: string | null;
+  variantName?: string | null;
   clientId: string;
   clientPhone: string;
   clientName: string;

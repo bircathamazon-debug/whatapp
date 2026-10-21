@@ -12,7 +12,7 @@ export {
 export { onAppointmentCancelledOfferWaitlist } from './waitlist';
 export { onAppointmentCompletedUpdateLoyalty } from './loyalty';
 export { broadcastEmptySlots, broadcastWeekdayDiscount } from './campaigns';
-export { ivrIncomingCall, ivrMenu, ivrDay, ivrTimeTyped, ivrConfirm, ivrReminderResponse } from './ivr';
+export { ivrIncomingCall, ivrMenu, ivrVariant, ivrDay, ivrTimeTyped, ivrConfirm, ivrReminderResponse } from './ivr';
 export { googleCalendarConnect, googleCalendarCallback } from './oauth';
 export { getAvailability, adminCreateAppointment, adminCancelAppointment, adminConfirmAppointment, adminMarkNoShow, adminMarkCompleted } from './api';
 export {

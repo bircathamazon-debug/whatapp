@@ -1,6 +1,6 @@
 import { onRequest } from 'firebase-functions/v2/https';
 import { db } from './admin';
-import type { Appointment, Branch, BlockedTime, Service, Staff } from './types';
+import type { Appointment, Branch, BlockedTime, Service, ServiceVariant, Staff } from './types';
 import { createAppointment, confirmAppointment, cancelAppointment, formatDate, formatTime } from './booking';
 import { getAvailableSlots, getStaffServiceDuration, toEpoch } from './availability';
 import { getIvrStrings, IvrStrings } from './ivrStrings';
@@ -72,6 +72,14 @@ interface IvrSessionData {
   dateStr?: string;
   dateLabel?: string;
   pendingSlot?: SlotWithStaff;
+  /** Si el servicio de la sucursal tiene variantes (ej. "Adulto"/"Niño"),
+   *  se pide elegir una antes de seguir con el día — `variantOptions` es
+   *  el orden en que se leyeron (índice = dígito - 1), para saber cuál
+   *  eligió. */
+  serviceId?: string;
+  variantOptions?: string[];
+  variantId?: string;
+  variantName?: string;
 }
 
 interface IvrSession {
@@ -142,22 +150,65 @@ export const ivrMenu = onRequest(async (req, res) => {
 
   if (digit === '1' || digit === '3') {
     const dateOptions = buildDateOptions(branch);
-    await saveIvrSession(callSid, { branchId, data: { intent: digit === '1' ? 'book' : 'schedule', clientPhone: from, dateOptions } });
-
+    const intent = digit === '1' ? 'book' : 'schedule';
     const base = process.env.FUNCTIONS_BASE_URL ?? '';
-    const intro = digit === '1' ? s.askDayIntro : s.askDayIntroSchedule;
-    const daySpeech = [intro, ...dateOptions.map((d) => s.dayOption(d.digit, d.label))].join(' ');
-    res.send(`<?xml version="1.0" encoding="UTF-8"?>
-<Response>
-  <Gather numDigits="1" action="${base}/ivrDay?branchId=${branchId}" method="POST" timeout="8">
-    <Say language="${s.sayLang}" voice="${s.sayVoice}">${daySpeech}</Say>
-  </Gather>
-  <Say language="${s.sayLang}" voice="${s.sayVoice}">${s.noChoice}</Say>
-</Response>`);
+
+    // Si va a reservar (no solo a escuchar horarios) y el servicio tiene
+    // variantes (ej. "Adulto"/"Niño"), primero hay que elegir cuál —
+    // "escuchar horarios" no necesita esto, solo lee huecos libres.
+    if (intent === 'book') {
+      const servicesSnap = await db.collection('services').where('branchId', '==', branch.id).limit(1).get();
+      const service = servicesSnap.empty ? null : (servicesSnap.docs[0].data() as Service);
+      if (service && hasVariants(service)) {
+        await saveIvrSession(callSid, {
+          branchId,
+          data: { intent, clientPhone: from, dateOptions, serviceId: service.id, variantOptions: service.variants!.map((v) => v.id) },
+        });
+        res.send(askVariantTeXML(base, branchId, s, service));
+        return;
+      }
+    }
+
+    await saveIvrSession(callSid, { branchId, data: { intent, clientPhone: from, dateOptions } });
+    const intro = intent === 'book' ? s.askDayIntro : s.askDayIntroSchedule;
+    res.send(askDayTeXML(base, branchId, s, intro, dateOptions));
     return;
   }
 
   res.send(sayAndHangup(s.sayLang, s.sayVoice, s.invalidChoice));
+});
+
+/** Procesa la variante elegida (apretada en respuesta a askVariantTeXML) y
+ * sigue con el día, igual que seguía directo `ivrMenu` cuando el servicio
+ * no tenía variantes. */
+export const ivrVariant = onRequest(async (req, res) => {
+  const digit = String(req.body.Digits ?? '');
+  const callSid = String(req.body.CallSid ?? '');
+  const branchId = String(req.query.branchId ?? '');
+
+  res.set('Content-Type', 'text/xml');
+
+  const branchSnap = await db.collection('branches').doc(branchId).get();
+  const branch = branchSnap.exists ? (branchSnap.data() as Branch) : null;
+  const s = getIvrStrings(branch?.language);
+  const session = await getIvrSession(callSid);
+  if (!branch || !session || !session.data.serviceId || !session.data.variantOptions) {
+    res.send(sayAndHangup(s.sayLang, s.sayVoice, s.systemError));
+    return;
+  }
+
+  const serviceSnap = await db.collection('services').doc(session.data.serviceId).get();
+  const service = serviceSnap.exists ? (serviceSnap.data() as Service) : null;
+  const variantId = session.data.variantOptions[Number(digit) - 1];
+  const variant = service?.variants?.find((v) => v.id === variantId);
+  if (!variant) {
+    res.send(sayAndHangup(s.sayLang, s.sayVoice, s.invalidChoice));
+    return;
+  }
+
+  await saveIvrSession(callSid, { branchId, data: { ...session.data, variantId: variant.id, variantName: variant.name } });
+  const base = process.env.FUNCTIONS_BASE_URL ?? '';
+  res.send(askDayTeXML(base, branchId, s, s.askDayIntro, session.data.dateOptions));
 });
 
 /** Procesa el día elegido (apretado en respuesta a ivrMenu, identificado
@@ -303,12 +354,14 @@ export const ivrConfirm = onRequest(async (req, res) => {
   }
   const service = servicesSnap.docs[0].data() as Service;
   const staff = staffSnap.data() as Staff;
+  const variant = session.data.variantId ? (service.variants ?? []).find((v) => v.id === session.data.variantId) ?? null : null;
 
   try {
     const appt = await createAppointment({
       branch,
       staff,
       service,
+      variant,
       clientPhone: session.data.clientPhone,
       clientName: s.defaultPhoneClientName,
       startsAt: slot.startsAt,
@@ -458,6 +511,38 @@ function resolveTypedTime(branch: Branch, dateStr: string, allSlots: SlotWithSta
     }
   }
   return null;
+}
+
+function hasVariants(service: Service): boolean {
+  return Array.isArray(service.variants) && service.variants.length > 0;
+}
+
+/** TeXML para preguntar el día (compartido entre "reservar" sin variantes
+ * y "reservar" después de elegir una variante — en ambos casos el
+ * siguiente paso es el mismo). */
+function askDayTeXML(base: string, branchId: string, s: IvrStrings, intro: string, dateOptions: DateOption[]): string {
+  const daySpeech = [intro, ...dateOptions.map((d) => s.dayOption(d.digit, d.label))].join(' ');
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Gather numDigits="1" action="${base}/ivrDay?branchId=${branchId}" method="POST" timeout="8">
+    <Say language="${s.sayLang}" voice="${s.sayVoice}">${daySpeech}</Say>
+  </Gather>
+  <Say language="${s.sayLang}" voice="${s.sayVoice}">${s.noChoice}</Say>
+</Response>`;
+}
+
+/** TeXML para preguntar qué variante del servicio quiere (ej. "Adulto —
+ * ₪60", "Niño — ₪40"), antes de seguir con el día. */
+function askVariantTeXML(base: string, branchId: string, s: IvrStrings, service: Service): string {
+  const variants = service.variants as ServiceVariant[];
+  const speech = [s.askVariantIntro(service.name), ...variants.map((v, i) => s.variantOption(i + 1, v.name, v.price))].join(' ');
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Gather numDigits="1" action="${base}/ivrVariant?branchId=${branchId}" method="POST" timeout="8">
+    <Say language="${s.sayLang}" voice="${s.sayVoice}">${speech}</Say>
+  </Gather>
+  <Say language="${s.sayLang}" voice="${s.sayVoice}">${s.noChoice}</Say>
+</Response>`;
 }
 
 /** TeXML para pedir la hora escrita con el teclado: sin numDigits fijo,

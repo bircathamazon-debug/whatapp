@@ -156,10 +156,15 @@ interface Dict {
     depositAmount: string;
     add: string;
     meta: (duration: number, price: number, deposit?: number) => string;
+    metaWithVariants: (duration: number) => string;
     deleteTitle: string;
     deleteConfirm: (name: string) => string;
     cancel: string;
     delete: string;
+    variantsTitle: string;
+    variantsHint: string;
+    variantNamePlaceholder: string;
+    variantPricePlaceholder: string;
   };
   staff: {
     needBranch: string;
@@ -428,10 +433,15 @@ const he: Dict = {
     depositAmount: 'סכום המקדמה (₪)',
     add: 'הוספת שירות',
     meta: (duration, price, deposit) => `${duration} דק' · ₪${price}${deposit ? ` · מקדמה ₪${deposit}` : ''}`,
+    metaWithVariants: (duration) => `${duration} דק' · המחיר תלוי בסוג שנבחר`,
     deleteTitle: 'מחיקת שירות',
     deleteConfirm: (name) => `למחוק את "${name}"?`,
     cancel: 'ביטול',
     delete: 'מחיקה',
+    variantsTitle: 'סוגים (וריאנטים)',
+    variantsHint: 'ללא שום סוג, השירות משתמש במחיר הקבוע למעלה. עם סוגים (למשל מבוגר/ילד), הלקוח בוחר אחד מהם.',
+    variantNamePlaceholder: 'מבוגר',
+    variantPricePlaceholder: '60',
   },
   staff: {
     needBranch: 'יש ליצור סניף קודם.',
@@ -700,10 +710,15 @@ const en: Dict = {
     depositAmount: 'Deposit amount (₪)',
     add: 'Add service',
     meta: (duration, price, deposit) => `${duration} min · ₪${price}${deposit ? ` · deposit ₪${deposit}` : ''}`,
+    metaWithVariants: (duration) => `${duration} min · price depends on the type chosen`,
     deleteTitle: 'Delete service',
     deleteConfirm: (name) => `Delete "${name}"?`,
     cancel: 'Cancel',
     delete: 'Delete',
+    variantsTitle: 'Types (variants)',
+    variantsHint: 'Without any types, the service uses the fixed price above. With types (e.g. adult/child), the client picks one.',
+    variantNamePlaceholder: 'Adult',
+    variantPricePlaceholder: '60',
   },
   staff: {
     needBranch: 'First create a branch.',
@@ -972,10 +987,15 @@ const es: Dict = {
     depositAmount: 'Monto del depósito (₪)',
     add: 'Agregar servicio',
     meta: (duration, price, deposit) => `${duration} min · ₪${price}${deposit ? ` · depósito ₪${deposit}` : ''}`,
+    metaWithVariants: (duration) => `${duration} min · el precio depende del tipo elegido`,
     deleteTitle: 'Eliminar servicio',
     deleteConfirm: (name) => `¿Eliminar "${name}"?`,
     cancel: 'Cancelar',
     delete: 'Eliminar',
+    variantsTitle: 'Tipos (variantes)',
+    variantsHint: 'Sin ningún tipo, el servicio usa el precio fijo de arriba. Con tipos (ej. adulto/niño), el cliente elige uno.',
+    variantNamePlaceholder: 'Adulto',
+    variantPricePlaceholder: '60',
   },
   staff: {
     needBranch: 'Creá primero una sucursal.',
