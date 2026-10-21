@@ -404,12 +404,15 @@ detalle técnico completo de arquitectura y setup.
     - `functions/src/ivr.ts` y `notify.ts`: todos los `<Say>` (menú
       principal, confirmaciones, cancelaciones, recordatorios
       telefónicos) ahora incluyen `voice="..."` además de `language`.
-    - ✅ Desplegado en `bot-para-peluqueria`. **Falta probarlo con una
-      llamada real** una vez que Twilio esté configurado de verdad (ver
-      punto siguiente) — hoy no se puede oír todavía porque no hay una
-      línea de teléfono real conectada.
-    - Si más adelante se quiere la opción (b) completa, queda anotada
-      igual para cuando se decida avanzar y se acuerde el costo.
+    - ✅ Desplegado en `bot-para-peluqueria`. **Superado por la migración
+      a Telnyx** (ver más abajo): esta voz neuronal era para Twilio, que
+      se terminó abandonando — en la reescritura para Telnyx, el hebreo
+      pasó a usar `Azure.he-IL-AvriNeural` (voz masculina, elegida
+      explícitamente por el usuario). Ya probado con llamadas reales,
+      ver el punto "RESUELTO Y EN PRODUCCIÓN" de Telnyx más abajo.
+    - Si más adelante se quiere la opción (b) completa (IA conversacional
+      libre, sin menú), queda anotada igual para cuando se decida
+      avanzar y se acuerde el costo.
   - 🐛 **Encontrado: el teléfono nunca tuvo una línea real conectada.**
     El usuario probó llamar para agendar y no atendió nadie. Causa: en
     `functions/.env`, `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` y
@@ -528,23 +531,44 @@ detalle técnico completo de arquitectura y setup.
         completarse (comprobante de domicilio + certificado de
         empresa) — el panel de Telnyx no mostró dónde subirlos.
       - ✅ **Se contactó al soporte en vivo de Telnyx** (chat, no mail)
-        pidiendo que pasen el pedido de "empresa" a "individuo". El
-        soporte confirmó el diagnóstico y lo mandó a la cola de
-        soporte humano — **esperando respuesta**.
-      - ⬜ **Falta**: respuesta de soporte de Telnyx. Una vez resuelto:
-        configurar el webhook del número (conectarlo a una "Call
-        Control Application" o "TeXML Application" apuntando a
-        `https://us-central1-bot-para-peluqueria.cloudfunctions.net/ivrIncomingCall`),
-        y reescribir `functions/src/ivr.ts` para usar la API de Telnyx
-        en vez de la de Twilio (Telnyx tiene "TeXML", compatible con el
-        formato TwiML que ya usa el código, así que el cambio debería
-        ser menor — cambiar el cliente/autenticación, no toda la
-        lógica de reservas). Guardar `TELNYX_PHONE_NUMBER` en
-        `functions/.env` cuando el número quede activo.
-      - **Alternativa de respaldo si Telnyx tampoco funciona**: Plivo
-        (quedó como segunda opción en la investigación), o directamente
-        pausar el IVR telefónico y seguir solo con WhatsApp (que ya
-        funciona de punta a punta) hasta más adelante.
+        pidiendo que pasen el pedido de "empresa" a "individuo" — lo
+        resolvieron y el número quedó activo.
+      - ✅ **RESUELTO Y EN PRODUCCIÓN — número activo: +972 76-567-1114
+        (0765671114).** `functions/.env` tiene cargados
+        `TELNYX_PHONE_NUMBER` y `TELNYX_CONNECTION_ID` (además de
+        `TELNYX_API_KEY`, ya probado desde antes). Se configuró el
+        webhook del número en el portal de Telnyx (TeXML Application
+        apuntando a `ivrIncomingCall?branchId=lvR7XmCtJEFm1FDxW7r7`) y
+        se reescribió por completo `functions/src/ivr.ts` para usar
+        TeXML de Telnyx (mismas etiquetas `<Gather>`/`<Say>`/`<Dial>`
+        que TwiML, Telnyx las traduce igual).
+        - El estado de la llamada en curso se guarda en
+          `ivrSessions/{CallSid}` (mismo patrón que `waConversations`
+          para WhatsApp), porque Telnyx no mantiene estado entre un
+          `<Gather>` y el siguiente.
+        - Flujo completo: **1** reservar (elegir el día por el nombre
+          del día de la semana — domingo=1, lunes=2... sábado=7, igual
+          que en hebreo los días ya se nombran así — después escribir
+          la hora con el teclado y confirmar antes de agendar), **2**
+          cancelar mi próxima cita, **3** escuchar los horarios libres
+          de un día sin reservar, **0** hablar directo con la
+          peluquería.
+        - 🐛 **Encontrado y corregido: la llamada tardaba mucho en
+          atender y entre cada paso.** Confirmado en los logs de Cloud
+          Functions: cada paso de una llamada real arrancaba de cero
+          (más de 25 segundos de demora acumulada en una sola prueba).
+          Se agregó `minInstances: 1` **solo** a `ivrIncomingCall`
+          (mantiene esa función siempre "despierta") — el usuario
+          eligió explícitamente esta opción más barata (~$2/mes) en
+          vez de aplicarlo a las 5 funciones del flujo completo
+          (~$10/mes); se puede sumar al resto después si todavía se
+          siente lento entre pasos.
+        - ✅ **Confirmado por el usuario con llamadas reales** — "ya
+          probé, atiende rápido ahora", y la reserva pregunta día y
+          hora paso a paso correctamente por teléfono.
+      - **Alternativa de respaldo que ya no hace falta**: Plivo había
+        quedado como segunda opción en la investigación si Telnyx no
+        funcionaba — no fue necesario usarla.
 - ✅ **Despliegue de esta ronda de cambios — COMPLETO.**
   1. ✅ Firebase: reglas de Firestore (`blockedTimes`) y las 26 funciones
      actualizadas, publicadas en `bot-para-peluqueria` sin errores.
