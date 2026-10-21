@@ -21,6 +21,19 @@ const DAYS_TO_OFFER = 6;
  * la instrucción de "escribí el número" quedan pegadas una a la otra, y
  * se entiende que hay que responder con un número en vez de perderse
  * entre varios globos de mensaje sueltos. */
+/** Link de "agregar a mi calendario" (Google Calendar) para el cliente que
+ * reservó — no es lo mismo que la sincronización con el Google Calendar del
+ * peluquero (esa usa un login de Google ya autorizado una vez); acá no
+ * tenemos permiso para tocar el calendario del cliente, así que le
+ * mandamos un link que abre su calendario con la cita ya cargada y solo
+ * falta que la guarde con un toque. */
+function buildCalendarLink(title, startsAtMs, endsAtMs, location) {
+  const fmt = (ms) => new Date(ms).toISOString().replace(/[-:]/g, '').slice(0, 15) + 'Z';
+  const params = new URLSearchParams({ action: 'TEMPLATE', text: title, dates: `${fmt(startsAtMs)}/${fmt(endsAtMs)}` });
+  if (location) params.set('location', location);
+  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+}
+
 function oneMessage(...lines) {
   return [lines.filter((l) => l !== null && l !== undefined).join('\n')];
 }
@@ -740,7 +753,9 @@ async function bookChosenSlot(phone, branch, state, slot) {
     });
     await resetToMainMenu(phone);
     const dateLabel = formatDateWithWeekday(state.data.dateStr, slot.startsAt, branch);
-    return [t(branch, 'appointmentConfirmed', dateLabel, formatTime(slot.startsAt, branch))];
+    const title = state.data.variantName ? `${service.name} (${state.data.variantName})` : service.name;
+    const calendarLink = buildCalendarLink(title, appointment.startsAt, appointment.endsAt, branch.address);
+    return [t(branch, 'appointmentConfirmed', dateLabel, formatTime(slot.startsAt, branch)), t(branch, 'addToCalendar', calendarLink)];
   } catch (err) {
     if (err.code === 'slot_taken') {
       return handleOccupiedSlot(phone, branch, state, slot);

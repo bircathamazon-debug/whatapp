@@ -54,6 +54,8 @@ export const adminSetUserAccess = onRequest(async (req, res) => {
   const data: Record<string, unknown> = {};
   if (isSuperAdmin !== undefined) data.isSuperAdmin = isSuperAdmin;
   if (branchIds !== undefined) data.branchIds = branchIds;
-  await db.collection('users').doc(uid).set(data, { merge: true });
-  res.json({ ok: true });
+  const ref = db.collection('users').doc(uid);
+  await ref.set(data, { merge: true });
+  const saved = await ref.get();
+  res.json({ ok: true, uid, data: saved.data() });
 });
