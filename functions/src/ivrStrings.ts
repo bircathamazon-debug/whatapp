@@ -26,6 +26,7 @@ export interface IvrStrings {
   outsideWorkingHours: (hoursLabel: string) => string;
   confirmBooking: (dayLabel: string, timeStr: string) => string;
   noSlotsThatDay: (dayLabel: string) => string;
+  closedThatDay: (dayLabel: string, reason?: string) => string;
   scheduleResult: (dayLabel: string, times: string[]) => string;
   slotTakenPhone: string;
   askVariantIntro: (serviceName: string) => string;
@@ -59,6 +60,7 @@ const he: IvrStrings = {
   outsideWorkingHours: (hoursLabel) => `אין קבלה בשעה הזו — שעות הפעילות הן ${hoursLabel}. נסו שעה אחרת.`,
   confirmBooking: (dayLabel, timeStr) => `${dayLabel} בשעה ${timeStr}. לאישור הקישו 1. לניסיון שעה אחרת הקישו 2.`,
   noSlotsThatDay: (dayLabel) => `אין תורים פנויים ב${dayLabel}. נסו יום אחר.`,
+  closedThatDay: (dayLabel, reason) => `המספרה סגורה ב${dayLabel}${reason ? ` (${reason})` : ''}.`,
   scheduleResult: (dayLabel, times) =>
     `השעות הפנויות ב${dayLabel} הן: ${times.join(', ')}. כדי לקבוע תור, התקשרו שוב ובחרו באפשרות הראשונה בתפריט.`,
   slotTakenPhone: 'מצטערים, השעה הזו נתפסה הרגע. נסו שוב מאוחר יותר.',
@@ -93,6 +95,7 @@ const en: IvrStrings = {
   outsideWorkingHours: (hoursLabel) => `We're closed at that time — working hours are ${hoursLabel}. Please try another time.`,
   confirmBooking: (dayLabel, timeStr) => `${dayLabel} at ${timeStr}. Press 1 to confirm. Press 2 to try a different time.`,
   noSlotsThatDay: (dayLabel) => `There are no available appointments on ${dayLabel}. Please try another day.`,
+  closedThatDay: (dayLabel, reason) => `The salon is closed on ${dayLabel}${reason ? ` (${reason})` : ''}.`,
   scheduleResult: (dayLabel, times) =>
     `The available times on ${dayLabel} are: ${times.join(', ')}. To book, call again and choose the first option in the menu.`,
   slotTakenPhone: 'Sorry, that time slot was just taken. Please try again later.',
@@ -127,6 +130,7 @@ const es: IvrStrings = {
   outsideWorkingHours: (hoursLabel) => `Está cerrado a esa hora — el horario de atención es de ${hoursLabel}. Probá con otra hora.`,
   confirmBooking: (dayLabel, timeStr) => `${dayLabel} a las ${timeStr}. Marque 1 para confirmar. Marque 2 para probar otra hora.`,
   noSlotsThatDay: (dayLabel) => `No hay turnos disponibles el ${dayLabel}. Intente otro día.`,
+  closedThatDay: (dayLabel, reason) => `La peluquería está cerrada el ${dayLabel}${reason ? ` (${reason})` : ''}.`,
   scheduleResult: (dayLabel, times) =>
     `Los horarios disponibles el ${dayLabel} son: ${times.join(', ')}. Para reservar, llame de nuevo y elija la primera opción del menú.`,
   slotTakenPhone: 'Lo sentimos, ese horario se acaba de ocupar. Intente de nuevo más tarde.',

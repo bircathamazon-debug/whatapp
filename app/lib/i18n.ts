@@ -57,6 +57,7 @@ interface Dict {
     searchPlaceholder: string;
     empty: string;
     requiresDeposit: string;
+    call: string;
     haircuts: (count: number, mod: number, threshold: number) => string;
     noShows: (count: number) => string;
     notesLabel: string;
@@ -212,6 +213,8 @@ interface Dict {
     blockHoursHint: string;
     allStaff: string;
     dateLabel: string;
+    rangeEndDateLabel: string;
+    rangeEndDateHint: string;
     blockAllDay: string;
     fullDay: string;
     to: string;
@@ -334,6 +337,7 @@ const he: Dict = {
     searchPlaceholder: 'חיפוש לפי שם או טלפון',
     empty: 'אין עדיין לקוחות.',
     requiresDeposit: 'דורש מקדמה',
+    call: 'התקשרות',
     haircuts: (count, mod, threshold) => `✂️ ${count} תספורות (${mod}/${threshold} לפרס הבא)`,
     noShows: (count) => `⚠️ ${count} אי-הגעות`,
     notesLabel: 'הערות',
@@ -489,6 +493,8 @@ const he: Dict = {
     blockHoursHint: 'לחגים, תורים אישיים או חופשות — השעות החסומות לא יוצעו ללקוחות בוואטסאפ או בטלפון.',
     allStaff: 'כל הצוות',
     dateLabel: 'תאריך (YYYY-MM-DD)',
+    rangeEndDateLabel: 'עד תאריך (אופציונלי)',
+    rangeEndDateHint: 'למלא רק אם רוצים לחסום כמה ימים ברצף (לדוגמה חופשה) — יחסום את כל הימים מהתאריך הראשון עד זה, יום שלם בכל אחד.',
     blockAllDay: 'לחסום את היום כולו',
     fullDay: 'יום שלם',
     to: 'עד',
@@ -611,6 +617,7 @@ const en: Dict = {
     searchPlaceholder: 'Search by name or phone',
     empty: 'No clients yet.',
     requiresDeposit: 'Requires deposit',
+    call: 'Call',
     haircuts: (count, mod, threshold) => `✂️ ${count} haircuts (${mod}/${threshold} to next reward)`,
     noShows: (count) => `⚠️ ${count} no-shows`,
     notesLabel: 'Notes',
@@ -766,6 +773,8 @@ const en: Dict = {
     blockHoursHint: "For holidays, personal appointments or time off — blocked hours won't be offered to clients on WhatsApp or by phone.",
     allStaff: 'Whole team',
     dateLabel: 'Date (YYYY-MM-DD)',
+    rangeEndDateLabel: 'Until date (optional)',
+    rangeEndDateHint: 'Fill in only to block several days in a row (e.g. vacation) — blocks every day from the first date through this one, full day each.',
     blockAllDay: 'Block the whole day',
     fullDay: 'Whole day',
     to: 'to',
@@ -888,6 +897,7 @@ const es: Dict = {
     searchPlaceholder: 'Buscar por nombre o teléfono',
     empty: 'Sin clientes todavía.',
     requiresDeposit: 'Requiere depósito',
+    call: 'Llamar',
     haircuts: (count, mod, threshold) => `✂️ ${count} cortes (${mod}/${threshold} para el próximo premio)`,
     noShows: (count) => `⚠️ ${count} inasistencias`,
     notesLabel: 'Observaciones',
@@ -1043,6 +1053,8 @@ const es: Dict = {
     blockHoursHint: 'Para feriados, turnos personales o vacaciones — las horas bloqueadas no se ofrecerán a los clientes por WhatsApp o teléfono.',
     allStaff: 'Todo el equipo',
     dateLabel: 'Fecha (AAAA-MM-DD)',
+    rangeEndDateLabel: 'Hasta la fecha (opcional)',
+    rangeEndDateHint: 'Completá solo si querés bloquear varios días seguidos (ej. vacaciones) — bloquea todos los días desde la primera fecha hasta esta, el día completo en cada uno.',
     blockAllDay: 'Bloquear el día completo',
     fullDay: 'Día completo',
     to: 'a',

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, ScrollView, Pressable, StyleSheet, RefreshControl, Alert } from 'react-native';
+import { View, Text, ScrollView, Pressable, StyleSheet, RefreshControl, Alert, Linking } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useBranch } from '../../lib/branchContext';
 import { useTheme, type ThemeColors, RADIUS, cardShadow, PRESSED_SCALE } from '../../lib/theme';
@@ -271,7 +271,15 @@ export default function AgendaScreen() {
                         <Text style={styles.chipName}>{item.clientName}</Text>
                         <Text style={styles.chipTime}>{new Date(item.startsAt).toLocaleTimeString(dateLocale, { hour: '2-digit', minute: '2-digit', hour12: false })}</Text>
                       </View>
-                      <Text style={styles.chipMeta}>{serviceName(item.serviceId)} · {staffName(item.staffId)} · {statusLabel(item.status)}</Text>
+                      <View style={styles.chipRow1}>
+                        <Text style={styles.chipMeta}>{serviceName(item.serviceId)} · {staffName(item.staffId)} · {statusLabel(item.status)}</Text>
+                        <Pressable
+                          style={({ pressed }) => [styles.chipCallBtn, pressed && PRESSED_SCALE]}
+                          onPress={() => Linking.openURL(`tel:${item.clientPhone}`)}
+                        >
+                          <Text style={styles.chipCallBtnText}>📞 {item.clientPhone}</Text>
+                        </Pressable>
+                      </View>
                       {(item.status === 'confirmed' || item.status === 'pending_deposit') && (
                         <View style={styles.chipActions}>
                           {item.status === 'pending_deposit' && (
@@ -491,7 +499,9 @@ function makeStyles(colors: ThemeColors, mode: 'light' | 'dark') {
     chipRow1: { flexDirection: 'row', justifyContent: 'space-between' },
     chipName: { fontSize: 13.5, fontWeight: '700', color: colors.text },
     chipTime: { fontSize: 13.5, fontWeight: '800', color: colors.text, fontVariant: ['tabular-nums'] },
-    chipMeta: { fontSize: 11.5, color: colors.textMuted, marginTop: 3 },
+    chipMeta: { fontSize: 11.5, color: colors.textMuted, marginTop: 3, flexShrink: 1 },
+    chipCallBtn: { backgroundColor: colors.surfaceMuted, borderRadius: RADIUS.pill, paddingVertical: 2, paddingHorizontal: 8, marginTop: 2 },
+    chipCallBtnText: { fontSize: 11, fontWeight: '700', color: colors.accent },
     chipActions: { flexDirection: 'row', gap: 8, marginTop: 10 },
     confirmBtn: { backgroundColor: colors.successSoft, borderRadius: RADIUS.pill, paddingHorizontal: 12, paddingVertical: 7 },
     confirmBtnText: { color: colors.success, fontWeight: '700', fontSize: 11 },

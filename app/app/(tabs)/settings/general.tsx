@@ -31,6 +31,7 @@ export default function SettingsScreen() {
   const [blockedTimes, setBlockedTimes] = useState<BlockedTime[]>([]);
 
   const [blockDate, setBlockDate] = useState(todayStr());
+  const [blockEndDate, setBlockEndDate] = useState('');
   const [blockStaffId, setBlockStaffId] = useState<string | null>(null);
   const [blockAllDay, setBlockAllDay] = useState(false);
   const [blockStart, setBlockStart] = useState('13:00');
@@ -92,19 +93,53 @@ export default function SettingsScreen() {
       Alert.alert(t.settings.invalidDateTitle, t.settings.invalidDateMessage);
       return;
     }
-    if (!blockAllDay && (!/^\d{2}:\d{2}$/.test(blockStart) || !/^\d{2}:\d{2}$/.test(blockEnd))) {
+    const hasRange = blockEndDate.trim().length > 0;
+    if (hasRange && !/^\d{4}-\d{2}-\d{2}$/.test(blockEndDate)) {
+      Alert.alert(t.settings.invalidDateTitle, t.settings.invalidDateMessage);
+      return;
+    }
+    if (!hasRange && !blockAllDay && (!/^\d{2}:\d{2}$/.test(blockStart) || !/^\d{2}:\d{2}$/.test(blockEnd))) {
       Alert.alert(t.settings.invalidTimeTitle, t.settings.invalidTimeMessage);
       return;
     }
-    await addBlockedTime({
-      branchId,
-      staffId: blockStaffId,
-      date: blockDate,
-      allDay: blockAllDay,
-      startTime: blockAllDay ? null : blockStart,
-      endTime: blockAllDay ? null : blockEnd,
-      reason: blockReason.trim() || undefined,
-    });
+
+    if (hasRange) {
+      // Un rango de varios días (ej. vacaciones) siempre bloquea el día
+      // completo — no tendría sentido pedir un horario parcial igual para
+      // cada uno de varios días.
+      const dates: string[] = [];
+      for (let d = new Date(`${blockDate}T00:00:00Z`); d <= new Date(`${blockEndDate}T00:00:00Z`); d.setUTCDate(d.getUTCDate() + 1)) {
+        dates.push(d.toISOString().slice(0, 10));
+      }
+      if (dates.length === 0) {
+        Alert.alert(t.settings.invalidDateTitle, t.settings.invalidDateMessage);
+        return;
+      }
+      await Promise.all(
+        dates.map((date) =>
+          addBlockedTime({
+            branchId,
+            staffId: blockStaffId,
+            date,
+            allDay: true,
+            startTime: null,
+            endTime: null,
+            reason: blockReason.trim() || undefined,
+          })
+        )
+      );
+    } else {
+      await addBlockedTime({
+        branchId,
+        staffId: blockStaffId,
+        date: blockDate,
+        allDay: blockAllDay,
+        startTime: blockAllDay ? null : blockStart,
+        endTime: blockAllDay ? null : blockEnd,
+        reason: blockReason.trim() || undefined,
+      });
+    }
+    setBlockEndDate('');
     setBlockReason('');
     await loadExtras();
   };
@@ -182,17 +217,25 @@ export default function SettingsScreen() {
         <Text style={styles.fieldLabel}>{t.settings.dateLabel}</Text>
         <TextInput style={styles.input} value={blockDate} onChangeText={setBlockDate} placeholder="2026-09-20" placeholderTextColor={colors.textMuted} />
 
-        <Pressable style={({ pressed }) => [styles.allDayRow, pressed && PRESSED_SCALE]} onPress={() => setBlockAllDay((v) => !v)}>
-          <View style={[styles.checkbox, blockAllDay && styles.checkboxActive]}>{blockAllDay && <Text style={styles.checkboxMark}>✓</Text>}</View>
-          <Text style={styles.allDayLabel}>{t.settings.blockAllDay}</Text>
-        </Pressable>
+        <Text style={styles.fieldLabel}>{t.settings.rangeEndDateLabel}</Text>
+        <Text style={styles.hint}>{t.settings.rangeEndDateHint}</Text>
+        <TextInput style={styles.input} value={blockEndDate} onChangeText={setBlockEndDate} placeholder="2026-09-25" placeholderTextColor={colors.textMuted} />
 
-        {!blockAllDay && (
-          <View style={styles.timeRow}>
-            <TextInput style={[styles.input, styles.timeInput]} value={blockStart} onChangeText={setBlockStart} placeholder="13:00" placeholderTextColor={colors.textMuted} />
-            <Text style={styles.timeSep}>{t.settings.to}</Text>
-            <TextInput style={[styles.input, styles.timeInput]} value={blockEnd} onChangeText={setBlockEnd} placeholder="14:00" placeholderTextColor={colors.textMuted} />
-          </View>
+        {!blockEndDate.trim() && (
+          <>
+            <Pressable style={({ pressed }) => [styles.allDayRow, pressed && PRESSED_SCALE]} onPress={() => setBlockAllDay((v) => !v)}>
+              <View style={[styles.checkbox, blockAllDay && styles.checkboxActive]}>{blockAllDay && <Text style={styles.checkboxMark}>✓</Text>}</View>
+              <Text style={styles.allDayLabel}>{t.settings.blockAllDay}</Text>
+            </Pressable>
+
+            {!blockAllDay && (
+              <View style={styles.timeRow}>
+                <TextInput style={[styles.input, styles.timeInput]} value={blockStart} onChangeText={setBlockStart} placeholder="13:00" placeholderTextColor={colors.textMuted} />
+                <Text style={styles.timeSep}>{t.settings.to}</Text>
+                <TextInput style={[styles.input, styles.timeInput]} value={blockEnd} onChangeText={setBlockEnd} placeholder="14:00" placeholderTextColor={colors.textMuted} />
+              </View>
+            )}
+          </>
         )}
 
         <TextInput style={styles.input} value={blockReason} onChangeText={setBlockReason} placeholder={t.settings.reasonPlaceholder} placeholderTextColor={colors.textMuted} />

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, RefreshControl, TextInput, Pressable } from 'react-native';
+import { View, Text, FlatList, StyleSheet, RefreshControl, TextInput, Pressable, Linking } from 'react-native';
 import { useBranch } from '../../../lib/branchContext';
 import { getClientsByBranch, updateClientNotes, updateClientPreferredChannel } from '../../../lib/clients';
 import { getAppointmentsByClientPhone } from '../../../lib/appointments';
@@ -173,7 +173,15 @@ function ClientCard({
           <Text style={styles.name}>{client.name}</Text>
           {client.blockedForDeposit && <Text style={styles.warnBadge}>{t.clients.requiresDeposit}</Text>}
         </View>
-        <Text style={styles.phone}>{client.phone}</Text>
+        <View style={styles.phoneRow}>
+          <Text style={styles.phone}>{client.phone}</Text>
+          <Pressable
+            style={({ pressed }) => [styles.callBtn, pressed && PRESSED_SCALE]}
+            onPress={() => Linking.openURL(`tel:${client.phone}`)}
+          >
+            <Text style={styles.callBtnText}>📞 {t.clients.call}</Text>
+          </Pressable>
+        </View>
         <View style={styles.statsRow}>
           <Text style={styles.stat}>{t.clients.haircuts(client.completedCount, client.completedCount % LOYALTY_THRESHOLD, LOYALTY_THRESHOLD)}</Text>
           {client.noShowCount > 0 && <Text style={[styles.stat, styles.noShow]}>{t.clients.noShows(client.noShowCount)}</Text>}
@@ -246,6 +254,9 @@ function makeStyles(colors: ThemeColors, mode: 'light' | 'dark') {
     name: { fontSize: 15, fontWeight: '700', color: colors.text },
     warnBadge: { fontSize: 11, color: colors.statusPending, fontWeight: '700' },
     phone: { fontSize: 13, color: colors.textMuted, marginTop: 2 },
+    phoneRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 2 },
+    callBtn: { backgroundColor: colors.surfaceMuted, borderRadius: RADIUS.pill, paddingVertical: 4, paddingHorizontal: 10 },
+    callBtnText: { fontSize: 12, fontWeight: '700', color: colors.accent },
     statsRow: { marginTop: 8, gap: 2 },
     stat: { fontSize: 12, color: colors.textMuted },
     noShow: { color: colors.danger },

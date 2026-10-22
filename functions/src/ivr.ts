@@ -306,8 +306,24 @@ export const ivrDay = onRequest({ minInstances: 1, memory: '256MiB' }, async (re
   const staffSnap = await db.collection('staff').where('branchId', '==', branch.id).where('active', '==', true).get();
   const staffList = staffSnap.docs.map((d) => d.data() as Staff);
 
+  // Si el peluquero bloqueó el día entero para todo el equipo (ej.
+  // vacaciones), avisar eso puntualmente y ofrecer elegir otro día en vez
+  // de colgar con el genérico "no hay horarios" — que suena a que el día
+  // simplemente está muy ocupado, no a que el local está cerrado.
+  const blockedSnap = await db.collection('blockedTimes').where('branchId', '==', branch.id).where('date', '==', chosen.dateStr).get();
+  const closedAllDay = blockedSnap.docs.map((d) => d.data() as BlockedTime).find((b) => b.staffId === null && b.allDay);
+  const base = process.env.FUNCTIONS_BASE_URL ?? '';
+  if (closedAllDay && session.data.intent === 'book') {
+    res.send(askDayTeXML(base, branchId, s, s.closedThatDay(chosen.label, closedAllDay.reason), session.data.dateOptions));
+    return;
+  }
+
   const allSlots = await availableSlotsForDay(branch, staffList, service, chosen.dateStr);
   if (allSlots.length === 0) {
+    if (closedAllDay) {
+      res.send(sayAndHangup(s.sayLang, s.sayVoice, s.closedThatDay(chosen.label, closedAllDay.reason)));
+      return;
+    }
     res.send(sayAndHangup(s.sayLang, s.sayVoice, s.noSlotsThatDay(chosen.label)));
     return;
   }
@@ -319,7 +335,6 @@ export const ivrDay = onRequest({ minInstances: 1, memory: '256MiB' }, async (re
   }
 
   await saveIvrSession(callSid, { branchId, data: { ...session.data, dateStr: chosen.dateStr, dateLabel: chosen.label } });
-  const base = process.env.FUNCTIONS_BASE_URL ?? '';
   res.send(askTimeGather(base, branchId, s, chosen.label));
 });
 

@@ -524,6 +524,25 @@ async function handleBookDay(phone, text, branch, state) {
  * pedido en lenguaje natural ya resuelto (continueBookingFastTrack) —
  * `greetingLines` opcionales van antes del mensaje (ej. "¡un placer, Dana!"). */
 async function enterDayTimeSelection(phone, branch, state, chosen, greetingLines = []) {
+  // Si el peluquero bloqueó el día entero para todo el equipo (ej.
+  // vacaciones), avisar eso específicamente en vez de "no hay horarios,
+  // ¿anotarte en lista de espera?" — ofrecer lista de espera para un día
+  // en el que el local directamente no abre es confuso, suena a que
+  // podría liberarse un hueco cuando en realidad está cerrado.
+  const blockedTimes = await blockedTimesForDay(branch.id, chosen.dateStr);
+  const closedAllDay = blockedTimes.find((b) => b.staffId === null && b.allDay);
+  if (closedAllDay) {
+    await saveConversation(phone, { step: 'BOOK_DAY', data: state.data });
+    const lines = (state.data.dateOptions || []).map((d, i) => `${menuNumber(i + 1)} ${d.label}`);
+    return oneMessage(
+      ...greetingLines,
+      ...(greetingLines.length ? [''] : []),
+      t(branch, 'closedThatDay', chosen.label, closedAllDay.reason),
+      t(branch, 'chooseDay'),
+      ...lines
+    );
+  }
+
   const service = await docById('services', state.data.serviceId);
   const staffList = state.data.staffId === 'any' ? await getActiveStaff(branch.id) : [await docById('staff', state.data.staffId)];
   const allSlots = await availableSlotsForDay(branch, staffList, service, chosen.dateStr);
