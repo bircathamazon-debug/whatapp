@@ -251,7 +251,8 @@ async function handleMainMenu(phone, text, branch, state) {
     return [...lines, '', t(branch, 'mainMenu')];
   }
   if (text === '5') {
-    const dateOptions = buildDateOptions(branch);
+    const staffForDays = await getActiveStaff(branch.id);
+    const dateOptions = buildDateOptions(branch, staffForDays);
     await saveConversation(phone, { step: 'AVAIL_DAY', data: { ...state.data, dateOptions } });
     const lines = dateOptions.map((d, i) => `${menuNumber(i + 1)} ${d.label}`);
     return oneMessage(t(branch, 'chooseDayAvailability'), ...lines, t(branch, 'chooseNumberHint'));
@@ -336,7 +337,7 @@ async function continueBookingFastTrack(phone, branch, state, clientName, greeti
   const staffList = await getActiveStaff(branch.id);
   const staffId = staffList.length === 1 ? staffList[0].id : 'any';
 
-  const dateOptions = buildDateOptions(branch);
+  const dateOptions = buildDateOptions(branch, staffList);
   let chosen = null;
   if (nlu.relativeDay === 'today') chosen = dateOptions[0];
   else if (nlu.relativeDay === 'tomorrow') chosen = dateOptions[1];
@@ -489,7 +490,7 @@ async function handleBookStaff(phone, text, branch, state) {
     staffId = chosen.id;
   }
 
-  const dateOptions = buildDateOptions(branch);
+  const dateOptions = buildDateOptions(branch, allStaff);
   await saveConversation(phone, { step: 'BOOK_DAY', data: { ...state.data, staffId, dateOptions } });
   const lines = dateOptions.map((d, i) => `${menuNumber(i + 1)} ${d.label}`);
   return oneMessage(t(branch, 'chooseDay'), ...lines, t(branch, 'chooseNumberHint'));
@@ -867,14 +868,21 @@ async function upcomingAppointments(phone, branch) {
   });
 }
 
-function buildDateOptions(branch) {
+/** No ofrece un día si ningún peluquero activo trabaja ese día de la
+ * semana (ej. sábado/Shabat, sin horario configurado) — antes se ofrecían
+ * siempre los próximos DAYS_TO_OFFER días aunque el local estuviera
+ * cerrado, y el cliente recién se enteraba de que no había nada después
+ * de elegirlo. Puede devolver menos de DAYS_TO_OFFER días. */
+function buildDateOptions(branch, staffList) {
   const options = [];
   const now = Date.now();
   const weekdays = weekdayNames(branch);
   for (let i = 0; i < DAYS_TO_OFFER; i++) {
     const time = now + i * 86400000;
     const dateStr = new Intl.DateTimeFormat('en-CA', { timeZone: branch.timezone }).format(time);
-    const weekday = weekdays[new Date(`${dateStr}T00:00:00Z`).getUTCDay()];
+    const dow = new Date(`${dateStr}T00:00:00Z`).getUTCDay();
+    if (!staffList.some((st) => st.hours && st.hours[dow])) continue;
+    const weekday = weekdays[dow];
     const label = i === 0 ? t(branch, 'today', weekday) : i === 1 ? t(branch, 'tomorrow', weekday) : t(branch, 'otherDay', weekday, dateStr.slice(8, 10), dateStr.slice(5, 7));
     options.push({ dateStr, label });
   }

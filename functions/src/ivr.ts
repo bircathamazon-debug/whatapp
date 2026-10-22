@@ -199,7 +199,9 @@ export const ivrMenu = onRequest({ minInstances: 1, memory: '256MiB' }, async (r
   }
 
   if (digit === '1' || digit === '3') {
-    const dateOptions = buildDateOptions(branch);
+    const staffForDaysSnap = await db.collection('staff').where('branchId', '==', branch.id).where('active', '==', true).get();
+    const staffForDays = staffForDaysSnap.docs.map((d) => d.data() as Staff);
+    const dateOptions = buildDateOptions(branch, staffForDays);
     const intent = digit === '1' ? 'book' : 'schedule';
     const base = process.env.FUNCTIONS_BASE_URL ?? '';
 
@@ -520,13 +522,19 @@ async function availableSlotsForDay(branch: Branch, staffList: Staff[], service:
  * ... sábado=7) — el mismo número de "yom rishón"/"yom shení" etc. que ya
  * usa el hebreo, así un cliente habitual aprende a apretar directo el día
  * que quiere sin tener que escuchar todo el menú. */
-function buildDateOptions(branch: Branch): DateOption[] {
+/** No ofrece un día si ningún peluquero activo trabaja ese día de la
+ * semana (ej. sábado/Shabat, con `hours[6]` sin configurar) — antes se
+ * ofrecían los 7 días siempre, aunque el local estuviera cerrado, y el
+ * cliente solo se enteraba de que no había nada después de elegirlo. */
+function buildDateOptions(branch: Branch, staffList: Staff[]): DateOption[] {
   const s = getIvrStrings(branch.language);
   const options: DateOption[] = [];
   const now = Date.now();
   for (let i = 0; i < DAYS_TO_OFFER; i++) {
     const dateStr = new Intl.DateTimeFormat('en-CA', { timeZone: branch.timezone }).format(now + i * 86400000);
     const weekday = new Date(`${dateStr}T00:00:00Z`).getUTCDay(); // 0=domingo ... 6=sábado
+    const anyoneWorks = staffList.some((st) => st.hours?.[weekday]);
+    if (!anyoneWorks) continue;
     options.push({ dateStr, digit: weekday + 1, label: s.weekdays[weekday] });
   }
   return options;
