@@ -127,5 +127,9 @@ service cloud.firestore {
     match /ivrSessions/{id} {
       allow read, write: if false;
     }
+
+    match /systemHealth/{id} {
+      allow read, write: if false;
+    }
   }
 }

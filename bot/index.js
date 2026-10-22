@@ -15,8 +15,35 @@ import 'dotenv/config';
 import { handleIncomingMessage } from './conversation.js';
 import { transcribeVoiceMessage } from './transcribe.js';
 import { startNotificationsWatcher } from './notificationsWatcher.js';
+import { db } from './firebaseClient.js';
 
 const BRANCH_ID = process.env.BRANCH_ID;
+
+// "Latido" para que functions/src/crons.ts (checkSystemHealth) pueda avisar
+// por SMS si el bot se desconecta por mucho tiempo — ver systemHealth/{BRANCH_ID}.
+// Se escribe apenas conecta y cada HEARTBEAT_INTERVAL_MS mientras siga
+// conectado; si el proceso se cae o pierde la conexión, deja de escribirse
+// y el cron del otro lado lo nota.
+const HEARTBEAT_INTERVAL_MS = 3 * 60000;
+let heartbeatTimer = null;
+
+function writeHeartbeat() {
+  db.collection('systemHealth')
+    .doc(BRANCH_ID)
+    .set({ branchId: BRANCH_ID, lastHeartbeat: Date.now() }, { merge: true })
+    .catch((err) => console.error('[bot] error escribiendo heartbeat', err));
+}
+
+function startHeartbeat() {
+  writeHeartbeat();
+  if (heartbeatTimer) clearInterval(heartbeatTimer);
+  heartbeatTimer = setInterval(writeHeartbeat, HEARTBEAT_INTERVAL_MS);
+}
+
+function stopHeartbeat() {
+  if (heartbeatTimer) clearInterval(heartbeatTimer);
+  heartbeatTimer = null;
+}
 
 // Si un cliente escribe su mensaje en varias burbujas seguidas (ej. "Hola" /
 // "quiero reservar" / "un corte para mañana"), esperamos este tiempo desde
@@ -151,12 +178,14 @@ async function connectToWhatsApp() {
     }
 
     if (connection === 'close') {
+      stopHeartbeat();
       const shouldReconnect = new Boom(lastDisconnect?.error)?.output?.statusCode !== DisconnectReason.loggedOut;
       console.log('[bot] Conexión cerrada. Reconectando:', shouldReconnect);
       if (shouldReconnect) connectToWhatsApp();
     } else if (connection === 'open') {
       console.log(`[bot] Conectado a WhatsApp para la sucursal ${BRANCH_ID}`);
       startNotificationsWatcher(sock, BRANCH_ID);
+      startHeartbeat();
     }
   });
 

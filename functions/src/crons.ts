@@ -214,6 +214,46 @@ export const chargeTranzilaSubscriptions = onSchedule({ schedule: '0 8 * * *', t
   }
 });
 
+const BOT_DOWN_THRESHOLD_MS = 15 * 60000; // sin latido del bot por más de esto = se considera caído
+const HEALTH_ALERT_COOLDOWN_MS = 60 * 60000; // no repetir la alerta más de una vez por hora
+
+/**
+ * Cada 10 minutos: si el bot de WhatsApp de alguna sucursal dejó de avisar
+ * que sigue vivo (`systemHealth/{branchId}.lastHeartbeat`, que el propio
+ * bot actualiza cada pocos minutos), avisa por SMS al teléfono de la
+ * sucursal — por SMS y no por WhatsApp a propósito, porque si el bot está
+ * caído, un aviso por WhatsApp nunca saldría (lo manda el mismo bot caído).
+ */
+export const checkSystemHealth = onSchedule({ schedule: 'every 10 minutes', timeZone: 'Asia/Jerusalem' }, async () => {
+  const now = Date.now();
+  const healthSnap = await db.collection('systemHealth').get();
+
+  for (const doc of healthSnap.docs) {
+    const health = doc.data() as { branchId: string; lastHeartbeat: number; lastAlertSentAt?: number };
+    if (now - health.lastHeartbeat <= BOT_DOWN_THRESHOLD_MS) continue;
+    if (health.lastAlertSentAt && now - health.lastAlertSentAt < HEALTH_ALERT_COOLDOWN_MS) continue;
+
+    const branchSnap = await db.collection('branches').doc(health.branchId).get();
+    if (!branchSnap.exists) continue;
+    const branch = branchSnap.data() as Branch;
+    if (!branch.phone) continue;
+
+    const minutesDown = Math.round((now - health.lastHeartbeat) / 60000);
+    try {
+      await sendNotification({
+        channel: 'sms',
+        to: branch.phone,
+        branch,
+        template: 'systemDown',
+        text: `⚠️ El bot de WhatsApp de ${branch.name} está desconectado hace ${minutesDown} minutos. Revisalo apenas puedas.`,
+      });
+    } catch (err) {
+      console.error('[crons] error enviando alerta de sistema caído', err);
+    }
+    await doc.ref.update({ lastAlertSentAt: now });
+  }
+});
+
 function nextOccurrence(fromMs: number, dayOfWeek: number, time: string, timezone: string): number {
   let cursor = fromMs;
   for (let i = 0; i < 8; i++) {

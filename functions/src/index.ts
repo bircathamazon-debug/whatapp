@@ -7,6 +7,7 @@ export {
   generateRecurringAppointments,
   sendComebackReminders,
   chargeTranzilaSubscriptions,
+  checkSystemHealth,
 } from './crons';
 
 export { onAppointmentCancelledOfferWaitlist } from './waitlist';

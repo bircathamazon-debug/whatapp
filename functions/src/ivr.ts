@@ -1,10 +1,42 @@
 import { onRequest } from 'firebase-functions/v2/https';
+import type { Request } from 'firebase-functions/v2/https';
+import nacl from 'tweetnacl';
 import { db } from './admin';
 import type { Appointment, Branch, BlockedTime, Service, ServiceVariant, Staff } from './types';
 import { createAppointment, confirmAppointment, cancelAppointment, formatDate, formatTime } from './booking';
 import { getAvailableSlots, getStaffServiceDuration, toEpoch } from './availability';
 import { getIvrStrings, IvrStrings } from './ivrStrings';
 import { getTelnyxConfig } from './telnyx';
+
+/**
+ * Verifica que el pedido venga de verdad de Telnyx (y no de cualquiera que
+ * descubra estas URLs y simule una llamada por HTTP directo) — Telnyx firma
+ * cada webhook con Ed25519 en los headers `telnyx-signature-ed25519` /
+ * `telnyx-timestamp`. La clave pública (TELNYX_PUBLIC_KEY, distinta de la
+ * API key — está en Mission Control > Account Settings > Public Key) hay
+ * que cargarla a mano en functions/.env. Sin ella configurada todavía, se
+ * deja pasar sin verificar — no rompe la línea real que ya funciona, pero
+ * tampoco protege: hallazgo de la auditoría de seguridad, pendiente de que
+ * se cargue esa clave.
+ */
+function verifyTelnyxWebhook(req: Request): boolean {
+  const publicKeyB64 = process.env.TELNYX_PUBLIC_KEY;
+  if (!publicKeyB64) return true;
+
+  const signature = req.get('telnyx-signature-ed25519');
+  const timestamp = req.get('telnyx-timestamp');
+  if (!signature || !timestamp) return false;
+
+  const ageSeconds = Math.abs(Date.now() / 1000 - Number(timestamp));
+  if (!Number.isFinite(ageSeconds) || ageSeconds > 300) return false;
+
+  try {
+    const message = Buffer.from(`${timestamp}|${(req as any).rawBody.toString('utf8')}`);
+    return nacl.sign.detached.verify(message, Buffer.from(signature, 'base64'), Buffer.from(publicKeyB64, 'base64'));
+  } catch {
+    return false;
+  }
+}
 
 /**
  * IVR telefónico con Telnyx (TeXML: mismas etiquetas <Gather>/<Say>/<Dial> que
@@ -88,6 +120,10 @@ interface IvrSession {
 }
 
 export const ivrIncomingCall = onRequest({ minInstances: 1 }, async (req, res) => {
+  if (!verifyTelnyxWebhook(req)) {
+    res.status(401).send('Firma inválida');
+    return;
+  }
   const branchId = String(req.query.branchId ?? req.body.branchId ?? '');
   const branchSnap = branchId ? await db.collection('branches').doc(branchId).get() : null;
   const branch = branchSnap?.exists ? (branchSnap.data() as Branch) : null;
@@ -117,6 +153,10 @@ export const ivrIncomingCall = onRequest({ minInstances: 1 }, async (req, res) =
 });
 
 export const ivrMenu = onRequest(async (req, res) => {
+  if (!verifyTelnyxWebhook(req)) {
+    res.status(401).send('Firma inválida');
+    return;
+  }
   const digit = String(req.body.Digits ?? '');
   const from = normalizePhone(String(req.body.From ?? ''));
   const callSid = String(req.body.CallSid ?? '');
@@ -182,6 +222,10 @@ export const ivrMenu = onRequest(async (req, res) => {
  * sigue con el día, igual que seguía directo `ivrMenu` cuando el servicio
  * no tenía variantes. */
 export const ivrVariant = onRequest(async (req, res) => {
+  if (!verifyTelnyxWebhook(req)) {
+    res.status(401).send('Firma inválida');
+    return;
+  }
   const digit = String(req.body.Digits ?? '');
   const callSid = String(req.body.CallSid ?? '');
   const branchId = String(req.query.branchId ?? '');
@@ -216,6 +260,10 @@ export const ivrVariant = onRequest(async (req, res) => {
  * la opción "escuchar horarios" (3), lee la lista y cuelga; si venía de
  * "reservar" (1), pide que escriban la hora con el teclado. */
 export const ivrDay = onRequest(async (req, res) => {
+  if (!verifyTelnyxWebhook(req)) {
+    res.status(401).send('Firma inválida');
+    return;
+  }
   const digit = String(req.body.Digits ?? '');
   const callSid = String(req.body.CallSid ?? '');
   const branchId = String(req.query.branchId ?? '');
@@ -270,6 +318,10 @@ export const ivrDay = onRequest(async (req, res) => {
  * mano (ver resolveTypedTime en bot/conversation.js). Si encuentra un
  * horario, pide confirmación antes de reservar. */
 export const ivrTimeTyped = onRequest(async (req, res) => {
+  if (!verifyTelnyxWebhook(req)) {
+    res.status(401).send('Firma inválida');
+    return;
+  }
   const digits = String(req.body.Digits ?? '');
   const callSid = String(req.body.CallSid ?? '');
   const branchId = String(req.query.branchId ?? '');
@@ -323,6 +375,10 @@ export const ivrTimeTyped = onRequest(async (req, res) => {
  * ivrTimeTyped. Confirmar crea la cita de verdad (misma transacción
  * anti-doble-reserva que usan WhatsApp y el panel — ver booking.ts). */
 export const ivrConfirm = onRequest(async (req, res) => {
+  if (!verifyTelnyxWebhook(req)) {
+    res.status(401).send('Firma inválida');
+    return;
+  }
   const digit = String(req.body.Digits ?? '');
   const callSid = String(req.body.CallSid ?? '');
   const branchId = String(req.query.branchId ?? '');
@@ -379,6 +435,10 @@ export const ivrConfirm = onRequest(async (req, res) => {
 
 /** Llamada saliente (crons.ts la usa a través de notify.dispatchTelnyx) al presionar 1/2 en la llamada de recordatorio. */
 export const ivrReminderResponse = onRequest(async (req, res) => {
+  if (!verifyTelnyxWebhook(req)) {
+    res.status(401).send('Firma inválida');
+    return;
+  }
   const digit = String(req.body.Digits ?? '');
   const appointmentId = String(req.query.appointmentId ?? '');
   const s = getIvrStrings(req.query.lang as string | undefined);
