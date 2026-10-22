@@ -1,6 +1,7 @@
 import { onCall, onRequest, HttpsError } from 'firebase-functions/v2/https';
 import { db } from './admin';
 import type { Branch } from './types';
+import { requireBranchAccess } from './access';
 
 /**
  * Suscripción de pago del sistema vía Tranzila — la pasarela israelí que
@@ -45,6 +46,7 @@ export const tranzilaCreateCheckoutUrl = onCall(async (request) => {
   const { branchId } = request.data as { branchId: string };
   const config = getConfig();
   if (!config) throw new HttpsError('failed-precondition', 'Los pagos todavía no están configurados.');
+  await requireBranchAccess(request.auth, branchId);
 
   const branchSnap = await db.collection('branches').doc(branchId).get();
   if (!branchSnap.exists) throw new HttpsError('not-found', 'Sucursal no encontrada.');
@@ -73,6 +75,7 @@ export const tranzilaCreateCheckoutUrl = onCall(async (request) => {
 export const tranzilaCancelSubscription = onCall(async (request) => {
   if (!request.auth) throw new HttpsError('unauthenticated', 'Requiere sesión.');
   const { branchId } = request.data as { branchId: string };
+  await requireBranchAccess(request.auth, branchId);
   await db.collection('branches').doc(branchId).update({ 'subscription.status': 'canceled' });
   return { ok: true };
 });

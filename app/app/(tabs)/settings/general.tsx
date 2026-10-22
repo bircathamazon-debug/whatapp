@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, Pressable, StyleSheet, ScrollView, TextInput, Linking, Alert, Switch } from 'react-native';
 import { useBranch } from '../../../lib/branchContext';
+import { auth } from '../../../lib/firebase';
 import { updateBranch } from '../../../lib/branches';
 import { getStaffByBranch } from '../../../lib/staff';
 import { getBlockedTimesByBranch, addBlockedTime, deleteBlockedTime } from '../../../lib/blockedTimes';
@@ -75,12 +76,14 @@ export default function SettingsScreen() {
     }
   };
 
-  const connectGoogleCalendar = (staffId: string) => {
+  const connectGoogleCalendar = async (staffId: string) => {
     if (!FUNCTIONS_BASE_URL) {
       Alert.alert(t.settings.missingConfigTitle, t.settings.missingConfigMessage);
       return;
     }
-    Linking.openURL(`${FUNCTIONS_BASE_URL}/googleCalendarConnect?staffId=${staffId}`);
+    const idToken = await auth.currentUser?.getIdToken();
+    if (!idToken) return;
+    Linking.openURL(`${FUNCTIONS_BASE_URL}/googleCalendarConnect?staffId=${staffId}&idToken=${encodeURIComponent(idToken)}`);
   };
 
   const submitBlock = async () => {

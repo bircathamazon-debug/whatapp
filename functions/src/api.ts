@@ -3,6 +3,7 @@ import { db } from './admin';
 import type { Appointment, Branch, BlockedTime, Service, Staff } from './types';
 import { getAvailableSlots, getStaffServiceDuration } from './availability';
 import { createAppointment, cancelAppointment, confirmAppointment, markNoShow, markCompleted } from './booking';
+import { requireBranchAccess } from './access';
 
 /** Callable: huecos libres de un peluquero en un día dado (usado por bot e IVR vía import directo, y por la app admin vía HTTPS). */
 export const getAvailability = onCall(async (request) => {
@@ -16,6 +17,7 @@ export const getAvailability = onCall(async (request) => {
   if (!staffSnap.exists || !serviceSnap.exists) throw new HttpsError('not-found', 'Peluquero o servicio no encontrado.');
   const staff = staffSnap.data() as Staff;
   const service = serviceSnap.data() as Service;
+  await requireBranchAccess(request.auth, staff.branchId);
 
   const branchSnap = await db.collection('branches').doc(staff.branchId).get();
   const branch = branchSnap.data() as Branch;
@@ -52,6 +54,7 @@ export const adminCreateAppointment = onCall(async (request) => {
   if (!branchSnap.exists || !staffSnap.exists || !serviceSnap.exists) {
     throw new HttpsError('not-found', 'Sucursal, peluquero o servicio no encontrado.');
   }
+  await requireBranchAccess(request.auth, branchId);
   const branch = branchSnap.data() as Branch;
   const staff = staffSnap.data() as Staff;
   const service = serviceSnap.data() as Service;
@@ -75,9 +78,20 @@ export const adminCreateAppointment = onCall(async (request) => {
   }
 });
 
+/** Antes de tocar una cita por su ID, confirma que quien llama tiene acceso
+ * a la sucursal dueña de esa cita — si no, revienta con permission-denied
+ * en vez de dejar actuar sobre una cita de otro negocio. */
+async function requireAppointmentAccess(auth: Parameters<typeof requireBranchAccess>[0], appointmentId: string): Promise<void> {
+  const snap = await db.collection('appointments').doc(appointmentId).get();
+  if (!snap.exists) throw new HttpsError('not-found', 'Cita no encontrada.');
+  const appt = snap.data() as Appointment;
+  await requireBranchAccess(auth, appt.branchId);
+}
+
 export const adminCancelAppointment = onCall(async (request) => {
   if (!request.auth) throw new HttpsError('unauthenticated', 'Requiere sesión.');
   const { appointmentId } = request.data as { appointmentId: string };
+  await requireAppointmentAccess(request.auth, appointmentId);
   await cancelAppointment(appointmentId, 'staff');
   return { ok: true };
 });
@@ -87,6 +101,7 @@ export const adminCancelAppointment = onCall(async (request) => {
 export const adminMarkNoShow = onCall(async (request) => {
   if (!request.auth) throw new HttpsError('unauthenticated', 'Requiere sesión.');
   const { appointmentId } = request.data as { appointmentId: string };
+  await requireAppointmentAccess(request.auth, appointmentId);
   await markNoShow(appointmentId);
   return { ok: true };
 });
@@ -96,6 +111,7 @@ export const adminMarkNoShow = onCall(async (request) => {
 export const adminMarkCompleted = onCall(async (request) => {
   if (!request.auth) throw new HttpsError('unauthenticated', 'Requiere sesión.');
   const { appointmentId } = request.data as { appointmentId: string };
+  await requireAppointmentAccess(request.auth, appointmentId);
   await markCompleted(appointmentId);
   return { ok: true };
 });
@@ -103,6 +119,7 @@ export const adminMarkCompleted = onCall(async (request) => {
 export const adminConfirmAppointment = onCall(async (request) => {
   if (!request.auth) throw new HttpsError('unauthenticated', 'Requiere sesión.');
   const { appointmentId } = request.data as { appointmentId: string };
+  await requireAppointmentAccess(request.auth, appointmentId);
   await confirmAppointment(appointmentId);
   return { ok: true };
 });

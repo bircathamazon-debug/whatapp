@@ -2,6 +2,7 @@ import Stripe from 'stripe';
 import { onCall, onRequest, HttpsError } from 'firebase-functions/v2/https';
 import { db } from './admin';
 import type { Branch } from './types';
+import { requireBranchAccess } from './access';
 
 /**
  * Suscripción de pago del sistema (cobro mensual recurrente a la
@@ -49,6 +50,7 @@ export const stripeCreateCheckoutSession = onCall(async (request) => {
   if (!stripe || !priceId || !baseUrl) {
     throw new HttpsError('failed-precondition', 'Los pagos todavía no están configurados.');
   }
+  await requireBranchAccess(request.auth, branchId);
 
   const branchSnap = await db.collection('branches').doc(branchId).get();
   if (!branchSnap.exists) throw new HttpsError('not-found', 'Sucursal no encontrada.');
@@ -79,6 +81,7 @@ export const stripeCustomerPortal = onCall(async (request) => {
   if (!stripe || !baseUrl) {
     throw new HttpsError('failed-precondition', 'Los pagos todavía no están configurados.');
   }
+  await requireBranchAccess(request.auth, branchId);
 
   const branchSnap = await db.collection('branches').doc(branchId).get();
   if (!branchSnap.exists) throw new HttpsError('not-found', 'Sucursal no encontrada.');

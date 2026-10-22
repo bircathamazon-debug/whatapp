@@ -5,6 +5,7 @@ import { sendNotification, getTemplates } from './notify';
 import { getAvailableSlots } from './availability';
 import { formatDate, formatTime } from './booking';
 import { getIvrStrings } from './ivrStrings';
+import { requireBranchAccess } from './access';
 
 /**
  * Llamada desde la app de administración: "Hoy quedó libre un turno a las
@@ -16,6 +17,7 @@ export const broadcastEmptySlots = onCall(async (request) => {
 
   const branchId = request.data?.branchId as string;
   if (!branchId) throw new HttpsError('invalid-argument', 'branchId es requerido.');
+  await requireBranchAccess(request.auth, branchId);
 
   const branchSnap = await db.collection('branches').doc(branchId).get();
   if (!branchSnap.exists) throw new HttpsError('not-found', 'Sucursal no encontrada.');
@@ -95,6 +97,7 @@ export const broadcastWeekdayDiscount = onCall(async (request) => {
 
   const branchId = request.data?.branchId as string;
   if (!branchId) throw new HttpsError('invalid-argument', 'branchId es requerido.');
+  await requireBranchAccess(request.auth, branchId);
 
   const branchSnap = await db.collection('branches').doc(branchId).get();
   if (!branchSnap.exists) throw new HttpsError('not-found', 'Sucursal no encontrada.');
