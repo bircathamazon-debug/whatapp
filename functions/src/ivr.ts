@@ -62,16 +62,22 @@ function verifyTelnyxWebhook(req: Request): boolean {
  * `CallSid` lo manda Telnyx solo en cada pedido, no hace falta pasarlo a
  * mano por la URL.
  *
- * `ivrIncomingCall` usa `minInstances: 1` — se mantiene siempre "despierta"
- * en vez de apagarse cuando no se usa. Sin esto, cada paso de una llamada
- * real (incluso el saludo inicial) tardaba varios segundos de más
- * esperando a que la función arrancara de cero (hallazgo real, confirmado
- * en los logs: más de 25 segundos de demora acumulada en una sola llamada
- * de prueba) — inaceptable en una llamada de voz en vivo. De momento solo
- * se aplica a esta función (arregla lo de "tardó en atender", el costo
- * extra más chico); si el resto de los pasos (menú/día/hora/confirmar)
- * sigue sintiéndose lento, se puede sumar minInstances: 1 también ahí
- * (más preciso, pero cuesta más por mes).
+ * Las 6 funciones del flujo en vivo (ivrIncomingCall, ivrMenu, ivrVariant,
+ * ivrDay, ivrTimeTyped, ivrConfirm) usan `minInstances: 1` — se mantienen
+ * siempre "despiertas" en vez de apagarse cuando no se usan. Sin esto, cada
+ * paso de una llamada real tardaba varios segundos de más esperando a que
+ * la función arrancara de cero (hallazgo real, confirmado primero solo en
+ * ivrIncomingCall —más de 25 segundos de demora acumulada en una sola
+ * llamada de prueba— y después en el resto de los pasos, con el usuario
+ * notando esperas de más de 7 segundos entre "elegir una opción" y la
+ * respuesta) — inaceptable en una llamada de voz en vivo. `ivrReminderResponse`
+ * (responder a un recordatorio telefónico, no al flujo de reserva en vivo)
+ * se dejó afuera a propósito, es menos sensible a la demora.
+ * Para que mantener 6 funciones "despiertas" no salga caro, también se les
+ * bajó la memoria reservada a 128MiB (`memory: '128MiB'`) — alcanza de
+ * sobra para lo que hacen (una consulta chica a Firestore y armar una
+ * respuesta de texto corta), y el costo de `minInstances` es proporcional
+ * a la memoria reservada.
  *
  * El día se identifica siempre con el mismo número en cualquier llamada:
  * domingo=1, lunes=2, martes=3, miércoles=4, jueves=5, viernes=6, sábado=7
@@ -119,7 +125,7 @@ interface IvrSession {
   data: IvrSessionData;
 }
 
-export const ivrIncomingCall = onRequest({ minInstances: 1 }, async (req, res) => {
+export const ivrIncomingCall = onRequest({ minInstances: 1, memory: '128MiB' }, async (req, res) => {
   if (!verifyTelnyxWebhook(req)) {
     res.status(401).send('Firma inválida');
     return;
@@ -152,7 +158,7 @@ export const ivrIncomingCall = onRequest({ minInstances: 1 }, async (req, res) =
 </Response>`);
 });
 
-export const ivrMenu = onRequest(async (req, res) => {
+export const ivrMenu = onRequest({ minInstances: 1, memory: '128MiB' }, async (req, res) => {
   if (!verifyTelnyxWebhook(req)) {
     res.status(401).send('Firma inválida');
     return;
@@ -221,7 +227,7 @@ export const ivrMenu = onRequest(async (req, res) => {
 /** Procesa la variante elegida (apretada en respuesta a askVariantTeXML) y
  * sigue con el día, igual que seguía directo `ivrMenu` cuando el servicio
  * no tenía variantes. */
-export const ivrVariant = onRequest(async (req, res) => {
+export const ivrVariant = onRequest({ minInstances: 1, memory: '128MiB' }, async (req, res) => {
   if (!verifyTelnyxWebhook(req)) {
     res.status(401).send('Firma inválida');
     return;
@@ -259,7 +265,7 @@ export const ivrVariant = onRequest(async (req, res) => {
  * siempre por el mismo número de día de semana). Si la llamada venía de
  * la opción "escuchar horarios" (3), lee la lista y cuelga; si venía de
  * "reservar" (1), pide que escriban la hora con el teclado. */
-export const ivrDay = onRequest(async (req, res) => {
+export const ivrDay = onRequest({ minInstances: 1, memory: '128MiB' }, async (req, res) => {
   if (!verifyTelnyxWebhook(req)) {
     res.status(401).send('Firma inválida');
     return;
@@ -317,7 +323,7 @@ export const ivrDay = onRequest(async (req, res) => {
  * lógica que usa el bot de WhatsApp cuando el cliente escribe una hora a
  * mano (ver resolveTypedTime en bot/conversation.js). Si encuentra un
  * horario, pide confirmación antes de reservar. */
-export const ivrTimeTyped = onRequest(async (req, res) => {
+export const ivrTimeTyped = onRequest({ minInstances: 1, memory: '128MiB' }, async (req, res) => {
   if (!verifyTelnyxWebhook(req)) {
     res.status(401).send('Firma inválida');
     return;
@@ -374,7 +380,7 @@ export const ivrTimeTyped = onRequest(async (req, res) => {
 /** Confirma (1) o descarta (cualquier otra tecla) el día+hora leídos por
  * ivrTimeTyped. Confirmar crea la cita de verdad (misma transacción
  * anti-doble-reserva que usan WhatsApp y el panel — ver booking.ts). */
-export const ivrConfirm = onRequest(async (req, res) => {
+export const ivrConfirm = onRequest({ minInstances: 1, memory: '128MiB' }, async (req, res) => {
   if (!verifyTelnyxWebhook(req)) {
     res.status(401).send('Firma inválida');
     return;
