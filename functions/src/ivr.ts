@@ -366,6 +366,20 @@ export const ivrTimeTyped = onRequest({ minInstances: 1, memory: '256MiB' }, asy
 
   const match = resolveTypedTime(branch, session.data.dateStr, allSlots, typed);
   if (!match) {
+    // No hay ningún hueco libre a esa hora — puede ser que ya esté ocupada,
+    // o que la hora pedida esté directamente fuera del horario de atención
+    // (ej. "700" interpretado como 7am o 7pm, antes de abrir o después de
+    // cerrar). Mismo hallazgo real que ya se había corregido en el bot de
+    // WhatsApp: decir "no entendimos" en los dos casos confunde al cliente,
+    // que repite la misma hora sin saber que nunca va a funcionar.
+    const outside = !(await anyCandidateWithinWorkingHours(branch, staffList, service, session.data.dateStr, typed));
+    if (outside) {
+      const hoursLabel = workingHoursLabel(staffList, session.data.dateStr);
+      if (hoursLabel) {
+        res.send(askTimeGather(base, branchId, s, session.data.dateLabel, s.outsideWorkingHours(hoursLabel)));
+        return;
+      }
+    }
     res.send(askTimeGather(base, branchId, s, session.data.dateLabel, s.invalidTimeEntry));
     return;
   }
@@ -581,6 +595,48 @@ function resolveTypedTime(branch: Branch, dateStr: string, allSlots: SlotWithSta
     }
   }
   return null;
+}
+
+/** ¿La hora pedida (o su equivalente de la tarde, si corresponde) cae
+ * dentro del horario de atención de algún peluquero ese día? Ignora a
+ * propósito las citas ya tomadas — es solo para distinguir "está fuera de
+ * horario" de "esa hora puntual ya está ocupada". */
+async function anyCandidateWithinWorkingHours(
+  branch: Branch,
+  staffList: Staff[],
+  service: Service,
+  dateStr: string,
+  typed: { h: number; m: number }
+): Promise<boolean> {
+  const blockedSnap = await db.collection('blockedTimes').where('branchId', '==', branch.id).where('date', '==', dateStr).get();
+  const blockedTimes = blockedSnap.docs.map((d) => d.data() as BlockedTime);
+
+  const candidates = [typed.h];
+  if (typed.h >= 1 && typed.h <= 11) candidates.push(typed.h + 12);
+  const epochs = candidates.map((h) => toEpoch(dateStr, hhmm(h, typed.m), branch.timezone));
+
+  for (const staff of staffList) {
+    const duration = getStaffServiceDuration(staff, service);
+    const slots = getAvailableSlots(staff, duration, dateStr, [], branch.timezone, Date.now(), blockedTimes);
+    if (slots.some((sl) => epochs.includes(sl.startsAt))) return true;
+  }
+  return false;
+}
+
+/** Texto tipo "9:00–19:00" con el horario más amplio entre los peluqueros
+ * activos ese día — null si ninguno trabaja ese día (cerrado). */
+function workingHoursLabel(staffList: Staff[], dateStr: string): string | null {
+  const dow = new Date(`${dateStr}T00:00:00Z`).getUTCDay();
+  let earliestStart: string | null = null;
+  let latestEnd: string | null = null;
+  for (const staff of staffList) {
+    const hours = staff.hours?.[dow];
+    if (!hours) continue;
+    if (!earliestStart || hours.start < earliestStart) earliestStart = hours.start;
+    if (!latestEnd || hours.end > latestEnd) latestEnd = hours.end;
+  }
+  if (!earliestStart || !latestEnd) return null;
+  return `${earliestStart}–${latestEnd}`;
 }
 
 function hasVariants(service: Service): boolean {

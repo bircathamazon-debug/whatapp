@@ -23,6 +23,7 @@ export interface IvrStrings {
   dayOption: (n: number, label: string) => string;
   askTimeTypedIntro: (dayLabel: string) => string;
   invalidTimeEntry: string;
+  outsideWorkingHours: (hoursLabel: string) => string;
   confirmBooking: (dayLabel: string, timeStr: string) => string;
   noSlotsThatDay: (dayLabel: string) => string;
   scheduleResult: (dayLabel: string, times: string[]) => string;
@@ -55,6 +56,7 @@ const he: IvrStrings = {
   askTimeTypedIntro: (dayLabel) =>
     `באיזו שעה תרצו תור ב${dayLabel}? הקישו את השעה ולאחריה סולמית. לדוגמה, לשעה תשע ושלושים הקישו 9, 3, 0, וסולמית.`,
   invalidTimeEntry: 'לא הצלחנו להבין את השעה שהוקשה.',
+  outsideWorkingHours: (hoursLabel) => `אין קבלה בשעה הזו — שעות הפעילות הן ${hoursLabel}. נסו שעה אחרת.`,
   confirmBooking: (dayLabel, timeStr) => `${dayLabel} בשעה ${timeStr}. לאישור הקישו 1. לניסיון שעה אחרת הקישו 2.`,
   noSlotsThatDay: (dayLabel) => `אין תורים פנויים ב${dayLabel}. נסו יום אחר.`,
   scheduleResult: (dayLabel, times) =>
@@ -88,6 +90,7 @@ const en: IvrStrings = {
   askTimeTypedIntro: (dayLabel) =>
     `What time would you like on ${dayLabel}? Enter the time followed by the pound key. For example, for 9:30, press 9, 3, 0, then pound.`,
   invalidTimeEntry: "We couldn't understand that time.",
+  outsideWorkingHours: (hoursLabel) => `We're closed at that time — working hours are ${hoursLabel}. Please try another time.`,
   confirmBooking: (dayLabel, timeStr) => `${dayLabel} at ${timeStr}. Press 1 to confirm. Press 2 to try a different time.`,
   noSlotsThatDay: (dayLabel) => `There are no available appointments on ${dayLabel}. Please try another day.`,
   scheduleResult: (dayLabel, times) =>
@@ -121,6 +124,7 @@ const es: IvrStrings = {
   askTimeTypedIntro: (dayLabel) =>
     `¿A qué hora querés el turno el ${dayLabel}? Marcá la hora seguida de la tecla numeral. Por ejemplo, para las 9:30, marque 9, 3, 0, y numeral.`,
   invalidTimeEntry: 'No pudimos entender esa hora.',
+  outsideWorkingHours: (hoursLabel) => `Está cerrado a esa hora — el horario de atención es de ${hoursLabel}. Probá con otra hora.`,
   confirmBooking: (dayLabel, timeStr) => `${dayLabel} a las ${timeStr}. Marque 1 para confirmar. Marque 2 para probar otra hora.`,
   noSlotsThatDay: (dayLabel) => `No hay turnos disponibles el ${dayLabel}. Intente otro día.`,
   scheduleResult: (dayLabel, times) =>
