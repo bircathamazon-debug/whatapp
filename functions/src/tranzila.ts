@@ -1,4 +1,5 @@
 import { onCall, onRequest, HttpsError } from 'firebase-functions/v2/https';
+import { createHmac, timingSafeEqual } from 'crypto';
 import { db } from './admin';
 import type { Branch } from './types';
 import { requireBranchAccess } from './access';
@@ -31,6 +32,36 @@ import { requireBranchAccess } from './access';
 
 const TOKEN_CHARGE_URL = 'https://secure5.tranzila.com/cgi-bin/tranzila31tk.cgi';
 
+/**
+ * `tranzilaNotify` no tenía ninguna verificación de que el pedido viniera
+ * de verdad de Tranzila — hallazgo crítico de la revisión de seguridad:
+ * cualquiera que supiera (o adivinara) un `branchId` podía mandar
+ * `POST /tranzilaNotify?branchId=X` con `Response=000` a mano y activar una
+ * suscripción paga gratis para esa sucursal, saltándose por completo el
+ * bloqueo de `firestore.rules` que deja "subscription" solo en manos del
+ * SDK de administrador (esta función corre justo con ese SDK). Mismo
+ * patrón ya usado en oauth.ts: se agrega un token firmado (HMAC) al link de
+ * notificación que le damos a Tranzila, y se verifica acá antes de tocar
+ * la base de datos — sin el token correcto, no pasa nada.
+ */
+function signNotifyToken(branchId: string): string {
+  const secret = process.env.ADMIN_SHARED_SECRET;
+  if (!secret) throw new Error('Falta ADMIN_SHARED_SECRET');
+  return createHmac('sha256', secret).update(branchId).digest('hex');
+}
+
+function verifyNotifyToken(branchId: string, token: string): boolean {
+  let expected: string;
+  try {
+    expected = signNotifyToken(branchId);
+  } catch {
+    return false;
+  }
+  const tokenBuf = Buffer.from(token, 'hex');
+  const expectedBuf = Buffer.from(expected, 'hex');
+  return tokenBuf.length === expectedBuf.length && timingSafeEqual(tokenBuf, expectedBuf);
+}
+
 function getConfig() {
   const terminal = process.env.TRANZILA_TERMINAL_NAME;
   const password = process.env.TRANZILA_PASSWORD;
@@ -52,7 +83,8 @@ export const tranzilaCreateCheckoutUrl = onCall(async (request) => {
   if (!branchSnap.exists) throw new HttpsError('not-found', 'Sucursal no encontrada.');
   const branch = { id: branchSnap.id, ...(branchSnap.data() as Omit<Branch, 'id'>) };
 
-  const notifyUrl = `${config.baseUrl}/tranzilaNotify?branchId=${encodeURIComponent(branchId)}`;
+  const notifyToken = signNotifyToken(branchId);
+  const notifyUrl = `${config.baseUrl}/tranzilaNotify?branchId=${encodeURIComponent(branchId)}&token=${notifyToken}`;
   const doneUrl = `${config.baseUrl}/tranzilaCheckoutDone`;
 
   const params = new URLSearchParams({
@@ -91,6 +123,12 @@ export const tranzilaCheckoutDone = onRequest((req, res) => {
 /** Callback de Tranzila con el resultado del pago (equivalente a un webhook). */
 export const tranzilaNotify = onRequest(async (req, res) => {
   const branchId = String(req.query.branchId ?? '');
+  const token = String(req.query.token ?? '');
+  if (!branchId || !token || !verifyNotifyToken(branchId, token)) {
+    res.status(401).send('Token inválido');
+    return;
+  }
+
   const body = req.body as Record<string, string>;
   const success = body?.Response === '000';
 
@@ -107,7 +145,10 @@ export const tranzilaNotify = onRequest(async (req, res) => {
         'subscription.currentPeriodEnd': nextMonth,
       });
   } else if (branchId) {
-    console.error('[tranzila] notify con error', body);
+    // No se loguea el body completo: TranzilaTK es un token de tarjeta
+    // (no el número real, pero igual es un dato sensible que no debería
+    // quedar en los logs de Cloud Logging).
+    console.error('[tranzila] notify con error', { Response: body?.Response, Error: body?.Error });
   }
 
   res.status(200).send('OK');

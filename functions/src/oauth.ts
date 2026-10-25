@@ -22,7 +22,8 @@ import { requireBranchAccessByUid } from './access';
  * peluquero — sin la firma, el callback lo rechaza.
  */
 function signState(staffId: string): string {
-  const secret = process.env.ADMIN_SHARED_SECRET || '';
+  const secret = process.env.ADMIN_SHARED_SECRET;
+  if (!secret) throw new Error('Falta ADMIN_SHARED_SECRET');
   return createHmac('sha256', secret).update(staffId).digest('hex');
 }
 
@@ -31,7 +32,12 @@ function verifyState(state: string): string | null {
   if (sepIndex === -1) return null;
   const staffId = state.slice(0, sepIndex);
   const signature = state.slice(sepIndex + 1);
-  const expected = signState(staffId);
+  let expected: string;
+  try {
+    expected = signState(staffId);
+  } catch {
+    return null;
+  }
   const sigBuf = Buffer.from(signature, 'hex');
   const expectedBuf = Buffer.from(expected, 'hex');
   if (sigBuf.length !== expectedBuf.length || !timingSafeEqual(sigBuf, expectedBuf)) return null;
@@ -67,7 +73,14 @@ export const googleCalendarConnect = onRequest(async (req, res) => {
     return;
   }
 
-  const url = getGoogleAuthUrl(`${staffId}.${signState(staffId)}`);
+  let signedState: string;
+  try {
+    signedState = `${staffId}.${signState(staffId)}`;
+  } catch {
+    res.status(500).send('Error de configuración del servidor.');
+    return;
+  }
+  const url = getGoogleAuthUrl(signedState);
   if (!url) {
     res.status(500).send('Google Calendar no está configurado (faltan credenciales OAuth).');
     return;

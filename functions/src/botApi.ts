@@ -1,4 +1,5 @@
 import { onRequest } from 'firebase-functions/v2/https';
+import { timingSafeEqual } from 'crypto';
 import { db } from './admin';
 import type { Branch, BlockedTime, Service, Staff } from './types';
 import { getAvailableSlots, getStaffServiceDuration } from './availability';
@@ -15,8 +16,27 @@ import { acceptWaitlistOffer } from './waitlist';
  */
 function checkSecret(req: any): boolean {
   const expected = process.env.BOT_SHARED_SECRET;
-  if (!expected) return false;
-  return req.get('x-bot-secret') === expected;
+  const given = req.get('x-bot-secret');
+  if (!expected || !given) return false;
+  const expectedBuf = Buffer.from(expected);
+  const givenBuf = Buffer.from(given);
+  return expectedBuf.length === givenBuf.length && timingSafeEqual(expectedBuf, givenBuf);
+}
+
+/** El secreto compartido autentica "algún bot válido", no a qué sucursal
+ * pertenece — chequea que el peluquero/servicio (cuando se pasan) sean
+ * realmente de la sucursal indicada, para que un bot no pueda tocar datos
+ * de otra sucursal con solo pasar otros ids. */
+async function staffAndServiceBelongToBranch(branchId: string, staffId?: string | null, serviceId?: string | null): Promise<boolean> {
+  if (staffId) {
+    const snap = await db.collection('staff').doc(staffId).get();
+    if (!snap.exists || (snap.data() as Staff).branchId !== branchId) return false;
+  }
+  if (serviceId) {
+    const snap = await db.collection('services').doc(serviceId).get();
+    if (!snap.exists || (snap.data() as Service).branchId !== branchId) return false;
+  }
+  return true;
 }
 
 export const botGetAvailability = onRequest(async (req, res) => {
@@ -79,6 +99,15 @@ export const botCreateAppointment = onRequest(async (req, res) => {
     const branch = branchSnap.data() as Branch;
     const staff = staffSnap.data() as Staff;
     const service = serviceSnap.data() as Service;
+    // El secreto compartido autentica "algún bot válido", no a qué sucursal
+    // pertenece — sin este chequeo, un bot de una sucursal podría reservar
+    // con el peluquero/servicio de OTRA sucursal con solo pasar sus ids.
+    // Hoy no es explotable (una sola sucursal/bot), pero hace falta antes
+    // de tener varias sucursales con el mismo secreto (Fase 1).
+    if (staff.branchId !== branchId || service.branchId !== branchId) {
+      res.status(400).json({ error: 'branch_mismatch' });
+      return;
+    }
     const variant = variantId ? (service.variants ?? []).find((v) => v.id === variantId) ?? null : null;
 
     const appt = await createAppointment({
@@ -143,6 +172,10 @@ export const botAddToWaitlist = onRequest(async (req, res) => {
     return;
   }
   const { branchId, staffId, serviceId, clientId, clientPhone, clientName, desiredDate, desiredWindow } = req.body as Record<string, any>;
+  if (!(await staffAndServiceBelongToBranch(branchId, staffId, serviceId))) {
+    res.status(400).json({ error: 'branch_mismatch' });
+    return;
+  }
   const ref = db.collection('waitlist').doc();
   await ref.set({
     id: ref.id,
@@ -168,6 +201,10 @@ export const botCreateRecurringBooking = onRequest(async (req, res) => {
     return;
   }
   const { branchId, staffId, serviceId, clientPhone, clientName, dayOfWeek, time } = req.body as Record<string, any>;
+  if (!(await staffAndServiceBelongToBranch(branchId, staffId, serviceId))) {
+    res.status(400).json({ error: 'branch_mismatch' });
+    return;
+  }
   const ref = db.collection('recurringBookings').doc();
   await ref.set({
     id: ref.id,

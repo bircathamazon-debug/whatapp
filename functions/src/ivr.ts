@@ -21,7 +21,12 @@ import { getTelnyxConfig } from './telnyx';
  */
 function verifyTelnyxWebhook(req: Request): boolean {
   const publicKeyB64 = process.env.TELNYX_PUBLIC_KEY;
-  if (!publicKeyB64) return true;
+  // Hallazgo de la revisión de seguridad: antes, sin la clave configurada,
+  // se dejaba pasar la petición sin verificar ("fallar abierto") — eso
+  // reabriría el IVR a cualquiera que mande un POST directo a estas URLs
+  // si la clave alguna vez faltara (se borra, se rota y no se recarga).
+  // Ahora se rechaza de una, ya que la clave está cargada y en uso.
+  if (!publicKeyB64) return false;
 
   const signature = req.get('telnyx-signature-ed25519');
   const timestamp = req.get('telnyx-timestamp');

@@ -1,5 +1,6 @@
 import { onRequest } from 'firebase-functions/v2/https';
 import { getAuth } from 'firebase-admin/auth';
+import { timingSafeEqual } from 'crypto';
 import { db } from './admin';
 
 /**
@@ -10,8 +11,11 @@ import { db } from './admin';
  */
 function checkSecret(req: any): boolean {
   const expected = process.env.ADMIN_SHARED_SECRET;
-  if (!expected) return false;
-  return req.get('x-admin-secret') === expected;
+  const given = req.get('x-admin-secret');
+  if (!expected || !given) return false;
+  const expectedBuf = Buffer.from(expected);
+  const givenBuf = Buffer.from(given);
+  return expectedBuf.length === givenBuf.length && timingSafeEqual(expectedBuf, givenBuf);
 }
 
 /** Busca el UID de una cuenta de Firebase Auth ya existente por su mail. */
