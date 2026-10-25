@@ -1053,6 +1053,48 @@ detalle técnico completo de arquitectura y setup.
     guardadas en Railway (Firebase, OpenAI) por las dudas, ya que
     Railway avisó que hubo que invalidar credenciales por su incidente
     — **pendiente que el usuario lo haga cuando pueda**, no es urgente.
+- ✅ **Ronda de 4 pedidos de seguridad/profesionalismo — PROGRAMADA Y
+  DESPLEGADA**:
+  1. 🐛 **La alerta automática de "bot caído" ya estaba construida
+     (late desde antes: el bot manda un latido cada 3 minutos a
+     Firestore, y un cron cada 10 minutos avisa si dejó de llegar) pero
+     NUNCA llegó a funcionar de verdad** — se mandaba por SMS, y el
+     número de Telnyx nunca tuvo un "Messaging Profile" asignado en el
+     portal (hace falta para poder mandar SMS, aparte de la voz).
+     Fallaba en silencio: quedaba solo en los logs, nadie se enteraba.
+     **Corregido**: se cambió a una llamada de voz (el mismo mecanismo
+     ya probado del IVR, sin depender de configurar nada nuevo en
+     Telnyx) — probado el camino técnico end-to-end antes de
+     desplegar.
+  2. ✅ **"Olvidé mi contraseña" en el login del panel** — usa el envío
+     de mail de recuperación propio de Firebase (ya incluido, no hace
+     falta ninguna cuenta ni configuración nueva). El peluquero puede
+     recuperar el acceso solo si se olvida la contraseña, sin depender
+     de que alguien se la resetee a mano.
+  3. ✅ **Copia de seguridad semanal automática de toda la base de
+     datos**, a un bucket privado separado del proyecto
+     (`gs://bot-para-peluqueria-backups`, en la misma región que la
+     base de datos) — se borran solas las de más de 60 días. Probada
+     de punta a punta con una copia real (182 documentos) antes de
+     dejarla en automático. Cómo restaurar si alguna vez hiciera falta
+     queda documentado en el comentario de
+     `functions/src/backup.ts` (es un trámite manual a propósito,
+     nunca automático, porque restaurar pisa los datos actuales).
+  4. ✅ **Política de privacidad ampliada**
+     (https://peluqueria-yaacob.web.app/privacy) — ya cubría la
+     recolección de datos por WhatsApp/teléfono; se agregaron
+     secciones de pagos (la tarjeta nunca pasa por nuestros
+     servidores), seguridad (aislamiento entre sucursales, login
+     personal, firma verificada del IVR, copias de seguridad),
+     retención/eliminación de datos más concreta, menores de edad y
+     fecha de última actualización.
+  - **Sobre la "auditoría externa certificada" del backlog**: se buscó
+    si existía alguna skill de Claude Code para eso — no hay ninguna
+    (confirmado con `SearchSkills`). Se corrió en cambio la skill de
+    revisión de seguridad de código ya disponible, como chequeo
+    adicional — aclarado con el usuario que esto NO reemplaza una
+    auditoría certificada por una empresa externa (eso sigue siendo un
+    trámite de negocio aparte, no algo que una skill pueda hacer).
 - **Ideas para el backlog (más adelante, el usuario lo aclaró
   explícitamente — no bloquean el piloto):**
   - Página web y video publicitario explicando el ahorro de tiempo/dinero
