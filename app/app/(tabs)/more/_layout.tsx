@@ -21,6 +21,7 @@ export default function MoreStackLayout() {
       <Stack.Screen name="clients" options={{ title: t.tabs.clients }} />
       <Stack.Screen name="campaigns" options={{ title: t.tabs.campaigns }} />
       <Stack.Screen name="questions" options={{ title: t.tabs.questions }} />
+      <Stack.Screen name="audit" options={{ title: t.tabs.auditLog }} />
     </Stack>
   );
 }

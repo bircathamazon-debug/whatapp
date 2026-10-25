@@ -4,6 +4,7 @@ import type { Appointment, Branch, BlockedTime, Service, Staff } from './types';
 import { getAvailableSlots, getStaffServiceDuration } from './availability';
 import { createAppointment, cancelAppointment, confirmAppointment, markNoShow, markCompleted } from './booking';
 import { requireBranchAccess } from './access';
+import { logAudit } from './audit';
 
 /** Callable: huecos libres de un peluquero en un día dado (usado por bot e IVR vía import directo, y por la app admin vía HTTPS). */
 export const getAvailability = onCall(async (request) => {
@@ -72,6 +73,7 @@ export const adminCreateAppointment = onCall(async (request) => {
       endsAt: startsAt + getStaffServiceDuration(staff, service) * 60000,
       source: 'admin',
     });
+    await logAudit(request.auth.uid, branchId, 'appointment_created', { appointmentId: appt.id, clientName, clientPhone, startsAt });
     return { appointment: appt };
   } catch (err: any) {
     throw new HttpsError('already-exists', err.message ?? 'El horario ya no está disponible.');
@@ -81,18 +83,20 @@ export const adminCreateAppointment = onCall(async (request) => {
 /** Antes de tocar una cita por su ID, confirma que quien llama tiene acceso
  * a la sucursal dueña de esa cita — si no, revienta con permission-denied
  * en vez de dejar actuar sobre una cita de otro negocio. */
-async function requireAppointmentAccess(auth: Parameters<typeof requireBranchAccess>[0], appointmentId: string): Promise<void> {
+async function requireAppointmentAccess(auth: Parameters<typeof requireBranchAccess>[0], appointmentId: string): Promise<string> {
   const snap = await db.collection('appointments').doc(appointmentId).get();
   if (!snap.exists) throw new HttpsError('not-found', 'Cita no encontrada.');
   const appt = snap.data() as Appointment;
   await requireBranchAccess(auth, appt.branchId);
+  return appt.branchId;
 }
 
 export const adminCancelAppointment = onCall(async (request) => {
   if (!request.auth) throw new HttpsError('unauthenticated', 'Requiere sesión.');
   const { appointmentId } = request.data as { appointmentId: string };
-  await requireAppointmentAccess(request.auth, appointmentId);
+  const branchId = await requireAppointmentAccess(request.auth, appointmentId);
   await cancelAppointment(appointmentId, 'staff');
+  await logAudit(request.auth.uid, branchId, 'appointment_cancelled', { appointmentId });
   return { ok: true };
 });
 
@@ -101,8 +105,9 @@ export const adminCancelAppointment = onCall(async (request) => {
 export const adminMarkNoShow = onCall(async (request) => {
   if (!request.auth) throw new HttpsError('unauthenticated', 'Requiere sesión.');
   const { appointmentId } = request.data as { appointmentId: string };
-  await requireAppointmentAccess(request.auth, appointmentId);
+  const branchId = await requireAppointmentAccess(request.auth, appointmentId);
   await markNoShow(appointmentId);
+  await logAudit(request.auth.uid, branchId, 'appointment_marked_no_show', { appointmentId });
   return { ok: true };
 });
 
@@ -111,15 +116,17 @@ export const adminMarkNoShow = onCall(async (request) => {
 export const adminMarkCompleted = onCall(async (request) => {
   if (!request.auth) throw new HttpsError('unauthenticated', 'Requiere sesión.');
   const { appointmentId } = request.data as { appointmentId: string };
-  await requireAppointmentAccess(request.auth, appointmentId);
+  const branchId = await requireAppointmentAccess(request.auth, appointmentId);
   await markCompleted(appointmentId);
+  await logAudit(request.auth.uid, branchId, 'appointment_marked_completed', { appointmentId });
   return { ok: true };
 });
 
 export const adminConfirmAppointment = onCall(async (request) => {
   if (!request.auth) throw new HttpsError('unauthenticated', 'Requiere sesión.');
   const { appointmentId } = request.data as { appointmentId: string };
-  await requireAppointmentAccess(request.auth, appointmentId);
+  const branchId = await requireAppointmentAccess(request.auth, appointmentId);
   await confirmAppointment(appointmentId);
+  await logAudit(request.auth.uid, branchId, 'appointment_confirmed', { appointmentId });
   return { ok: true };
 });

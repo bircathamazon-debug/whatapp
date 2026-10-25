@@ -3,6 +3,7 @@ import { createHmac, timingSafeEqual } from 'crypto';
 import { db } from './admin';
 import type { Branch } from './types';
 import { requireBranchAccess } from './access';
+import { logAudit } from './audit';
 
 /**
  * Suscripción de pago del sistema vía Tranzila — la pasarela israelí que
@@ -109,6 +110,7 @@ export const tranzilaCancelSubscription = onCall(async (request) => {
   const { branchId } = request.data as { branchId: string };
   await requireBranchAccess(request.auth, branchId);
   await db.collection('branches').doc(branchId).update({ 'subscription.status': 'canceled' });
+  await logAudit(request.auth.uid, branchId, 'subscription_cancelled');
   return { ok: true };
 });
 

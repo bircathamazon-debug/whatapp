@@ -15,11 +15,12 @@ export default function MoreMenuScreen() {
   const t = useT();
   const styles = makeStyles(colors, mode);
 
-  const MENU: { icon: IconName; label: string; route: '/more/waitlist' | '/more/clients' | '/more/campaigns' | '/more/questions' }[] = [
+  const MENU: { icon: IconName; label: string; route: '/more/waitlist' | '/more/clients' | '/more/campaigns' | '/more/questions' | '/more/audit' }[] = [
     { icon: 'time', label: t.tabs.waitlist, route: '/more/waitlist' },
     { icon: 'people', label: t.tabs.clients, route: '/more/clients' },
     { icon: 'megaphone', label: t.tabs.campaigns, route: '/more/campaigns' },
     { icon: 'help-circle', label: t.tabs.questions, route: '/more/questions' },
+    { icon: 'document-text', label: t.tabs.auditLog, route: '/more/audit' },
   ];
 
   const logout = async () => {

@@ -14,7 +14,7 @@ export type Lang = 'he' | 'en' | 'es';
 export const RTL_LANGS: Lang[] = ['he'];
 
 interface Dict {
-  tabs: { agenda: string; waitlist: string; waitlistShort: string; clients: string; campaigns: string; questions: string; home: string; more: string };
+  tabs: { agenda: string; waitlist: string; waitlistShort: string; clients: string; campaigns: string; questions: string; home: string; more: string; auditLog: string };
   home: {
     greeting: string;
     todayApptsLabel: (n: number) => string;
@@ -105,6 +105,17 @@ interface Dict {
     deleteTitle: string;
     deleteConfirm: string;
     cancel: string;
+  };
+  auditLog: {
+    empty: string;
+    action: {
+      appointment_created: string;
+      appointment_cancelled: string;
+      appointment_marked_no_show: string;
+      appointment_marked_completed: string;
+      appointment_confirmed: string;
+      subscription_cancelled: string;
+    };
   };
   adminMenu: {
     title: string;
@@ -302,7 +313,7 @@ interface Dict {
 }
 
 const he: Dict = {
-  tabs: { agenda: 'יומן', waitlist: 'רשימת המתנה', waitlistShort: 'המתנה', clients: 'לקוחות', campaigns: 'קמפיינים', questions: 'שאלות', home: 'בית', more: 'עוד' },
+  tabs: { agenda: 'יומן', waitlist: 'רשימת המתנה', waitlistShort: 'המתנה', clients: 'לקוחות', campaigns: 'קמפיינים', questions: 'שאלות', home: 'בית', more: 'עוד', auditLog: 'יומן פעילות' },
   home: {
     greeting: 'שלום',
     todayApptsLabel: (n) => `${n} תורים היום`,
@@ -393,6 +404,17 @@ const he: Dict = {
     deleteTitle: 'מחיקת שאלה',
     deleteConfirm: 'למחוק את השאלה הזו?',
     cancel: 'ביטול',
+  },
+  auditLog: {
+    empty: 'אין עדיין פעולות רשומות.',
+    action: {
+      appointment_created: 'קבע תור',
+      appointment_cancelled: 'ביטל תור',
+      appointment_marked_no_show: 'סימן "לא הגיע"',
+      appointment_marked_completed: 'סימן "הושלם"',
+      appointment_confirmed: 'אישר תור',
+      subscription_cancelled: 'ביטל את המנוי',
+    },
   },
   adminMenu: {
     title: 'הפאנל שלי',
@@ -590,7 +612,7 @@ const he: Dict = {
 };
 
 const en: Dict = {
-  tabs: { agenda: 'Agenda', waitlist: 'Waitlist', waitlistShort: 'Waitlist', clients: 'Clients', campaigns: 'Campaigns', questions: 'Questions', home: 'Home', more: 'More' },
+  tabs: { agenda: 'Agenda', waitlist: 'Waitlist', waitlistShort: 'Waitlist', clients: 'Clients', campaigns: 'Campaigns', questions: 'Questions', home: 'Home', more: 'More', auditLog: 'Activity log' },
   home: {
     greeting: 'Hello',
     todayApptsLabel: (n) => `${n} appointments today`,
@@ -681,6 +703,17 @@ const en: Dict = {
     deleteTitle: 'Delete question',
     deleteConfirm: 'Delete this question?',
     cancel: 'Cancel',
+  },
+  auditLog: {
+    empty: 'No actions logged yet.',
+    action: {
+      appointment_created: 'Booked an appointment',
+      appointment_cancelled: 'Cancelled an appointment',
+      appointment_marked_no_show: 'Marked "no-show"',
+      appointment_marked_completed: 'Marked "completed"',
+      appointment_confirmed: 'Confirmed an appointment',
+      subscription_cancelled: 'Cancelled the subscription',
+    },
   },
   adminMenu: {
     title: 'My panel',
@@ -878,7 +911,7 @@ const en: Dict = {
 };
 
 const es: Dict = {
-  tabs: { agenda: 'Agenda', waitlist: 'Lista de espera', waitlistShort: 'Espera', clients: 'Clientes', campaigns: 'Campañas', questions: 'Preguntas', home: 'Inicio', more: 'Más' },
+  tabs: { agenda: 'Agenda', waitlist: 'Lista de espera', waitlistShort: 'Espera', clients: 'Clientes', campaigns: 'Campañas', questions: 'Preguntas', home: 'Inicio', more: 'Más', auditLog: 'Registro de actividad' },
   home: {
     greeting: 'Hola',
     todayApptsLabel: (n) => `${n} citas hoy`,
@@ -969,6 +1002,17 @@ const es: Dict = {
     deleteTitle: 'Eliminar pregunta',
     deleteConfirm: '¿Eliminar esta pregunta?',
     cancel: 'Cancelar',
+  },
+  auditLog: {
+    empty: 'Todavía no hay ninguna acción registrada.',
+    action: {
+      appointment_created: 'Reservó un turno',
+      appointment_cancelled: 'Canceló un turno',
+      appointment_marked_no_show: 'Marcó "no vino"',
+      appointment_marked_completed: 'Marcó "completado"',
+      appointment_confirmed: 'Confirmó un turno',
+      subscription_cancelled: 'Canceló la suscripción',
+    },
   },
   adminMenu: {
     title: 'Panel del peluquero',

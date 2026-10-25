@@ -206,6 +206,28 @@ export interface UnansweredMessage {
 }
 
 /**
+ * Registro de auditoría: quién hizo una acción sensible desde el panel y
+ * cuándo (altas/bajas/cambios de estado de citas, cancelar la
+ * suscripción) — de solo lectura desde el cliente, solo lo escribe el
+ * backend (ver `functions/src/audit.ts`).
+ */
+export interface AuditLogEntry {
+  id: string;
+  branchId: string;
+  uid: string;
+  email: string;
+  action:
+    | 'appointment_created'
+    | 'appointment_cancelled'
+    | 'appointment_marked_no_show'
+    | 'appointment_marked_completed'
+    | 'appointment_confirmed'
+    | 'subscription_cancelled';
+  details?: Record<string, unknown>;
+  createdAt: number;
+}
+
+/**
  * Gasto del negocio (alquiler, agua/luz, empleados, insumos, otro) cargado
  * a mano por el peluquero en la pantalla de Finanzas, para poder comparar
  * ingresos contra gastos.
