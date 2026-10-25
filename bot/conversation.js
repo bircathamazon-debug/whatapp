@@ -138,9 +138,12 @@ export async function handleIncomingMessage(jid, rawText, branchId, pushName) {
   const state = await getConversation(phone);
 
   // Respuesta 1/2 a un recordatorio o a una oferta de lista de espera pendiente,
-  // solo si el cliente no está en medio de otro flujo activo.
+  // solo si el cliente no está en medio de otro flujo activo Y no saludó/usó
+  // el menú después de que se mandó ese aviso — si ya lo hizo (ej. escribió
+  // "hola" para empezar de cero y después "1"), ese "1" es una opción del
+  // menú nueva, no una respuesta tardía a un aviso de hace rato.
   if (state.step === 'MAIN_MENU' && (text === '1' || text === '2')) {
-    const pendingReply = await findAwaitingReply(phone);
+    const pendingReply = await findAwaitingReply(phone, state.updatedAt);
     if (pendingReply) return handlePendingReply(phone, pendingReply, text, branch);
   }
 
@@ -173,7 +176,7 @@ export async function handleIncomingMessage(jid, rawText, branchId, pushName) {
   }
 }
 
-async function findAwaitingReply(phone) {
+async function findAwaitingReply(phone, convUpdatedAt) {
   const snap = await db
     .collection('notifications')
     .where('to', '==', phone)
@@ -185,6 +188,12 @@ async function findAwaitingReply(phone) {
   for (const doc of snap.docs) {
     const data = doc.data();
     if (!data.awaitingReply || data.replyHandledAt) continue;
+    // Si el cliente ya saludó/usó el menú (lo que actualiza
+    // waConversations.updatedAt) DESPUÉS de que se mandó este aviso, significa
+    // que decidió arrancar de cero por su cuenta — este "1"/"2" es una opción
+    // del menú, no una respuesta a este aviso, aunque la cita/oferta
+    // relacionada siga vigente.
+    if (convUpdatedAt && data.sentAt && convUpdatedAt > data.sentAt) continue;
     if (await isStaleAwaitingReply(data)) {
       // El cliente nunca contestó este aviso (ni 1 ni 2) y lo que esperaba
       // ya se resolvió solo con el tiempo (la cita se completó/canceló/no
