@@ -956,6 +956,103 @@ detalle técnico completo de arquitectura y setup.
     de `flowsivan613@gmail.com`) — no era un problema del sistema, sino
     que el usuario estaba viendo otra cuenta de Google en la app de
     Calendar de su teléfono. Cambió de cuenta y ya lo vio. **Cerrado.**
+- ✅ **Auditoría de seguridad profesional (pedida explícitamente por el
+  usuario antes de dar la app a probadores externos) — PROGRAMADA Y
+  DESPLEGADA.** Se encontraron y corrigieron 3 problemas reales:
+  1. **Grave: las 12 funciones `onCall` de Firebase (el motor de
+     reservas, cancelar citas, campañas, Stripe/Tranzila, etc.) no
+     chequeaban a qué sucursal pertenecía quien llamaba** — las reglas
+     de Firestore que ya separaban los datos de cada sucursal solo
+     protegían el acceso directo del cliente a la base, pero estas
+     funciones usan un acceso de administrador que se las salta por
+     completo. Cualquier usuario logueado podía, en teoría, leer/escribir
+     datos de OTRA sucursal. Nuevo `functions/src/access.ts`
+     (`requireBranchAccess`) agregado a las 12 funciones. Probado en vivo
+     con la cuenta de prueba del amigo: confirmado que ahora da error de
+     permiso al intentar tocar otra sucursal, y que el acceso normal
+     sigue funcionando.
+  2. **El botón "Conectar Google Calendar" no pedía ningún login** —
+     cualquiera que adivinara la URL podía secuestrar la conexión de
+     calendario de otra persona. Se reescribió `functions/src/oauth.ts`
+     para exigir el login real (token de Firebase) y firmar la petición
+     con una clave secreta.
+  3. Se activó la verificación de firma de los webhooks de Telnyx (antes
+     cualquiera podía mandar peticiones falsas simulando ser una llamada
+     real) — requirió que el usuario consiga `TELNYX_PUBLIC_KEY` del
+     panel de Telnyx.
+  - De paso se armó una cuenta de acceso separada para que el amigo
+    peluquero probador pruebe con los números reales sin compartir el
+    mail/contraseña del usuario — con acceso completo, pero scoped a su
+    sucursal, vía `adminProvision.ts` (protegido con secreto).
+- ✅ **Ronda de pedidos del usuario tras probar en vivo — PROGRAMADA Y
+  DESPLEGADA**:
+  - **IVR (llamadas) lento en cada paso**: diagnosticado como
+    "cold start" (cada paso de la llamada arrancaba de cero) — se
+    presentaron 3 opciones de costo, el usuario eligió la más barata
+    (reducir memoria en vez de mantener todas las funciones siempre
+    despiertas). Corregido y confirmado por el usuario con llamadas
+    reales.
+  - **IVR decía "no entendí la hora" en vez de avisar que estaba
+    cerrado**: mismo tipo de bug que ya se había corregido antes en el
+    bot de WhatsApp — corregido también en el teléfono.
+  - **Sábado/Shabat nunca se debe ofrecer como día de reserva** (pedido
+    explícito: la clientela es religiosa, no se corta el pelo en
+    Shabat) — tanto el bot de WhatsApp como el IVR ahora solo ofrecen
+    los días en que algún peluquero tiene horario configurado, así que
+    si nadie trabaja los sábados, el sábado directamente no aparece en
+    la lista.
+  - **Bloqueo de un rango de fechas (vacaciones)**: nuevo campo en
+    Ajustes → Horarios para bloquear "del 5 al 10", por ejemplo — si
+    alguien intenta reservar en ese rango (por WhatsApp o por teléfono),
+    el bot avisa que la peluquería está cerrada esos días y ofrece
+    elegir otra fecha, en vez del mensaje genérico de "no hay horarios".
+  - **CRM de Clientes**: ahora se ve el número de teléfono de cada
+    cliente (antes solo el nombre) y hay un botón de "📞 llamar" directo,
+    también agregado en cada cita de la Agenda.
+  - **Ícono propio de la app**: se reemplazó el ícono genérico de Expo
+    por uno propio (recortado de un video que mandó el usuario), en
+    todos los tamaños necesarios (celular, favicon, PWA).
+- ✅ **"Agregar a la pantalla de inicio" se ve como una app — PROGRAMADO
+  Y DESPLEGADO.** El usuario preguntó si el link se puede ver como una
+  app al abrirlo desde el celular — ya estaba armado de una sesión
+  anterior (ícono propio, nombre, "modo standalone" sin la barra del
+  navegador), solo le faltaba actualizar 3 colores viejos (un verde
+  oscuro que ya no se usa) para que coincidan con el diseño actual
+  (`app.json`, `public/manifest.json`, `app/+html.tsx`). Se explicó al
+  usuario cómo instalarlo: en Android, menú de Chrome → "Instalar
+  aplicación"; en iPhone, botón de compartir de Safari → "Agregar a
+  pantalla de inicio".
+- 🐛 **Bug real encontrado y corregido: un "1" para pedir una cita nueva
+  confirmaba por error una cita vieja, sin preguntar día ni hora
+  ("התור אושר" de la nada).** El usuario lo reportó, se reprodujo y
+  confirmó en vivo con una captura de pantalla real (saludo → menú →
+  "1" → "✅ התור אושר. מחכים לך!" en vez de la lista de servicios).
+  Causa real: cuando se manda un recordatorio de cita ("apretá 1 para
+  confirmar, 2 para cancelar") y el cliente nunca contesta, ese aviso
+  quedaba "esperando respuesta" para siempre, sin ningún mecanismo que
+  lo diera por vencido — y el bot interceptaba CUALQUIER "1"/"2"
+  siguiente como si fuera la respuesta a ese aviso viejo, sin importar
+  cuánto tiempo hubiera pasado ni que el cliente ya hubiera saludado de
+  nuevo para empezar de cero.
+  - ✅ **Corregido en 2 pasos** (`bot/conversation.js`,
+    `findAwaitingReply`): primero, un aviso cuya cita ya no está activa
+    (se completó/canceló) se da por vencido solo. Segundo —el que
+    resolvió el caso real reportado, donde la cita original SEGUÍA
+    vigente—: si el cliente volvió a usar el menú (saludó) DESPUÉS de
+    que se mandó el aviso, ese "1"/"2" se trata como una opción del
+    menú nueva, nunca como respuesta al aviso viejo.
+  - ✅ **Desplegado en Railway y confirmado por el usuario en vivo**
+    ("probé de nuevo, ahora sí funciona").
+  - Nota técnica: este mismo período hubo un **apagón real y prolongado
+    de la plataforma Railway** (incidente de seguridad del proveedor,
+    21-22/10, con rotación de credenciales y tokens invalidados de su
+    lado) que bloqueó CUALQUIER subida nueva del bot durante casi toda
+    la sesión anterior — ya se resolvió solo del lado de Railway, sin
+    que hiciera falta ninguna acción de este lado más que reintentar.
+    Se le recomendó al usuario renovar (rotar) las claves que tiene
+    guardadas en Railway (Firebase, OpenAI) por las dudas, ya que
+    Railway avisó que hubo que invalidar credenciales por su incidente
+    — **pendiente que el usuario lo haga cuando pueda**, no es urgente.
 - **Ideas para el backlog (más adelante, el usuario lo aclaró
   explícitamente — no bloquean el piloto):**
   - Página web y video publicitario explicando el ahorro de tiempo/dinero
