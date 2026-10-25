@@ -9,6 +9,7 @@ export {
   chargeTranzilaSubscriptions,
   checkSystemHealth,
 } from './crons';
+export { backupFirestore } from './backup';
 
 export { onAppointmentCancelledOfferWaitlist } from './waitlist';
 export { onAppointmentCompletedUpdateLoyalty } from './loyalty';

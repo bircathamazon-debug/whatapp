@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from '../../lib/firebase';
 import { useTheme, type ThemeColors, RADIUS, cardShadow, accentGlow, accentBorder, PRESSED_SCALE } from '../../lib/theme';
 import { useT } from '../../lib/i18n';
@@ -24,6 +24,9 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [resetMode, setResetMode] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetLoading, setResetLoading] = useState(false);
 
   const login = async () => {
     if (!email || !password) return;
@@ -38,6 +41,21 @@ export default function LoginScreen() {
     }
   };
 
+  const sendReset = async () => {
+    if (!resetEmail) return;
+    setResetLoading(true);
+    try {
+      await sendPasswordResetEmail(auth, resetEmail);
+      Alert.alert(t.login.resetTitle, t.login.resetSuccess);
+      setResetMode(false);
+      setResetEmail('');
+    } catch {
+      Alert.alert(t.login.error, t.login.resetError);
+    } finally {
+      setResetLoading(false);
+    }
+  };
+
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -49,40 +67,72 @@ export default function LoginScreen() {
       <Text style={styles.brand}>{t.login.title}</Text>
       <Text style={styles.subtitle}>{t.login.subtitle}</Text>
 
-      <View style={styles.card}>
-        <View style={styles.inputRow}>
-          <Ionicons name="mail-outline" size={18} color={colors.textMuted} style={styles.inputIcon} />
-          <TextInput
-            style={styles.input}
-            value={email}
-            onChangeText={setEmail}
-            placeholder={t.login.email}
-            placeholderTextColor={colors.textMuted}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            autoCorrect={false}
-          />
+      {resetMode ? (
+        <View style={styles.card}>
+          <Text style={styles.resetTitle}>{t.login.resetTitle}</Text>
+          <View style={styles.inputRow}>
+            <Ionicons name="mail-outline" size={18} color={colors.textMuted} style={styles.inputIcon} />
+            <TextInput
+              style={styles.input}
+              value={resetEmail}
+              onChangeText={setResetEmail}
+              placeholder={t.login.resetEmailPlaceholder}
+              placeholderTextColor={colors.textMuted}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+          </View>
+          <Pressable
+            style={({ pressed }) => [styles.btn, resetLoading && styles.btnDisabled, pressed && PRESSED_SCALE]}
+            onPress={sendReset}
+            disabled={resetLoading}
+          >
+            <Text style={styles.btnText}>{resetLoading ? t.login.resetSending : t.login.resetSend}</Text>
+          </Pressable>
+          <Pressable onPress={() => setResetMode(false)} style={styles.linkBtn}>
+            <Text style={styles.linkText}>{t.login.resetCancel}</Text>
+          </Pressable>
         </View>
-        <View style={styles.inputRow}>
-          <Ionicons name="lock-closed-outline" size={18} color={colors.textMuted} style={styles.inputIcon} />
-          <TextInput
-            style={styles.input}
-            value={password}
-            onChangeText={setPassword}
-            placeholder={t.login.password}
-            placeholderTextColor={colors.textMuted}
-            secureTextEntry
-          />
-        </View>
+      ) : (
+        <View style={styles.card}>
+          <View style={styles.inputRow}>
+            <Ionicons name="mail-outline" size={18} color={colors.textMuted} style={styles.inputIcon} />
+            <TextInput
+              style={styles.input}
+              value={email}
+              onChangeText={setEmail}
+              placeholder={t.login.email}
+              placeholderTextColor={colors.textMuted}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+          </View>
+          <View style={styles.inputRow}>
+            <Ionicons name="lock-closed-outline" size={18} color={colors.textMuted} style={styles.inputIcon} />
+            <TextInput
+              style={styles.input}
+              value={password}
+              onChangeText={setPassword}
+              placeholder={t.login.password}
+              placeholderTextColor={colors.textMuted}
+              secureTextEntry
+            />
+          </View>
 
-        <Pressable
-          style={({ pressed }) => [styles.btn, loading && styles.btnDisabled, pressed && PRESSED_SCALE]}
-          onPress={login}
-          disabled={loading}
-        >
-          <Text style={styles.btnText}>{loading ? t.login.submitting : t.login.submit}</Text>
-        </Pressable>
-      </View>
+          <Pressable
+            style={({ pressed }) => [styles.btn, loading && styles.btnDisabled, pressed && PRESSED_SCALE]}
+            onPress={login}
+            disabled={loading}
+          >
+            <Text style={styles.btnText}>{loading ? t.login.submitting : t.login.submit}</Text>
+          </Pressable>
+          <Pressable onPress={() => { setResetEmail(email); setResetMode(true); }} style={styles.linkBtn}>
+            <Text style={styles.linkText}>{t.login.forgotPassword}</Text>
+          </Pressable>
+        </View>
+      )}
     </KeyboardAvoidingView>
   );
 }
@@ -150,5 +200,8 @@ function makeStyles(colors: ThemeColors, mode: 'light' | 'dark') {
     },
     btnDisabled: { opacity: 0.6 },
     btnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
+    linkBtn: { marginTop: 16, alignItems: 'center' },
+    linkText: { color: colors.accent, fontSize: 14, fontWeight: '600' },
+    resetTitle: { fontSize: 16, fontWeight: '700', color: colors.text, textAlign: 'center', marginBottom: 16 },
   });
 }

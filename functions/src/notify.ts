@@ -162,6 +162,7 @@ export interface TemplateSet {
   weekdayDiscountCampaign: (percent: number, daysLabel: string) => string;
   noShowWarning: (clientName: string) => string;
   comebackReminder: (clientName: string) => string;
+  systemDown: (branchName: string, minutesDown: number) => string;
 }
 
 const templatesHe: TemplateSet = {
@@ -200,6 +201,9 @@ const templatesHe: TemplateSet = {
 
   comebackReminder: (clientName) =>
     `שלום ${clientName}! עבר כבר חודש מהתספורת האחרונה שלך ✂️ מוזמנים לקבוע תור חדש — כתבו "menu".`,
+
+  systemDown: (branchName, minutesDown) =>
+    `הבוט של וואטסאפ של ${branchName} מנותק כבר ${minutesDown} דקות. כדאי לבדוק בהקדם.`,
 };
 
 const templatesEn: TemplateSet = {
@@ -238,6 +242,9 @@ const templatesEn: TemplateSet = {
 
   comebackReminder: (clientName) =>
     `Hi ${clientName}! It's been a month since your last haircut ✂️ Feel free to book a new one — type "menu".`,
+
+  systemDown: (branchName, minutesDown) =>
+    `${branchName}'s WhatsApp bot has been disconnected for ${minutesDown} minutes. Please check it as soon as you can.`,
 };
 
 const templatesEs: TemplateSet = {
@@ -276,6 +283,9 @@ const templatesEs: TemplateSet = {
 
   comebackReminder: (clientName) =>
     `¡Hola ${clientName}! Ya pasó un mes desde tu último corte ✂️ Te invitamos a reservar uno nuevo — escribí "menu".`,
+
+  systemDown: (branchName, minutesDown) =>
+    `El bot de WhatsApp de ${branchName} está desconectado hace ${minutesDown} minutos. Revisalo apenas puedas.`,
 };
 
 const TEMPLATE_SETS: Record<string, TemplateSet> = { he: templatesHe, en: templatesEn, es: templatesEs };

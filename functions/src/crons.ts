@@ -220,9 +220,14 @@ const HEALTH_ALERT_COOLDOWN_MS = 60 * 60000; // no repetir la alerta más de una
 /**
  * Cada 10 minutos: si el bot de WhatsApp de alguna sucursal dejó de avisar
  * que sigue vivo (`systemHealth/{branchId}.lastHeartbeat`, que el propio
- * bot actualiza cada pocos minutos), avisa por SMS al teléfono de la
- * sucursal — por SMS y no por WhatsApp a propósito, porque si el bot está
- * caído, un aviso por WhatsApp nunca saldría (lo manda el mismo bot caído).
+ * bot actualiza cada pocos minutos), avisa con una LLAMADA al teléfono de
+ * la sucursal — una llamada y no un WhatsApp a propósito, porque si el bot
+ * está caído, un aviso por WhatsApp nunca saldría (lo manda el mismo bot
+ * caído). Antes se mandaba por SMS, pero el número de Telnyx nunca tuvo un
+ * "Messaging Profile" asignado en el portal (hace falta para poder mandar
+ * SMS) — la alerta se encolaba pero fallaba en silencio y nunca llegaba de
+ * verdad. Se cambió a llamada porque la voz ya está probada y funcionando
+ * (es el mismo mecanismo del IVR), sin depender de configurar nada nuevo.
  */
 export const checkSystemHealth = onSchedule({ schedule: 'every 10 minutes', timeZone: 'Asia/Jerusalem' }, async () => {
   const now = Date.now();
@@ -241,11 +246,11 @@ export const checkSystemHealth = onSchedule({ schedule: 'every 10 minutes', time
     const minutesDown = Math.round((now - health.lastHeartbeat) / 60000);
     try {
       await sendNotification({
-        channel: 'sms',
+        channel: 'call',
         to: branch.phone,
         branch,
         template: 'systemDown',
-        text: `⚠️ El bot de WhatsApp de ${branch.name} está desconectado hace ${minutesDown} minutos. Revisalo apenas puedas.`,
+        text: getTemplates(branch.language).systemDown(branch.name, minutesDown),
       });
     } catch (err) {
       console.error('[crons] error enviando alerta de sistema caído', err);

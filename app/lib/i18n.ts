@@ -128,6 +128,14 @@ interface Dict {
     submitting: string;
     error: string;
     errorMessage: string;
+    forgotPassword: string;
+    resetTitle: string;
+    resetEmailPlaceholder: string;
+    resetSend: string;
+    resetSending: string;
+    resetSuccess: string;
+    resetError: string;
+    resetCancel: string;
   };
   branches: {
     name: string;
@@ -408,6 +416,14 @@ const he: Dict = {
     submitting: 'מתחבר...',
     error: 'שגיאה',
     errorMessage: 'אימייל או סיסמה שגויים',
+    forgotPassword: 'שכחתי סיסמה',
+    resetTitle: 'איפוס סיסמה',
+    resetEmailPlaceholder: 'הכניסו את האימייל שנרשמתם איתו',
+    resetSend: 'שלחו לי קישור לאיפוס',
+    resetSending: 'שולח...',
+    resetSuccess: 'שלחנו לכם מייל עם קישור לאיפוס הסיסמה. בדקו גם בתיקיית ספאם.',
+    resetError: 'לא הצלחנו לשלוח — בדקו שהאימייל נכון.',
+    resetCancel: 'ביטול',
   },
   branches: {
     name: 'שם',
@@ -688,6 +704,14 @@ const en: Dict = {
     submitting: 'Logging in...',
     error: 'Error',
     errorMessage: 'Incorrect email or password',
+    forgotPassword: 'Forgot password',
+    resetTitle: 'Reset password',
+    resetEmailPlaceholder: 'Enter the email you signed up with',
+    resetSend: 'Send me a reset link',
+    resetSending: 'Sending...',
+    resetSuccess: "We sent you an email with a reset link. Check your spam folder too.",
+    resetError: "We couldn't send it — check the email is correct.",
+    resetCancel: 'Cancel',
   },
   branches: {
     name: 'Name',
@@ -968,6 +992,14 @@ const es: Dict = {
     submitting: 'Ingresando...',
     error: 'Error',
     errorMessage: 'Email o contraseña incorrectos',
+    forgotPassword: 'Olvidé mi contraseña',
+    resetTitle: 'Restablecer contraseña',
+    resetEmailPlaceholder: 'Ingresá el email con el que te registraste',
+    resetSend: 'Enviarme un link para restablecerla',
+    resetSending: 'Enviando...',
+    resetSuccess: 'Te enviamos un mail con un link para restablecer la contraseña. Revisá también la carpeta de spam.',
+    resetError: 'No pudimos enviarlo — revisá que el email sea correcto.',
+    resetCancel: 'Cancelar',
   },
   branches: {
     name: 'Nombre',
