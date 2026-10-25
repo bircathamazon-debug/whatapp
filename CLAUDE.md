@@ -1112,6 +1112,34 @@ detalle técnico completo de arquitectura y setup.
     ABIERTAS si faltaba la clave/secreto (dejaban pasar sin verificar
     en vez de rechazar) — ahora fallan CERRADAS. Desplegado y
     verificado.
+- ✅ **2 últimos pedidos del checklist "nivel profesional" — PROGRAMADOS Y
+  DESPLEGADOS**:
+  1. ✅ **Registro de auditoría ("quién cambió qué y cuándo")**: nueva
+     colección `auditLog` (`functions/src/audit.ts`), de solo lectura
+     desde el panel — solo el backend puede escribir, así nadie puede
+     borrar ni falsificar su propio rastro. Por ahora cubre las
+     acciones que ya pasan por una Cloud Function con sesión
+     verificada (las más consecuentes): crear/cancelar/confirmar una
+     cita, marcar que no vino o que se completó, y cancelar la
+     suscripción. Nueva pantalla **"Registro de actividad"** en el
+     menú Más. **Aclarado con el usuario (no es un "completo" sin
+     matices)**: las pantallas que escriben directo a Firestore desde
+     la app (Horarios, Sucursales, Servicios, Campañas, Ajustes
+     generales) todavía NO quedan registradas acá — haría falta
+     pasarlas por una Cloud Function para poder confiar en quién hizo
+     el cambio, que es un trabajo aparte más grande, no se construyó
+     todavía.
+  2. ✅ **Alertas automáticas de "función fallando"** (la mitad que le
+     faltaba a la alerta del bot caído, ya resuelta antes): se usó
+     Google Cloud Monitoring (nativo del proyecto, sin código propio
+     que mantener) — un canal de email a `flow613@gmail.com` y una
+     política de alerta que avisa cuando una función devuelve un error
+     5xx real (no un rechazo esperado como 401/404/409, que ya pasa
+     seguido en el uso normal: pedidos sin el secreto correcto,
+     horarios ocupados, etc.). **Falta que el usuario confirme el mail
+     de verificación** que Google le mandó a esa casilla — sin
+     confirmarlo, las alertas no llegan todavía aunque la política ya
+     esté creada y activa.
 - **Ideas para el backlog (más adelante, el usuario lo aclaró
   explícitamente — no bloquean el piloto):**
   - Página web y video publicitario explicando el ahorro de tiempo/dinero
