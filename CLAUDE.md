@@ -1095,6 +1095,23 @@ detalle técnico completo de arquitectura y setup.
     adicional — aclarado con el usuario que esto NO reemplaza una
     auditoría certificada por una empresa externa (eso sigue siendo un
     trámite de negocio aparte, no algo que una skill pueda hacer).
+  - 🐛 **Esa revisión encontró un hallazgo CRÍTICO real, corregido de
+    inmediato**: `tranzilaNotify` (el aviso de pago de Tranzila) no
+    verificaba que el pedido viniera de verdad de Tranzila —
+    cualquiera que supiera un `branchId` podía activar una suscripción
+    paga gratis para esa sucursal con un simple POST a mano,
+    saltándose el bloqueo de `firestore.rules` que deja "subscription"
+    solo en manos del SDK de administrador (esta función corre
+    justo con ese SDK). Se agregó un token firmado (HMAC) al link de
+    notificación, verificado antes de tocar la base de datos — mismo
+    patrón ya usado en `oauth.ts`. **Confirmado con una petición de
+    prueba real**: antes daba 200 (hubiera activado el pago gratis),
+    ahora da 401 sin el token correcto. También se corrigieron 2
+    hallazgos menores de la misma revisión: la verificación de firma
+    de Telnyx y la firma del "state" de Google OAuth fallaban
+    ABIERTAS si faltaba la clave/secreto (dejaban pasar sin verificar
+    en vez de rechazar) — ahora fallan CERRADAS. Desplegado y
+    verificado.
 - **Ideas para el backlog (más adelante, el usuario lo aclaró
   explícitamente — no bloquean el piloto):**
   - Página web y video publicitario explicando el ahorro de tiempo/dinero
