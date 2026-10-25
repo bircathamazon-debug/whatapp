@@ -182,8 +182,37 @@ async function findAwaitingReply(phone) {
     .orderBy('sentAt', 'desc')
     .limit(5)
     .get();
-  const doc = snap.docs.find((d) => d.data().awaitingReply && !d.data().replyHandledAt);
-  return doc ?? null;
+  for (const doc of snap.docs) {
+    const data = doc.data();
+    if (!data.awaitingReply || data.replyHandledAt) continue;
+    if (await isStaleAwaitingReply(data)) {
+      // El cliente nunca contestó este aviso (ni 1 ni 2) y lo que esperaba
+      // ya se resolvió solo con el tiempo (la cita se completó/canceló/no
+      // vino, o la oferta de lista de espera venció) — se da por vencido en
+      // vez de dejarlo "esperando respuesta" para siempre. Si no se hace
+      // esto, un "1" escrito mucho después para algo sin relación (ej. "hola"
+      // + "1" para pedir una cita nueva) se interpreta por error como la
+      // respuesta a este aviso viejo.
+      await doc.ref.update({ replyHandledAt: Date.now() });
+      continue;
+    }
+    return doc;
+  }
+  return null;
+}
+
+async function isStaleAwaitingReply(data) {
+  if (data.awaitingReply === 'confirm_cancel' && data.relatedAppointmentId) {
+    const snap = await db.collection('appointments').doc(data.relatedAppointmentId).get();
+    const status = snap.exists ? snap.data().status : null;
+    return status !== 'confirmed' && status !== 'pending_deposit';
+  }
+  if (data.awaitingReply === 'waitlist_offer' && data.data?.waitlistId) {
+    const snap = await db.collection('waitlist').doc(data.data.waitlistId).get();
+    const status = snap.exists ? snap.data().status : null;
+    return status !== 'offered';
+  }
+  return false;
 }
 
 async function handlePendingReply(phone, doc, digit, branch) {
