@@ -1140,6 +1140,28 @@ detalle técnico completo de arquitectura y setup.
      de verificación** que Google le mandó a esa casilla — sin
      confirmarlo, las alertas no llegan todavía aunque la política ya
      esté creada y activa.
+- ✅ **3 últimos pedidos del checklist — PROGRAMADOS Y DESPLEGADOS**:
+  1. ✅ **Modo "solo lectura" para cuentas de invitado/prueba**: cualquier
+     cuenta se puede marcar como `readOnly` (vía `adminSetUserAccess`,
+     la misma herramienta que ya se usó para la cuenta del amigo
+     probador) — entra y ve todo, pero no puede crear/cambiar/cancelar
+     nada de verdad. Bloqueado tanto en `firestore.rules` (pantallas
+     que escriben directo a Firestore) como en los callables de Cloud
+     Functions (`requireBranchWriteAccess`, nueva en `access.ts`). La
+     app muestra un aviso arriba ("modo solo lectura") para que no
+     quede confuso si algo no se puede guardar. **Probado de punta a
+     punta** prendiendo y apagando el flag en la cuenta real del
+     amigo — se la dejó con acceso completo (`readOnly: false`), como
+     corresponde, ya que él necesita probar de verdad.
+  2. **Cobro automático del depósito con tarjeta**: el usuario decidió
+     que no hace falta — alcanza con el completado automático de la
+     cita (cuenta como ingreso sola) + la corrección manual ya
+     construidos. Backlog cerrado por decisión, sin cambios de código.
+  3. **Doble factor de autenticación**: el usuario decidió que no hace
+     falta, ya que "olvidé mi contraseña" (agregado antes) cubre el
+     caso real que le preocupaba (quedarse afuera del panel). Backlog
+     cerrado por decisión — se respondió el comentario abierto en el
+     checklist imprimible.
 - **Ideas para el backlog (más adelante, el usuario lo aclaró
   explícitamente — no bloquean el piloto):**
   - Página web y video publicitario explicando el ahorro de tiempo/dinero
