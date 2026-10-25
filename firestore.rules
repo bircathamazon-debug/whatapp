@@ -29,6 +29,19 @@ service cloud.firestore {
       return isSignedIn() && (isSuperAdmin() || branchId in userDoc().data.get('branchIds', []));
     }
 
+    // Cuentas de invitado/prueba (ej. un peluquero amigo probando el
+    // sistema) pueden marcarse como "solo lectura" (`users/{uid}.readOnly`)
+    // — entran y ven todo, pero no pueden crear, cambiar ni borrar nada de
+    // verdad. Se arma con el SDK de administrador (`adminSetUserAccess`),
+    // igual que `branchIds`/`isSuperAdmin`.
+    function isReadOnly() {
+      return isSignedIn() && userDoc().data.get('readOnly', false) == true;
+    }
+
+    function canWrite(branchId) {
+      return hasBranchAccess(branchId) && !isReadOnly();
+    }
+
     // Ninguna cuenta puede escribir su propia ficha de acceso (así nadie
     // puede darse permiso a otra sucursal o a sí mismo): solo se crea con
     // el SDK de administrador, nunca desde el cliente.
@@ -40,78 +53,80 @@ service cloud.firestore {
     match /branches/{id} {
       allow read: if hasBranchAccess(id);
       // Crear o borrar una sucursal (negocio) entera es una acción de alta,
-      // reservada al administrador general.
-      allow create, delete: if isSuperAdmin();
+      // reservada al administrador general (y nunca a una cuenta de solo
+      // lectura, aunque fuera superadmin).
+      allow create, delete: if isSuperAdmin() && !isReadOnly();
       // El campo "subscription" (estado real de pago en Stripe) solo lo
       // puede tocar el webhook con el SDK de administrador, que no pasa por
       // estas reglas — así ningún cliente puede marcarse a sí mismo como
       // "activo" sin haber pagado de verdad.
-      allow update: if hasBranchAccess(id)
+      allow update: if canWrite(id)
         && request.resource.data.get('subscription', null) == resource.data.get('subscription', null);
     }
 
     match /staff/{id} {
       allow read: if hasBranchAccess(resource.data.branchId);
-      allow create: if hasBranchAccess(request.resource.data.branchId);
-      allow update, delete: if hasBranchAccess(resource.data.branchId) && hasBranchAccess(request.resource.data.branchId);
+      allow create: if canWrite(request.resource.data.branchId);
+      allow update, delete: if canWrite(resource.data.branchId) && canWrite(request.resource.data.branchId);
     }
 
     match /services/{id} {
       allow read: if hasBranchAccess(resource.data.branchId);
-      allow create: if hasBranchAccess(request.resource.data.branchId);
-      allow update, delete: if hasBranchAccess(resource.data.branchId) && hasBranchAccess(request.resource.data.branchId);
+      allow create: if canWrite(request.resource.data.branchId);
+      allow update, delete: if canWrite(resource.data.branchId) && canWrite(request.resource.data.branchId);
     }
 
     match /clients/{id} {
       allow read: if hasBranchAccess(resource.data.branchId);
-      allow create: if hasBranchAccess(request.resource.data.branchId);
-      allow update, delete: if hasBranchAccess(resource.data.branchId) && hasBranchAccess(request.resource.data.branchId);
+      allow create: if canWrite(request.resource.data.branchId);
+      allow update, delete: if canWrite(resource.data.branchId) && canWrite(request.resource.data.branchId);
     }
 
     match /appointments/{id} {
       allow read: if hasBranchAccess(resource.data.branchId);
-      allow create: if hasBranchAccess(request.resource.data.branchId);
-      allow update, delete: if hasBranchAccess(resource.data.branchId) && hasBranchAccess(request.resource.data.branchId);
+      allow create: if canWrite(request.resource.data.branchId);
+      allow update, delete: if canWrite(resource.data.branchId) && canWrite(request.resource.data.branchId);
     }
 
     match /waitlist/{id} {
       allow read: if hasBranchAccess(resource.data.branchId);
-      allow create: if hasBranchAccess(request.resource.data.branchId);
-      allow update, delete: if hasBranchAccess(resource.data.branchId) && hasBranchAccess(request.resource.data.branchId);
+      allow create: if canWrite(request.resource.data.branchId);
+      allow update, delete: if canWrite(resource.data.branchId) && canWrite(request.resource.data.branchId);
     }
 
     match /recurringBookings/{id} {
       allow read: if hasBranchAccess(resource.data.branchId);
-      allow create: if hasBranchAccess(request.resource.data.branchId);
-      allow update, delete: if hasBranchAccess(resource.data.branchId) && hasBranchAccess(request.resource.data.branchId);
+      allow create: if canWrite(request.resource.data.branchId);
+      allow update, delete: if canWrite(resource.data.branchId) && canWrite(request.resource.data.branchId);
     }
 
     match /blockedTimes/{id} {
       allow read: if hasBranchAccess(resource.data.branchId);
-      allow create: if hasBranchAccess(request.resource.data.branchId);
-      allow update, delete: if hasBranchAccess(resource.data.branchId) && hasBranchAccess(request.resource.data.branchId);
+      allow create: if canWrite(request.resource.data.branchId);
+      allow update, delete: if canWrite(resource.data.branchId) && canWrite(request.resource.data.branchId);
     }
 
     match /campaigns/{id} {
       allow read: if hasBranchAccess(resource.data.branchId);
-      allow create: if hasBranchAccess(request.resource.data.branchId);
-      allow update, delete: if hasBranchAccess(resource.data.branchId) && hasBranchAccess(request.resource.data.branchId);
+      allow create: if canWrite(request.resource.data.branchId);
+      allow update, delete: if canWrite(resource.data.branchId) && canWrite(request.resource.data.branchId);
     }
 
     match /unansweredMessages/{id} {
       allow read: if hasBranchAccess(resource.data.branchId);
-      allow create: if hasBranchAccess(request.resource.data.branchId);
-      allow update, delete: if hasBranchAccess(resource.data.branchId) && hasBranchAccess(request.resource.data.branchId);
+      allow create: if canWrite(request.resource.data.branchId);
+      allow update, delete: if canWrite(resource.data.branchId) && canWrite(request.resource.data.branchId);
     }
 
     match /expenses/{id} {
       allow read: if hasBranchAccess(resource.data.branchId);
-      allow create: if hasBranchAccess(request.resource.data.branchId);
-      allow update, delete: if hasBranchAccess(resource.data.branchId) && hasBranchAccess(request.resource.data.branchId);
+      allow create: if canWrite(request.resource.data.branchId);
+      allow update, delete: if canWrite(resource.data.branchId) && canWrite(request.resource.data.branchId);
     }
 
     match /settings/{branchId} {
-      allow read, write: if hasBranchAccess(branchId);
+      allow read: if hasBranchAccess(branchId);
+      allow write: if canWrite(branchId);
     }
 
     // Cola de notificaciones salientes y estado de conversación del bot:

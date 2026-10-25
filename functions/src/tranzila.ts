@@ -2,7 +2,7 @@ import { onCall, onRequest, HttpsError } from 'firebase-functions/v2/https';
 import { createHmac, timingSafeEqual } from 'crypto';
 import { db } from './admin';
 import type { Branch } from './types';
-import { requireBranchAccess } from './access';
+import { requireBranchWriteAccess } from './access';
 import { logAudit } from './audit';
 
 /**
@@ -78,7 +78,7 @@ export const tranzilaCreateCheckoutUrl = onCall(async (request) => {
   const { branchId } = request.data as { branchId: string };
   const config = getConfig();
   if (!config) throw new HttpsError('failed-precondition', 'Los pagos todavía no están configurados.');
-  await requireBranchAccess(request.auth, branchId);
+  await requireBranchWriteAccess(request.auth, branchId);
 
   const branchSnap = await db.collection('branches').doc(branchId).get();
   if (!branchSnap.exists) throw new HttpsError('not-found', 'Sucursal no encontrada.');
@@ -108,7 +108,7 @@ export const tranzilaCreateCheckoutUrl = onCall(async (request) => {
 export const tranzilaCancelSubscription = onCall(async (request) => {
   if (!request.auth) throw new HttpsError('unauthenticated', 'Requiere sesión.');
   const { branchId } = request.data as { branchId: string };
-  await requireBranchAccess(request.auth, branchId);
+  await requireBranchWriteAccess(request.auth, branchId);
   await db.collection('branches').doc(branchId).update({ 'subscription.status': 'canceled' });
   await logAudit(request.auth.uid, branchId, 'subscription_cancelled');
   return { ok: true };

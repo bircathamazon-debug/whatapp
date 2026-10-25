@@ -45,19 +45,28 @@ export const adminCreateAuthUser = onRequest(async (req, res) => {
 });
 
 /**
- * Define a qué sucursal(es) puede entrar una cuenta (`branchIds`), o si es
- * administrador general (`isSuperAdmin`, ve todas). Lo leen las reglas de
- * Firestore (`firestore.rules`) para separar los datos entre negocios.
+ * Define a qué sucursal(es) puede entrar una cuenta (`branchIds`), si es
+ * administrador general (`isSuperAdmin`, ve todas), y si es una cuenta de
+ * "solo lectura" (`readOnly` — pensada para invitados/pruebas: pueden
+ * entrar y mirar todo, pero cualquier intento de crear/cambiar/cancelar
+ * algo se rechaza, tanto en el backend como en `firestore.rules`). Lo leen
+ * las reglas de Firestore para separar los datos entre negocios.
  */
 export const adminSetUserAccess = onRequest(async (req, res) => {
   if (!checkSecret(req)) {
     res.status(401).json({ error: 'unauthorized' });
     return;
   }
-  const { uid, isSuperAdmin, branchIds } = req.body as { uid: string; isSuperAdmin?: boolean; branchIds?: string[] };
+  const { uid, isSuperAdmin, branchIds, readOnly } = req.body as {
+    uid: string;
+    isSuperAdmin?: boolean;
+    branchIds?: string[];
+    readOnly?: boolean;
+  };
   const data: Record<string, unknown> = {};
   if (isSuperAdmin !== undefined) data.isSuperAdmin = isSuperAdmin;
   if (branchIds !== undefined) data.branchIds = branchIds;
+  if (readOnly !== undefined) data.readOnly = readOnly;
   const ref = db.collection('users').doc(uid);
   await ref.set(data, { merge: true });
   const saved = await ref.get();

@@ -3,7 +3,7 @@ import { db } from './admin';
 import type { Appointment, Branch, BlockedTime, Service, Staff } from './types';
 import { getAvailableSlots, getStaffServiceDuration } from './availability';
 import { createAppointment, cancelAppointment, confirmAppointment, markNoShow, markCompleted } from './booking';
-import { requireBranchAccess } from './access';
+import { requireBranchAccess, requireBranchWriteAccess } from './access';
 import { logAudit } from './audit';
 
 /** Callable: huecos libres de un peluquero en un día dado (usado por bot e IVR vía import directo, y por la app admin vía HTTPS). */
@@ -55,7 +55,7 @@ export const adminCreateAppointment = onCall(async (request) => {
   if (!branchSnap.exists || !staffSnap.exists || !serviceSnap.exists) {
     throw new HttpsError('not-found', 'Sucursal, peluquero o servicio no encontrado.');
   }
-  await requireBranchAccess(request.auth, branchId);
+  await requireBranchWriteAccess(request.auth, branchId);
   const branch = branchSnap.data() as Branch;
   const staff = staffSnap.data() as Staff;
   const service = serviceSnap.data() as Service;
@@ -87,7 +87,7 @@ async function requireAppointmentAccess(auth: Parameters<typeof requireBranchAcc
   const snap = await db.collection('appointments').doc(appointmentId).get();
   if (!snap.exists) throw new HttpsError('not-found', 'Cita no encontrada.');
   const appt = snap.data() as Appointment;
-  await requireBranchAccess(auth, appt.branchId);
+  await requireBranchWriteAccess(auth, appt.branchId);
   return appt.branchId;
 }
 

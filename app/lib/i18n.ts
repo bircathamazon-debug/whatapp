@@ -14,6 +14,7 @@ export type Lang = 'he' | 'en' | 'es';
 export const RTL_LANGS: Lang[] = ['he'];
 
 interface Dict {
+  readOnlyBanner: string;
   tabs: { agenda: string; waitlist: string; waitlistShort: string; clients: string; campaigns: string; questions: string; home: string; more: string; auditLog: string };
   home: {
     greeting: string;
@@ -313,6 +314,7 @@ interface Dict {
 }
 
 const he: Dict = {
+  readOnlyBanner: '👁️ מצב צפייה בלבד — אי אפשר לשמור שינויים בחשבון הזה',
   tabs: { agenda: 'יומן', waitlist: 'רשימת המתנה', waitlistShort: 'המתנה', clients: 'לקוחות', campaigns: 'קמפיינים', questions: 'שאלות', home: 'בית', more: 'עוד', auditLog: 'יומן פעילות' },
   home: {
     greeting: 'שלום',
@@ -612,6 +614,7 @@ const he: Dict = {
 };
 
 const en: Dict = {
+  readOnlyBanner: '👁️ View-only mode — changes can’t be saved on this account',
   tabs: { agenda: 'Agenda', waitlist: 'Waitlist', waitlistShort: 'Waitlist', clients: 'Clients', campaigns: 'Campaigns', questions: 'Questions', home: 'Home', more: 'More', auditLog: 'Activity log' },
   home: {
     greeting: 'Hello',
@@ -911,6 +914,7 @@ const en: Dict = {
 };
 
 const es: Dict = {
+  readOnlyBanner: '👁️ Modo solo lectura — no se pueden guardar cambios en esta cuenta',
   tabs: { agenda: 'Agenda', waitlist: 'Lista de espera', waitlistShort: 'Espera', clients: 'Clientes', campaigns: 'Campañas', questions: 'Preguntas', home: 'Inicio', more: 'Más', auditLog: 'Registro de actividad' },
   home: {
     greeting: 'Hola',

@@ -67,7 +67,7 @@ export const googleCalendarConnect = onRequest(async (req, res) => {
     return;
   }
   try {
-    await requireBranchAccessByUid(uid, (staffSnap.data() as { branchId: string }).branchId);
+    await requireBranchAccessByUid(uid, (staffSnap.data() as { branchId: string }).branchId, { requireWrite: true });
   } catch {
     res.status(403).send('No tenés acceso a este peluquero.');
     return;
