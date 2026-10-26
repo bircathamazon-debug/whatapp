@@ -1410,8 +1410,29 @@ detalle técnico completo de arquitectura y setup.
     (auditar barberías de México = lista de posibles clientes) y quizás
     ofrecerlo más adelante como servicio a los clientes del bot. El plan
     de Google e IA y la Ruta ya se reescribieron con este foco.
-  - Pendientes que dependen del usuario: lista de 20 búsquedas reales
-    (palabras clave), nombre comercial del bot + dominio .com. Tareas
+  - 🇻🇪 **Decisión del usuario (27-10-2026): primer mercado = Caracas,
+    Venezuela** (nació ahí y tiene familia: aliado local para demos cara a
+    cara). México queda para después. Los 3 artifacts (Meta, Google/IA,
+    Ruta) ya se adaptaron. Contexto honesto ya explicado al usuario: el
+    estudio de mercado le dio 3/10 a Venezuela (cobro manual, luz,
+    competencia gratis — ReservaSimple gratis hasta 30 reservas/mes y
+    US$13,99 con WhatsApp —, costo de mensajes de la API oficial
+    ~US$0,013 c/u). La familia confirmó que se puede cobrar mensualidad
+    (Pago Móvil, débito inmediato/domiciliación en algunos bancos, Zelle,
+    Binance USDT) — al principio a mano. El precio es lo que el test tiene
+    que responder (estudio sugería ≥ US$29/mes).
+  - 🔎 **Skill propia `investigar-palabras-clave`** (`.claude/skills/`):
+    autocompletado de Google + Google Trends (pytrends, `retries` sin
+    usar por un bug de urllib3) + intención de búsqueda; acepta el CSV del
+    Planificador de Google Ads para volúmenes reales. Primera corrida para
+    Venezuela en `research_notes/palabras-clave/` (lo más buscado del
+    nicho: "app para barberos" 143 y "software para barbería" 93 contra
+    "bot de whatsapp" = 100; "whatsapp business" 39.050). El usuario no
+    está en Venezuela: la skill y el Planificador (que permite elegir
+    país) reemplazan la búsqueda manual.
+  - Pendientes que dependen del usuario: revisar la lista de palabras
+    clave con su familia, definir cobro y precio a probar, nombre
+    comercial del bot + dominio .com. Tareas
     "Mentor" (las hace el asistente con visto bueno): programar y
     publicar la web del bot en español (inicio, precios, una página por
     función y por rubro, comparación honesta, guías; schema
