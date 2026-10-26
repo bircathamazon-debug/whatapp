@@ -1430,9 +1430,19 @@ detalle técnico completo de arquitectura y setup.
     "bot de whatsapp" = 100; "whatsapp business" 39.050). El usuario no
     está en Venezuela: la skill y el Planificador (que permite elegir
     país) reemplazan la búsqueda manual.
-  - Pendientes que dependen del usuario: revisar la lista de palabras
-    clave con su familia, definir cobro y precio a probar, nombre
-    comercial del bot + dominio .com. Tareas
+  - 📏 **Preferencia del usuario (27-10-2026): decidir con datos reales,
+    NO preguntándole a la gente** ("es muy relativo"). No proponer
+    tareas de "preguntale a tu familia/conocidos": usar Google Trends,
+    autocompletado, estadísticas oficiales (BCV), precios publicados y,
+    sobre todo, el comportamiento medido en el test (quién paga). Datos
+    de Caracas en `research_notes/palabras-clave/` y en el plan de Meta
+    (sección "Los datos de Venezuela"): decir "barbería" y "pedir cita"
+    (nunca "turno"); Pago Móvil = 41,6 % de los pagos (BCV abr-2026);
+    corte en barberías establecidas US$8–18; cliente ideal = barbería
+    de US$10+ (US$29/mes = 2 cortes a US$15).
+  - Pendientes que dependen del usuario: elegir y justificar 8 palabras
+    clave, definir el precio a probar, nombre comercial del bot +
+    dominio .com. Tareas
     "Mentor" (las hace el asistente con visto bueno): programar y
     publicar la web del bot en español (inicio, precios, una página por
     función y por rubro, comparación honesta, guías; schema
