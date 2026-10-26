@@ -1387,6 +1387,30 @@ detalle técnico completo de arquitectura y setup.
     mismo mecanismo para generar un link de pago real por depósito.
     Cuando se retome, también revisar si conviene corregir el texto del
     mensaje mientras tanto (no prometer un link que no se manda).
+- 🎓 **Marketing digital — el asistente es MENTOR del usuario (pedido
+  explícito, 27-10-2026).** Objetivo principal: que el usuario aprenda
+  marketing digital profesional (anuncios en Meta, SEO local en Google
+  Maps, SEO web y posicionamiento en IA/GEO); secundario: tantear el
+  mercado de México/Panamá para el software. Reglas: explicar cada
+  concepto antes de cada tarea, revisar lo que hizo, nunca inventar datos,
+  reseñas ni testimonios, y no tocar el número del bot de la peluquería
+  para anuncios (usar uno aparte).
+  - Plan de Meta (6 módulos): https://claude.ai/artifact/AGqBdLkZKsQQXfkE4uvU2C
+  - Plan de Google e IA (7 módulos): https://claude.ai/artifact/KVYpNh4NNkrCunzFQntngE
+  - **Ruta de Marketing Digital** (mapa mental + 10 reglas + checklist de
+    8 semanas + diccionario): https://claude.ai/artifact/GkpvW8iv5okvKxP1BEcTkn
+    — el usuario tilda las tareas ahí y el progreso queda en la base de
+    datos del artifact (colección `tasks`, un documento por tarea con
+    `done`/`doneAt`); leerlo con `ArtifactData list` al empezar cada
+    sesión de marketing para saber en qué paso está.
+  - Pendientes que dependen del usuario: dirección exacta del local
+    (para la web y el Perfil de Empresa), si ya existe ficha en Google
+    Maps, nombre comercial del software. Tareas "Mentor" (las hace el
+    asistente con visto bueno): cambios SEO en `website/index.html`
+    (dirección, teléfono del IVR, schema `HairSalon`, Open Graph),
+    Search Console, mensaje del bot pidiendo reseña a TODOS los clientes
+    (sin premio, una vez por cliente — Google prohíbe incentivos y pedirla
+    solo a los contentos), y la página del producto en español.
 - **Decisiones ya tomadas con el usuario:**
   - El piloto se hace en la peluquería propia o de un familiar.
   - Se arranca con Baileys (gratis) y se migra a la API oficial de WhatsApp
