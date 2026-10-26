@@ -1403,14 +1403,22 @@ detalle técnico completo de arquitectura y setup.
     datos del artifact (colección `tasks`, un documento por tarea con
     `done`/`doneAt`); leerlo con `ArtifactData list` al empezar cada
     sesión de marketing para saber en qué paso está.
-  - Pendientes que dependen del usuario: dirección exacta del local
-    (para la web y el Perfil de Empresa), si ya existe ficha en Google
-    Maps, nombre comercial del software. Tareas "Mentor" (las hace el
-    asistente con visto bueno): cambios SEO en `website/index.html`
-    (dirección, teléfono del IVR, schema `HairSalon`, Open Graph),
-    Search Console, mensaje del bot pidiendo reseña a TODOS los clientes
-    (sin premio, una vez por cliente — Google prohíbe incentivos y pedirla
-    solo a los contentos), y la página del producto en español.
+  - ⚠️ **Aclarado por el usuario (27-10-2026): el marketing es del BOT
+    (el software), NO de la peluquería de Yaacob.** No hacerle SEO ni
+    perfil de Google a la peluquería. El SEO local (Google Maps, reseñas)
+    se aprende para entenderlo, usarlo como herramienta de venta
+    (auditar barberías de México = lista de posibles clientes) y quizás
+    ofrecerlo más adelante como servicio a los clientes del bot. El plan
+    de Google e IA y la Ruta ya se reescribieron con este foco.
+  - Pendientes que dependen del usuario: lista de 20 búsquedas reales
+    (palabras clave), nombre comercial del bot + dominio .com. Tareas
+    "Mentor" (las hace el asistente con visto bueno): programar y
+    publicar la web del bot en español (inicio, precios, una página por
+    función y por rubro, comparación honesta, guías; schema
+    `SoftwareApplication` SIN calificaciones inventadas), conectar Search
+    Console y Bing Webmaster Tools, y —si el usuario lo aprueba— sumar al
+    bot el pedido automático de reseñas en Google a TODOS los clientes
+    (sin premio, una vez por cliente) como función vendible.
 - **Decisiones ya tomadas con el usuario:**
   - El piloto se hace en la peluquería propia o de un familiar.
   - Se arranca con Baileys (gratis) y se migra a la API oficial de WhatsApp
