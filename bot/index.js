@@ -12,12 +12,18 @@ import { Boom } from '@hapi/boom';
 import qrcodeTerminal from 'qrcode-terminal';
 import QRCode from 'qrcode';
 import 'dotenv/config';
+import { readdirSync, rmSync } from 'node:fs';
 import { handleIncomingMessage } from './conversation.js';
 import { transcribeVoiceMessage } from './transcribe.js';
 import { startNotificationsWatcher } from './notificationsWatcher.js';
 import { db } from './firebaseClient.js';
 
 const BRANCH_ID = process.env.BRANCH_ID;
+// Número del bot (solo dígitos, con código de país). Si está, al vincular se
+// pide un código de 8 letras en vez de depender solo del QR: el QR vence en
+// ~20 s y desde un servidor remoto casi nunca llega a tiempo a quien escanea.
+const PAIRING_PHONE = (process.env.PAIRING_PHONE || '').replace(/\D/g, '');
+const AUTH_DIR = 'auth_info_baileys';
 
 // "Latido" para que functions/src/crons.ts (checkSystemHealth) pueda avisar
 // por SMS si el bot se desconecta por mucho tiempo — ver systemHealth/{BRANCH_ID}.
@@ -153,7 +159,8 @@ if (!BRANCH_ID) {
 }
 
 async function connectToWhatsApp() {
-  const { state, saveCreds } = await useMultiFileAuthState('auth_info_baileys');
+  const { state, saveCreds } = await useMultiFileAuthState(AUTH_DIR);
+  let pairingRequested = false;
 
   const sock = makeWASocket({
     auth: state,
@@ -175,13 +182,30 @@ async function connectToWhatsApp() {
       // desde afuera (ej. leyendo los logs del hosting) sin necesitar
       // acceso a archivos del servidor.
       console.log(`[bot] QR_DATA:${qr}`);
+      if (PAIRING_PHONE && !state.creds.registered && !pairingRequested) {
+        pairingRequested = true;
+        sock
+          .requestPairingCode(PAIRING_PHONE)
+          .then((code) => console.log(`[bot] PAIRING_CODE:${code}`))
+          .catch((err) => console.error('[bot] no se pudo pedir el código de vinculación', err));
+      }
     }
 
     if (connection === 'close') {
       stopHeartbeat();
       const shouldReconnect = new Boom(lastDisconnect?.error)?.output?.statusCode !== DisconnectReason.loggedOut;
       console.log('[bot] Conexión cerrada. Reconectando:', shouldReconnect);
-      if (shouldReconnect) connectToWhatsApp();
+      if (shouldReconnect) {
+        connectToWhatsApp();
+      } else {
+        // WhatsApp desvinculó este dispositivo: la sesión guardada ya no
+        // sirve. Se borra (el contenido, no la carpeta: es el volumen de
+        // Railway) y se arranca de cero, así aparece un QR/código nuevo en el
+        // log sin tener que recrear el volumen a mano.
+        console.log('[bot] Sesión desvinculada: borrando la sesión guardada para volver a vincular.');
+        for (const f of readdirSync(AUTH_DIR)) rmSync(`${AUTH_DIR}/${f}`, { recursive: true, force: true });
+        connectToWhatsApp();
+      }
     } else if (connection === 'open') {
       console.log(`[bot] Conectado a WhatsApp para la sucursal ${BRANCH_ID}`);
       startNotificationsWatcher(sock, BRANCH_ID);
