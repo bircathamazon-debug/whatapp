@@ -165,6 +165,10 @@ async function connectToWhatsApp() {
   const sock = makeWASocket({
     auth: state,
     printQRInTerminal: false,
+    // Con vinculación por código, cada "ronda" de QR dura 10 min en vez de
+    // 20-60 s: así el código de 8 letras sigue sirviendo el tiempo que la
+    // persona tarda en recibirlo y escribirlo en el celular.
+    ...(PAIRING_PHONE ? { qrTimeout: 10 * 60000 } : {}),
   });
 
   sock.ev.on('creds.update', saveCreds);
