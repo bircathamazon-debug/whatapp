@@ -1162,6 +1162,37 @@ detalle técnico completo de arquitectura y setup.
      caso real que le preocupaba (quedarse afuera del panel). Backlog
      cerrado por decisión — se respondió el comentario abierto en el
      checklist imprimible.
+- 🐛 **WhatsApp desvinculó el bot (5-11-2026) — RESUELTO Y RECONECTADO
+  (6-11-2026).** WhatsApp mandó `conflict / device_removed` y el bot quedó
+  prendido pero sin conexión (no respondía "Shalom"; el IVR seguía bien).
+  Al revincular aparecieron 3 problemas reales, todos corregidos en
+  `bot/index.js`:
+  1. Los QR (20 s) llegaban vencidos al usuario → ahora hay **código de
+     vinculación de 8 letras** (`PAIRING_PHONE=972533981227` en Railway,
+     se imprime como `[bot] PAIRING_CODE:` en el log) y cada ronda de QR/
+     código dura 10 min (`qrTimeout`).
+  2. La vinculación "andaba" en el celular pero WhatsApp rechazaba el login
+     siguiente con **401**: Baileys traía una versión vieja de WhatsApp Web
+     y se presentaba como "Mac OS / Chrome". Ahora usa
+     `fetchLatestWaWebVersion()` y el perfil **Ubuntu/Chrome**
+     (`BOT_BROWSER=ubuntu` en Railway). Con eso vinculó a la primera. OJO:
+     el perfil `macOS('Desktop')` NO sirve (WhatsApp corta la conexión al
+     instante).
+  3. Reconexión sin pausa (llegó a martillar WhatsApp varias veces por
+     segundo) → ahora espera creciente de 2 s a 2 min. Y si WhatsApp
+     desvincula (401), el bot borra la sesión sola y pide código nuevo: ya
+     no hace falta recrear el volumen de Railway.
+  - Para revincular en el futuro: mirar el log (`railway logs --service
+    bot-peluqueria | grep PAIRING_CODE`) y en el celular del bot:
+    Dispositivos vinculados → Vincular un dispositivo → "Vincular con número
+    de teléfono". El log ahora anota el código exacto de cada desconexión.
+  - 🐛 También: **la alerta de "bot caído" nunca podía llamar** — el perfil de
+    llamadas salientes de Telnyx solo permitía EE.UU./Canadá. Se agregó
+    Israel (con permiso del usuario) y la alerta ya llamó de verdad.
+  - ⚠️ Saldo de Telnyx bajo (US$6,37 el 5-11): si llega a 0 el IVR deja de
+    atender — el usuario tiene que cargar saldo.
+  - Los mails de Railway de "deploy crashed" de ese día fueron los apagados
+    normales (SIGTERM) de cada redespliegue, no caídas reales.
 - **Ideas para el backlog (más adelante, el usuario lo aclaró
   explícitamente — no bloquean el piloto):**
   - Página web y video publicitario explicando el ahorro de tiempo/dinero

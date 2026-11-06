@@ -7,7 +7,7 @@
  * Cada instancia del bot atiende UNA sucursal (ver BRANCH_ID en .env). Para
  * varias sucursales, corre una instancia por cada número de WhatsApp.
  */
-import makeWASocket, { DisconnectReason, fetchLatestWaWebVersion, useMultiFileAuthState } from '@whiskeysockets/baileys';
+import makeWASocket, { Browsers, DisconnectReason, fetchLatestWaWebVersion, useMultiFileAuthState } from '@whiskeysockets/baileys';
 import { Boom } from '@hapi/boom';
 import qrcodeTerminal from 'qrcode-terminal';
 import QRCode from 'qrcode';
@@ -24,6 +24,18 @@ const BRANCH_ID = process.env.BRANCH_ID;
 // ~20 s y desde un servidor remoto casi nunca llega a tiempo a quien escanea.
 const PAIRING_PHONE = (process.env.PAIRING_PHONE || '').replace(/\D/g, '');
 const AUTH_DIR = 'auth_info_baileys';
+const BROWSER = { ubuntu: Browsers.ubuntu('Chrome'), windows: Browsers.windows('Chrome') }[process.env.BOT_BROWSER] ?? Browsers.macOS('Chrome');
+
+// Espera creciente entre reconexiones (2 s, 4 s, 8 s… hasta 2 min): si
+// WhatsApp corta enseguida, reconectar sin pausa lo martilla y puede marcar
+// la línea. Se vuelve a 0 cuando la conexión se abre bien.
+let reconnectAttempts = 0;
+function scheduleReconnect() {
+  const delay = Math.min(120000, 2000 * 2 ** reconnectAttempts);
+  reconnectAttempts++;
+  console.log(`[bot] Reintento en ${Math.round(delay / 1000)} s`);
+  setTimeout(connectToWhatsApp, delay);
+}
 
 // "Latido" para que functions/src/crons.ts (checkSystemHealth) pueda avisar
 // por SMS si el bot se desconecta por mucho tiempo — ver systemHealth/{BRANCH_ID}.
@@ -172,6 +184,9 @@ async function connectToWhatsApp() {
     auth: state,
     printQRInTerminal: false,
     ...(version ? { version } : {}),
+    // Perfil con el que el bot se presenta (BOT_BROWSER: ubuntu | windows |
+    // macos). "Desktop" no sirve: WhatsApp corta la conexión apenas se abre.
+    browser: BROWSER,
     // Con vinculación por código, cada "ronda" de QR dura 10 min en vez de
     // 20-60 s: así el código de 8 letras sigue sirviendo el tiempo que la
     // persona tarda en recibirlo y escribirlo en el celular.
@@ -209,7 +224,7 @@ async function connectToWhatsApp() {
         '| código:', lastDisconnect?.error?.output?.statusCode,
         '| detalle:', JSON.stringify(lastDisconnect?.error?.data ?? null));
       if (shouldReconnect) {
-        connectToWhatsApp();
+        scheduleReconnect();
       } else {
         // WhatsApp desvinculó este dispositivo: la sesión guardada ya no
         // sirve. Se borra (el contenido, no la carpeta: es el volumen de
@@ -217,9 +232,10 @@ async function connectToWhatsApp() {
         // log sin tener que recrear el volumen a mano.
         console.log('[bot] Sesión desvinculada: borrando la sesión guardada para volver a vincular.');
         for (const f of readdirSync(AUTH_DIR)) rmSync(`${AUTH_DIR}/${f}`, { recursive: true, force: true });
-        connectToWhatsApp();
+        scheduleReconnect();
       }
     } else if (connection === 'open') {
+      reconnectAttempts = 0;
       console.log(`[bot] Conectado a WhatsApp para la sucursal ${BRANCH_ID}`);
       startNotificationsWatcher(sock, BRANCH_ID);
       startHeartbeat();
