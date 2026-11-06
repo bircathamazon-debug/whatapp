@@ -7,7 +7,7 @@
  * Cada instancia del bot atiende UNA sucursal (ver BRANCH_ID en .env). Para
  * varias sucursales, corre una instancia por cada número de WhatsApp.
  */
-import makeWASocket, { DisconnectReason, useMultiFileAuthState } from '@whiskeysockets/baileys';
+import makeWASocket, { DisconnectReason, fetchLatestWaWebVersion, useMultiFileAuthState } from '@whiskeysockets/baileys';
 import { Boom } from '@hapi/boom';
 import qrcodeTerminal from 'qrcode-terminal';
 import QRCode from 'qrcode';
@@ -161,10 +161,17 @@ if (!BRANCH_ID) {
 async function connectToWhatsApp() {
   const { state, saveCreds } = await useMultiFileAuthState(AUTH_DIR);
   let pairingRequested = false;
+  // WhatsApp rechaza versiones viejas de WhatsApp Web (la vinculación "anda" en
+  // el celular pero el login siguiente falla con "no se pudo vincular"): se
+  // usa la versión actual publicada por WhatsApp, con la de Baileys de
+  // respaldo si no se puede consultar.
+  const { version } = await fetchLatestWaWebVersion().catch(() => ({ version: undefined }));
+  console.log('[bot] Versión de WhatsApp Web:', version?.join('.') ?? 'la de Baileys');
 
   const sock = makeWASocket({
     auth: state,
     printQRInTerminal: false,
+    ...(version ? { version } : {}),
     // Con vinculación por código, cada "ronda" de QR dura 10 min en vez de
     // 20-60 s: así el código de 8 letras sigue sirviendo el tiempo que la
     // persona tarda en recibirlo y escribirlo en el celular.
@@ -198,7 +205,9 @@ async function connectToWhatsApp() {
     if (connection === 'close') {
       stopHeartbeat();
       const shouldReconnect = new Boom(lastDisconnect?.error)?.output?.statusCode !== DisconnectReason.loggedOut;
-      console.log('[bot] Conexión cerrada. Reconectando:', shouldReconnect);
+      console.log('[bot] Conexión cerrada. Reconectando:', shouldReconnect,
+        '| código:', lastDisconnect?.error?.output?.statusCode,
+        '| detalle:', JSON.stringify(lastDisconnect?.error?.data ?? null));
       if (shouldReconnect) {
         connectToWhatsApp();
       } else {
