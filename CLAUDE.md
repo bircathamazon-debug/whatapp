@@ -1224,9 +1224,23 @@ detalle técnico completo de arquitectura y setup.
     de producción falla igual, usar el mismo Dockerfile.
   - ⚠️ El bot de prueba usa la misma base de datos: las citas de prueba
     quedan de verdad en la agenda de יעקב (cancelarlas desde el panel).
-  - ⬜ Falta: (1) registrar el número real 076 en la cuenta (verificación
-    por llamada, desviándola un rato al celular del usuario; probar si Meta
-    acepta ese número de Telnyx), nombre visible y método de pago; (2)
+  - 🟡 **Registro del 076 (8-11-2026): el número SE VERIFICÓ por llamada**
+    (Meta lo aceptó), pero el último paso del alta ("información comercial
+    de los nuevos activos": nombre, categoría, país, web) falló con el
+    error **2494070** "tu negocio no cumple los requisitos de la política
+    de WhatsApp". Estado de la cuenta y del portafolio: sin restricciones.
+    Probable desconfianza de Meta con un portafolio recién creado → se
+    reintenta UNA vez el 10-11 (recordatorio programado en esta sesión); si
+    falla de nuevo, Paso 3: verificación del negocio. No repetir el intento
+    seguido (Meta puede endurecer el bloqueo).
+    - Cómo se desvió la llamada de verificación: Telnyx **no permite**
+      `call_forwarding` en números que usan TeXML; se cambió un rato el
+      `voice_url` de la TeXML app `3074130028892522349` a un XML estático
+      con `<Dial>` al celular del usuario (publicado en
+      peluqueria-yaacob.web.app con nombre aleatorio, `voice_method: get`)
+      y después se restauró `ivrIncomingCall` (POST) y se borró el archivo.
+  - ⬜ Falta: (1) terminar el alta del 076 (ver arriba), nombre visible y
+    método de pago; (2)
     plantillas aprobadas para los recordatorios (fuera de las 24 h desde el
     último mensaje del cliente, Meta solo deja mandar plantillas —
     `notificationsWatcher` hoy manda texto libre); (3) pasar producción a
