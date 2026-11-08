@@ -1193,6 +1193,45 @@ detalle técnico completo de arquitectura y setup.
     atender — el usuario tiene que cargar saldo.
   - Los mails de Railway de "deploy crashed" de ese día fueron los apagados
     normales (SIGTERM) de cada redespliegue, no caídas reales.
+- 🚀 **Migración a la API oficial de WhatsApp (Meta Cloud API) — EN CURSO
+  (8-11-2026). Primera reserva completa ya probada con el número de prueba.**
+  Pedido del usuario para que el bot no se vuelva a desvincular. Plan: UN
+  solo número (el de Telnyx, 076-567-1114) para WhatsApp por la API y para
+  las llamadas del IVR (un número registrado en la API sigue recibiendo
+  llamadas comunes).
+  - Meta: portafolio **Azulay Digital** (business_id `1471646231739516`),
+    app **BOT DE CITAS** (app_id `2260806938036566`, publicada), cuenta de
+    WhatsApp de prueba (WABA `2040541386653584`), número de prueba
+    **+1 555 146-5767** (phone_number_id `1442363928960584` — ojo, al
+    principio se cruzaron los dos IDs y el bot ignoraba los mensajes).
+    Usuario del sistema **bot-citas** (Admin, control total de la app y la
+    cuenta) con **token permanente**. El webhook de la app apunta a
+    `https://bot-oficial-prueba-production.up.railway.app/webhook` (campo
+    `messages` suscrito; la cuenta suscrita a la app vía `subscribed_apps`).
+  - Código: `bot/cloudApi.js` (webhook con firma `X-Hub-Signature-256`
+    verificada con la clave secreta de la app, envío por Graph API, descarga
+    de notas de voz) y `bot/index.js` elige el transporte con
+    `WA_TRANSPORT=cloud|baileys` — la conversación (`conversation.js`) es la
+    misma. `WA_TEST_MODE=1` apaga recordatorios y latido para probar en
+    paralelo sin pisar al bot real.
+  - Railway: servicio aparte **`bot-oficial-prueba`** (el bot real
+    `bot-peluqueria` sigue con Baileys, sin tocar). Variables secretas
+    (`WA_ACCESS_TOKEN`, `WA_APP_SECRET`) las cargó el usuario en el panel de
+    Railway; las de Firebase/OpenAI son referencias `${{bot-peluqueria.X}}`.
+    Se arma con `bot/Dockerfile.cloud` (`RAILWAY_DOCKERFILE_PATH`) porque el
+    armador de Railway (railpack) fallaba al bajar herramientas de GitHub
+    (504) — **el bot de producción también usa railpack**: si un `railway up`
+    de producción falla igual, usar el mismo Dockerfile.
+  - ⚠️ El bot de prueba usa la misma base de datos: las citas de prueba
+    quedan de verdad en la agenda de יעקב (cancelarlas desde el panel).
+  - ⬜ Falta: (1) registrar el número real 076 en la cuenta (verificación
+    por llamada, desviándola un rato al celular del usuario; probar si Meta
+    acepta ese número de Telnyx), nombre visible y método de pago; (2)
+    plantillas aprobadas para los recordatorios (fuera de las 24 h desde el
+    último mensaje del cliente, Meta solo deja mandar plantillas —
+    `notificationsWatcher` hoy manda texto libre); (3) pasar producción a
+    `WA_TRANSPORT=cloud` y apagar Baileys; (4) verificación del negocio
+    para pasar el límite de 250 destinatarios/día.
 - **Ideas para el backlog (más adelante, el usuario lo aclaró
   explícitamente — no bloquean el piloto):**
   - Página web y video publicitario explicando el ahorro de tiempo/dinero
