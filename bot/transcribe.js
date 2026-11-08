@@ -9,14 +9,27 @@ import { downloadMediaMessage } from '@whiskeysockets/baileys';
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
-/** @param {import('@whiskeysockets/baileys').WAMessage} msg */
+/** Nota de voz que llega por Baileys. @param {import('@whiskeysockets/baileys').WAMessage} msg */
 export async function transcribeVoiceMessage(msg) {
   if (!OPENAI_API_KEY) {
     console.warn('[transcribe] falta OPENAI_API_KEY, no se puede transcribir la nota de voz');
     return null;
   }
   try {
-    const buffer = await downloadMediaMessage(msg, 'buffer', {});
+    return await transcribeAudioBuffer(await downloadMediaMessage(msg, 'buffer', {}));
+  } catch (err) {
+    console.error('[transcribe] error descargando nota de voz', err);
+    return null;
+  }
+}
+
+/** Transcribe un audio ya descargado (lo usan Baileys y la API oficial). */
+export async function transcribeAudioBuffer(buffer) {
+  if (!OPENAI_API_KEY) {
+    console.warn('[transcribe] falta OPENAI_API_KEY, no se puede transcribir la nota de voz');
+    return null;
+  }
+  try {
     const form = new FormData();
     form.append('file', new Blob([buffer], { type: 'audio/ogg' }), 'voice.ogg');
     form.append('model', 'whisper-1');

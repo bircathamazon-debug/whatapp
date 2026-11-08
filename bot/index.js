@@ -1,5 +1,13 @@
 /**
- * Bot de WhatsApp (Baileys) para reservar citas de la peluquería.
+ * Bot de WhatsApp para reservar citas de la peluquería.
+ *
+ * Dos formas de conectarse a WhatsApp (variable WA_TRANSPORT):
+ *   - "baileys" (por defecto): WhatsApp Web no oficial, con un celular
+ *     vinculado. Puede desvincularse solo (ver CLAUDE.md).
+ *   - "cloud": API oficial de WhatsApp de Meta (ver cloudApi.js). Sin
+ *     celular vinculado; Meta avisa cada mensaje por webhook.
+ * Con WA_TEST_MODE=1 no se mandan recordatorios ni se escribe el latido,
+ * para poder probar en paralelo sin pisar al bot que atiende de verdad.
  *
  * Primera ejecución: escanea el QR con el número de WhatsApp de la sucursal.
  * La sesión se guarda en ./auth_info_baileys/ para las siguientes ejecuciones.
@@ -14,11 +22,14 @@ import QRCode from 'qrcode';
 import 'dotenv/config';
 import { readdirSync, rmSync } from 'node:fs';
 import { handleIncomingMessage } from './conversation.js';
-import { transcribeVoiceMessage } from './transcribe.js';
+import { transcribeAudioBuffer, transcribeVoiceMessage } from './transcribe.js';
+import { createCloudTransport } from './cloudApi.js';
 import { startNotificationsWatcher } from './notificationsWatcher.js';
 import { db } from './firebaseClient.js';
 
 const BRANCH_ID = process.env.BRANCH_ID;
+const TRANSPORT = process.env.WA_TRANSPORT === 'cloud' ? 'cloud' : 'baileys';
+const TEST_MODE = process.env.WA_TEST_MODE === '1';
 // Número del bot (solo dígitos, con código de país). Si está, al vincular se
 // pide un código de 8 letras en vez de depender solo del QR: el QR vence en
 // ~20 s y desde un servidor remoto casi nunca llega a tiempo a quien escanea.
@@ -284,4 +295,39 @@ async function connectToWhatsApp() {
   });
 }
 
-connectToWhatsApp();
+/** Bot por la API oficial de Meta (WA_TRANSPORT=cloud). */
+function startCloud() {
+  const cloud = createCloudTransport({
+    phoneNumberId: process.env.WA_PHONE_NUMBER_ID,
+    accessToken: process.env.WA_ACCESS_TOKEN,
+    appSecret: process.env.WA_APP_SECRET,
+    verifyToken: process.env.WA_VERIFY_TOKEN,
+  });
+
+  cloud.start(async (m) => {
+    if (alreadyProcessed(m.id)) return; // Meta reintenta avisos: no responder dos veces
+    const jid = `${m.from.replace(/\D/g, '')}@s.whatsapp.net`;
+    let text = (m.text || '').trim();
+    if (!text && m.type === 'audio' && m.mediaId) {
+      text =
+        (await cloud
+          .downloadMedia(m.mediaId)
+          .then(({ buffer }) => transcribeAudioBuffer(buffer))
+          .catch((err) => {
+            console.error('[bot] no se pudo descargar la nota de voz', err);
+            return null;
+          })) || '[nota de voz — no se pudo transcribir]';
+    }
+    if (!text) return;
+    enqueueMessage(cloud.sock, jid, text, m.name);
+  });
+
+  console.log(`[bot] API oficial de WhatsApp lista para la sucursal ${BRANCH_ID}${TEST_MODE ? ' (modo prueba: sin recordatorios ni latido)' : ''}`);
+  if (!TEST_MODE) {
+    startNotificationsWatcher(cloud.sock, BRANCH_ID);
+    startHeartbeat();
+  }
+}
+
+if (TRANSPORT === 'cloud') startCloud();
+else connectToWhatsApp();
