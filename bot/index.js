@@ -167,6 +167,7 @@ async function flushPending(sock, jid) {
 async function processMessage(sock, jid, text, pushName) {
   try {
     const replies = await handleIncomingMessage(jid, text, BRANCH_ID, pushName);
+    if (TRANSPORT === 'cloud') console.log(`[bot] ${jid.split('@')[0]} escribió ${JSON.stringify(text.slice(0, 80))} → ${replies.length} respuesta(s)`);
     for (const reply of replies) {
       await sock.sendMessage(jid, { text: reply });
     }

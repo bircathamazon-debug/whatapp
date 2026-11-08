@@ -106,7 +106,16 @@ export function createCloudTransport({ phoneNumberId, accessToken, appSecret, ve
           for (const entry of body.entry ?? []) {
             for (const change of entry.changes ?? []) {
               const value = change.value ?? {};
-              if (value.metadata?.phone_number_id !== phoneNumberId) continue;
+              console.log('[cloud] aviso de Meta:', JSON.stringify({
+                campo: change.field,
+                numero: value.metadata?.phone_number_id,
+                mensajes: (value.messages ?? []).map((m) => ({ de: m.from, tipo: m.type })),
+                estados: (value.statuses ?? []).map((st) => st.status),
+              }));
+              if (value.metadata?.phone_number_id !== phoneNumberId) {
+                console.warn(`[cloud] aviso para otro número (${value.metadata?.phone_number_id}), se ignora; este bot atiende ${phoneNumberId}`);
+                continue;
+              }
               for (const st of value.statuses ?? []) {
                 if (st.status === 'failed') console.error('[cloud] Meta no pudo entregar un mensaje a', st.recipient_id, JSON.stringify(st.errors ?? null));
               }
