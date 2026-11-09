@@ -1239,7 +1239,23 @@ detalle técnico completo de arquitectura y setup.
       con `<Dial>` al celular del usuario (publicado en
       peluqueria-yaacob.web.app con nombre aleatorio, `voice_method: get`)
       y después se restauró `ivrIncomingCall` (POST) y se borró el archivo.
-  - ⬜ Falta: (1) terminar el alta del 076 (ver arriba), nombre visible y
+  - ✅ **Reintento del 9-11-2026 — el 076 quedó AGREGADO y VERIFICADO.**
+    Se agregó desde el Administrador de WhatsApp (no desde el flujo de la
+    app) a la cuenta **"Azulay Digital"** (WABA `992568343309292`, creada
+    sola el 8-11 en el intento cortado). phone_number_id del 076:
+    **`1454497257742771`**. Verificación por llamada pedida por API
+    (`request_code` VOICE + `verify_code`), con el mismo desvío temporal
+    del IVR (ya restaurado). bot-citas tiene control total de la cuenta y
+    la cuenta ya está suscrita a la app (`subscribed_apps`).
+    - 🟡 **Falta el `register`**: Meta lo rechaza mientras la cuenta esté
+      en revisión (`account_review_status: PENDING`, error "cuenta de
+      WhatsApp Business no aprobada"). El PIN de 2 pasos ya está generado
+      y guardado en Railway (`WA_REGISTRATION_PIN`, bot-oficial-prueba).
+      Hay un chequeo automático programado en esta sesión que registra
+      el número apenas Meta apruebe la cuenta.
+    - El nombre visible quedó "Azulay Digital" — cambiarlo a
+      "המספרה של יעקב" cuando la cuenta esté aprobada (Meta lo revisa).
+  - ⬜ Falta: (1) `register` del 076 y nombre visible (ver arriba) y
     método de pago; (2)
     plantillas aprobadas para los recordatorios (fuera de las 24 h desde el
     último mensaje del cliente, Meta solo deja mandar plantillas —
