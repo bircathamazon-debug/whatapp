@@ -1262,6 +1262,46 @@ detalle técnico completo de arquitectura y setup.
     `notificationsWatcher` hoy manda texto libre); (3) pasar producción a
     `WA_TRANSPORT=cloud` y apagar Baileys; (4) verificación del negocio
     para pasar el límite de 250 destinatarios/día.
+- 💳 **Planes y cobro a las barberías (12-11-2026) — PROGRAMADO, FALTA
+  DESPLEGAR Y CONFIGURAR TRANZILA.** Decisión del usuario: vender el bot a
+  barberías con **1 mes gratis**, plan **Básico ₪99/mes** y **Pro ₪150/mes**
+  (la barbería cambia de plan cuando quiere), **cobro automático**, mail +
+  contraseña por barbería, y poder **bloquear** a quien no paga.
+  - Defaults elegidos por el asistente (el usuario no contestó las
+    preguntas; se pueden cambiar en `functions/src/plans.ts`): Básico hasta
+    **250 citas/mes** (sale del estudio de precios: con más el margen cae);
+    si un Básico se pasa, se avisa al 80 % y **ese período se cobra ₪150** —
+    el bot nunca deja de atender por pasarse. IVA: pendiente de saber si el
+    usuario es עוסק פטור o מורשה (recomendado cobrar "+ IVA").
+  - Backend: `plans.ts` (precios/límites/uso), `billing.ts` (callables
+    `billingStatus`, `billingSetPlan`, `ownerUpdateBilling`,
+    `ownerCreateBarbershop` + cron `billingDaily` 09:00 con avisos y
+    bloqueos), Tranzila cobra según plan y uso y el pago desbloquea solo.
+    Bloqueada = bot e IVR derivan al peluquero (mismo camino que modo
+    mantenimiento) y el panel muestra "cuenta en pausa" con botón de pago.
+    Sucursales sin `billing` (la de יעקב, el piloto) no se tocan nunca.
+  - App: Ajustes → **Mi plan** y **Pedidos de cambio** (la barbería pide
+    cambios de su menú: tipos de corte, peluqueros); Más → **Mis clientes**
+    (solo `isSuperAdmin`): estado, uso, notas privadas (`accountNotes`),
+    pedidos abiertos con respuesta, bloquear/desbloquear, +30 días, alta de
+    barbería nueva con mail y contraseña.
+  - ⬜ Falta: desplegar (functions + rules + indexes + hosting — requiere
+    `firebase login` de nuevo, el reinicio del servidor borró el login),
+    confirmar que `flow613@gmail.com` tenga `isSuperAdmin: true`, cuenta de
+    Tranzila (`TRANZILA_TERMINAL_NAME`/`TRANZILA_PASSWORD`; ya no se usa
+    `TRANZILA_SUBSCRIPTION_SUM`, el monto sale del plan), y comprar el
+    número de Telnyx de la primera barbería (el usuario tiene que cargar
+    saldo y dejar `TELNYX_API_KEY` en Railway).
+  - 📊 Estudio de precios Israel/Venezuela/España:
+    `reports/Precio del bot Israel Venezuela España.md`. Hallazgos para
+    arreglar: el bot manda 5 mensajes de WhatsApp por cita (duplica el
+    costo); quien reserva por teléfono recibe los recordatorios por WhatsApp
+    (`getOrCreateClient` pone `preferredChannel: 'whatsapp'` siempre); y
+    falta probar si un teléfono kasher puede llamar a un 076.
+  - ⚠️ El reinicio del servidor de la sesión (10-11) borró `functions/.env`,
+    `bot/.env` y los logins de Railway/Firebase. `app/.env` se reconstruyó
+    con la config pública del sitio publicado. Railway se volvió a loguear
+    (`railway login --browserless`).
 - **Ideas para el backlog (más adelante, el usuario lo aclaró
   explícitamente — no bloquean el piloto):**
   - Página web y video publicitario explicando el ahorro de tiempo/dinero
