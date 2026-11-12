@@ -1,0 +1,13 @@
+{
+  "id": "P007",
+  "buys": true,
+  "purchases_first_month": 1,
+  "reason_code": "need",
+  "reason": "Pierdo citas cada semana por clientas que no avisan y una uña semipermanente son 20-35 euros que no vuelven. Si los recordatorios hacen que falten menos, con salvar una cita al mes ya me paga el plan, y el primer mes es gratis para probar.",
+  "objection": "¿Y si no me atienden cuando falla? Si el bot se cae un sábado y mis clientas no pueden reservar o se pierden citas, con quién hablo y en cuánto tiempo me responden.",
+  "would_change_my_mind": "Ver claro que hay soporte humano que responde rápido por WhatsApp o teléfono, y que puedo cancelar sin líos si falla.",
+  "price_too_cheap": 8,
+  "price_cheap": 19,
+  "price_expensive": 35,
+  "price_too_expensive": 55
+}

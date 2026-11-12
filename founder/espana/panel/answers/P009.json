@@ -1,0 +1,13 @@
+{
+  "id": "P009",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "Ya llevo mi agenda a mano por WhatsApp y me funciona, y las clientas que quieren reservar solas ya usan Booksy. Pagar casi 35 euros con IVA al mes por algo que hago gratis, aunque me quite mensajes, no me convence.",
+  "objection": "Son más de 35 euros al mes con IVA, casi lo que cobro por una sola cita de semipermanente, y no sé si mis clientas van a querer hablar con un bot en vez de conmigo.",
+  "would_change_my_mind": "Probarlo el primer mes con mis propias clientas y ver que de verdad reservan solas y me ahorran mensajes, y un precio más cerca de 15 euros al mes.",
+  "price_too_cheap": 5,
+  "price_cheap": 12,
+  "price_expensive": 25,
+  "price_too_expensive": 40
+}

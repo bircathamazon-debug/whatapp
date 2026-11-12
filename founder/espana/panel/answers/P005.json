@@ -1,0 +1,13 @@
+{
+  "id": "P005",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "trust",
+  "reason": "Ya pago mi plataforma y aunque me quejo de las comisiones, funciona y tiene soporte. Un bot de WhatsApp que no conozco me da miedo: si falla un sábado con la agenda llena, pierdo clientes y no hay nadie a quien llamar.",
+  "objection": "¿Y si no me atienden cuando falla? Si el bot se cae o WhatsApp lo bloquea, me quedo sin agenda y nadie me responde.",
+  "would_change_my_mind": "Soporte humano por teléfono o WhatsApp con respuesta rápida garantizada, y poder importar mi agenda y clientes actuales sin perder nada durante el mes gratis.",
+  "price_too_cheap": 8,
+  "price_cheap": 15,
+  "price_expensive": 30,
+  "price_too_expensive": 45
+}

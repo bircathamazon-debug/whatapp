@@ -1,0 +1,13 @@
+{
+  "id": "P001",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "Ya pago Booksy/Treatwell y me quejo, pero mis clientas están acostumbradas a reservar ahí y a mí me da pereza cambiar todo por un bot que no conozco. Tengo 22 años y un local pequeño, no quiero líos con la agenda.",
+  "objection": "Mis clientes prefieren la app de Booksy; si me paso a un bot por WhatsApp y se lía la agenda, pierdo citas y no tengo tiempo de arreglarlo.",
+  "would_change_my_mind": "Ver funcionando con otra manicurista que me conozca, y que importe mi agenda y mis clientas de Booksy sin que yo tenga que hacer nada.",
+  "price_too_cheap": 7,
+  "price_cheap": 15,
+  "price_expensive": 29,
+  "price_too_expensive": 45
+}

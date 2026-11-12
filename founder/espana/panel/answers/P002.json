@@ -1,0 +1,13 @@
+{
+  "id": "P002",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "trust",
+  "reason": "Mis clientas ya me escriben por Instagram y por WhatsApp y las atiendo yo, así que no siento que me falte algo urgente. Y antes de meter los datos de mis clientas en un bot quiero estar segura de que es legal y de que alguien lo usa de verdad.",
+  "objection": "¿Es legal mandar WhatsApp con los datos de mis clientas (RGPD)? Y no veo ninguna reseña de otra manicurista que lo use.",
+  "would_change_my_mind": "Reseñas reales de centros de uñas en España que lo usen, y algo claro por escrito sobre RGPD (qué datos se guardan y dónde), más que el primer mes gratis sin darme tarjeta.",
+  "price_too_cheap": 8,
+  "price_cheap": 15,
+  "price_expensive": 35,
+  "price_too_expensive": 55
+}
