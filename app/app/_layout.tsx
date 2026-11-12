@@ -1,10 +1,11 @@
 import { useEffect } from 'react';
-import { I18nManager, Platform, View, Text } from 'react-native';
+import { I18nManager, Platform, View, Text, Pressable, Linking, Alert } from 'react-native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { BranchProvider, useBranch } from '../lib/branchContext';
 import { useTheme, WEB_SHELL_MAX_WIDTH } from '../lib/theme';
 import { useLang, isRtl, useT } from '../lib/i18n';
+import { createTranzilaCheckoutUrl } from '../lib/tranzila';
 
 // Por defecto arranca en RTL (hebreo, el mercado actual) hasta que se sepa
 // el idioma real de la sucursal — eso requiere haber iniciado sesión y
@@ -18,7 +19,9 @@ function ThemedStack() {
   const { mode, colors } = useTheme();
   const lang = useLang();
   const t = useT();
-  const { readOnly } = useBranch();
+  const { readOnly, isSuperAdmin, branches, branchId } = useBranch();
+  const currentBranch = branches.find((b) => b.id === branchId);
+  const blocked = !isSuperAdmin && currentBranch?.billing?.blocked === true;
 
   // Si la sucursal termina usando un idioma con otra dirección de escritura
   // (ej. inglés/español, LTR, contra el RTL con el que arrancó la app), se
@@ -45,6 +48,32 @@ function ThemedStack() {
       <Stack.Screen name="admin" options={{ headerShown: false }} />
     </Stack>
   );
+
+  // Barbería con la cuenta en pausa (falta de pago o bloqueo del dueño): en
+  // vez del panel ve un aviso y el botón para cargar la tarjeta. El dueño del
+  // sistema (super administrador) nunca queda bloqueado.
+  const pay = async () => {
+    if (!branchId) return;
+    try {
+      await Linking.openURL(await createTranzilaCheckoutUrl(branchId));
+    } catch (err: any) {
+      Alert.alert(err?.code === 'functions/failed-precondition' ? t.billing.paymentsNotReady : t.billing.error);
+    }
+  };
+  const blockedView = blocked ? (
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 28, backgroundColor: colors.bg }}>
+      <Text style={{ fontSize: 44 }}>⏸️</Text>
+      <Text style={{ fontSize: 22, fontWeight: '800', color: colors.text, marginTop: 10, textAlign: 'center' }}>{t.billing.blockedTitle}</Text>
+      <Text style={{ fontSize: 15, color: colors.textMuted, marginTop: 10, textAlign: 'center', lineHeight: 22 }}>
+        {currentBranch?.billing?.blockedReason === 'manual' ? t.billing.blockedManual : t.billing.blockedText}
+      </Text>
+      {currentBranch?.billing?.blockedReason !== 'manual' && (
+        <Pressable onPress={pay} style={{ backgroundColor: colors.accent, borderRadius: 999, paddingVertical: 14, paddingHorizontal: 28, marginTop: 22 }}>
+          <Text style={{ color: '#fff', fontWeight: '800', fontSize: 15.5 }}>{t.billing.payWithCard}</Text>
+        </Pressable>
+      )}
+    </View>
+  ) : null;
 
   const banner = readOnly ? (
     <View style={{ backgroundColor: colors.statusPending, paddingVertical: 6, paddingHorizontal: 12 }}>
@@ -74,11 +103,11 @@ function ThemedStack() {
               shadowOffset: { width: 0, height: 0 },
             }}
           >
-            {stack}
+            {blockedView ?? stack}
           </View>
         </View>
       ) : (
-        stack
+        blockedView ?? stack
       )}
     </>
   );

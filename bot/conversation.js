@@ -124,7 +124,9 @@ export async function handleIncomingMessage(jid, rawText, branchId, pushName) {
   // Interruptor de emergencia: si el peluquero activó "modo mantenimiento"
   // en Ajustes, no se procesa ningún flujo — se avisa y se da el contacto
   // directo, hasta que se desactive desde la app.
-  if (branch.maintenanceMode) {
+  // Cuenta bloqueada por falta de pago (billing.blocked, lo maneja el
+  // backend): mismo trato que el modo mantenimiento, el cliente habla directo.
+  if (branch.maintenanceMode || branch.billing?.blocked === true) {
     const lines = await buildTalkToStaffLines(branch);
     return [t(branch, 'maintenanceMessage'), ...(lines || [])];
   }

@@ -29,3 +29,4 @@ export {
 export { adminLookupUserByEmail, adminCreateAuthUser, adminSetUserAccess } from './adminProvision';
 export { stripeCreateCheckoutSession, stripeCustomerPortal, stripeCheckoutDone, stripeWebhook } from './stripe';
 export { tranzilaCreateCheckoutUrl, tranzilaCancelSubscription, tranzilaCheckoutDone, tranzilaNotify } from './tranzila';
+export { billingStatus, billingSetPlan, ownerUpdateBilling, ownerCreateBarbershop, billingDaily } from './billing';

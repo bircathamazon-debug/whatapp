@@ -6,6 +6,7 @@ import { sendNotification, getTemplates, flushDueTelnyxNotifications } from './n
 import { markCompleted, releaseExpiredDepositHolds, formatDate, formatTime, createAppointment } from './booking';
 import { toEpoch, getStaffServiceDuration } from './availability';
 import { chargeTranzilaToken } from './tranzila';
+import { amountForPeriod } from './plans';
 
 /** Cada 15 minutos: recordatorios 24h y 2h antes, por el canal preferido del cliente. */
 export const sendReminders = onSchedule({ schedule: 'every 15 minutes', timeZone: 'Asia/Jerusalem' }, async () => {
@@ -205,11 +206,22 @@ export const chargeTranzilaSubscriptions = onSchedule({ schedule: '0 8 * * *', t
     const branch = { id: doc.id, ...(doc.data() as Omit<Branch, 'id'>) };
     if (!branch.subscription?.currentPeriodEnd || branch.subscription.currentPeriodEnd > now) continue;
 
-    const success = await chargeTranzilaToken(branch);
+    // Monto según el plan y el uso real de los últimos 30 días: un Básico
+    // que pasó el límite paga ese período como Pro (ver plans.ts).
+    const plan = branch.billing?.plan ?? 'basic';
+    const periodEnd = branch.subscription.currentPeriodEnd;
+    const { amount } = await amountForPeriod(branch.id, plan, periodEnd - 30 * 24 * 3600000, periodEnd);
+    const success = await chargeTranzilaToken(branch, amount);
     if (success) {
-      await doc.ref.update({ 'subscription.currentPeriodEnd': now + 30 * 24 * 3600000 });
+      await doc.ref.update({
+        'subscription.currentPeriodEnd': now + 30 * 24 * 3600000,
+        'billing.lastChargeAmount': amount,
+        'billing.pastDueSince': null,
+        'billing.blocked': false,
+        'billing.blockedReason': null,
+      });
     } else {
-      await doc.ref.update({ 'subscription.status': 'past_due' });
+      await doc.ref.update({ 'subscription.status': 'past_due', 'billing.pastDueSince': now });
     }
   }
 });

@@ -16,6 +16,8 @@ interface BranchContextValue {
    * backend. Se usa para mostrar un aviso en vez de dejar que el intento de
    * guardar falle sin explicación. */
   readOnly: boolean;
+  /** Dueño del sistema (users/{uid}.isSuperAdmin): ve el panel de dueño con todas las barberías. */
+  isSuperAdmin: boolean;
 }
 
 const BranchContext = createContext<BranchContextValue>({
@@ -25,6 +27,7 @@ const BranchContext = createContext<BranchContextValue>({
   loading: true,
   reload: async () => {},
   readOnly: false,
+  isSuperAdmin: false,
 });
 
 export function BranchProvider({ children }: { children: React.ReactNode }) {
@@ -32,6 +35,7 @@ export function BranchProvider({ children }: { children: React.ReactNode }) {
   const [branchId, setBranchId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [readOnly, setReadOnly] = useState(false);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
 
   const reload = useCallback(async () => {
     setLoading(true);
@@ -49,19 +53,26 @@ export function BranchProvider({ children }: { children: React.ReactNode }) {
       if (user) {
         reload();
         getDoc(doc(db, 'users', user.uid))
-          .then((snap) => setReadOnly(snap.data()?.readOnly === true))
-          .catch(() => setReadOnly(false));
+          .then((snap) => {
+            setReadOnly(snap.data()?.readOnly === true);
+            setIsSuperAdmin(snap.data()?.isSuperAdmin === true);
+          })
+          .catch(() => {
+            setReadOnly(false);
+            setIsSuperAdmin(false);
+          });
       } else {
         setBranches([]);
         setBranchId(null);
         setReadOnly(false);
+        setIsSuperAdmin(false);
         setLoading(false);
       }
     });
     return unsub;
   }, [reload]);
 
-  return <BranchContext.Provider value={{ branches, branchId, setBranchId, loading, reload, readOnly }}>{children}</BranchContext.Provider>;
+  return <BranchContext.Provider value={{ branches, branchId, setBranchId, loading, reload, readOnly, isSuperAdmin }}>{children}</BranchContext.Provider>;
 }
 
 export function useBranch() {

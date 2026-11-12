@@ -148,7 +148,7 @@ export const ivrIncomingCall = onRequest({ minInstances: 1, memory: '256MiB' }, 
 
   // Interruptor de emergencia: si el peluquero activó "modo mantenimiento"
   // en Ajustes, no se ofrece el menú automático — se transfiere directo.
-  if (branch?.maintenanceMode) {
+  if (branch?.maintenanceMode || branch?.billing?.blocked === true) {
     res.send(`<?xml version="1.0" encoding="UTF-8"?>
 <Response>
   <Say language="${s.sayLang}" voice="${s.sayVoice}">${s.maintenanceMessage}</Say>

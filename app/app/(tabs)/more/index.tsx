@@ -6,6 +6,7 @@ import { signOut } from 'firebase/auth';
 import { auth } from '../../../lib/firebase';
 import { useTheme, type ThemeColors, RADIUS, cardShadow, PRESSED_SCALE } from '../../../lib/theme';
 import { useT } from '../../../lib/i18n';
+import { useBranch } from '../../../lib/branchContext';
 
 type IconName = React.ComponentProps<typeof Ionicons>['name'];
 
@@ -14,8 +15,10 @@ export default function MoreMenuScreen() {
   const { colors, mode } = useTheme();
   const t = useT();
   const styles = makeStyles(colors, mode);
+  const { isSuperAdmin } = useBranch();
 
-  const MENU: { icon: IconName; label: string; route: '/more/waitlist' | '/more/clients' | '/more/campaigns' | '/more/questions' | '/more/audit' }[] = [
+  const MENU: { icon: IconName; label: string; route: '/more/waitlist' | '/more/clients' | '/more/campaigns' | '/more/questions' | '/more/audit' | '/more/owner' }[] = [
+    ...(isSuperAdmin ? [{ icon: 'briefcase' as IconName, label: t.billing.owner, route: '/more/owner' as const }] : []),
     { icon: 'time', label: t.tabs.waitlist, route: '/more/waitlist' },
     { icon: 'people', label: t.tabs.clients, route: '/more/clients' },
     { icon: 'megaphone', label: t.tabs.campaigns, route: '/more/campaigns' },

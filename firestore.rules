@@ -61,7 +61,30 @@ service cloud.firestore {
       // estas reglas — así ningún cliente puede marcarse a sí mismo como
       // "activo" sin haber pagado de verdad.
       allow update: if canWrite(id)
-        && request.resource.data.get('subscription', null) == resource.data.get('subscription', null);
+        && request.resource.data.get('subscription', null) == resource.data.get('subscription', null)
+        // "billing" (plan, mes gratis, bloqueo por falta de pago) tampoco:
+        // solo lo cambian las Cloud Functions (billing.ts), así nadie se
+        // desbloquea solo ni se pone un plan sin pagarlo.
+        && request.resource.data.get('billing', null) == resource.data.get('billing', null);
+    }
+
+    // Pedidos de la barbería al dueño del sistema ("agregá tal corte", "sumá
+    // a tal peluquero"). La barbería crea y lee los suyos; solo el dueño
+    // (super administrador) los marca como hechos y contesta.
+    match /changeRequests/{id} {
+      allow read: if hasBranchAccess(resource.data.branchId);
+      allow create: if canWrite(request.resource.data.branchId)
+        && request.resource.data.status == 'open'
+        && request.resource.data.get('reply', null) == null
+        && request.resource.data.text is string
+        && request.resource.data.text.size() > 0
+        && request.resource.data.text.size() <= 2000;
+      allow update, delete: if isSuperAdmin() && !isReadOnly();
+    }
+
+    // Notas privadas del dueño sobre cada barbería (su CRM): solo él las ve.
+    match /accountNotes/{branchId} {
+      allow read, write: if isSuperAdmin() && !isReadOnly();
     }
 
     match /staff/{id} {

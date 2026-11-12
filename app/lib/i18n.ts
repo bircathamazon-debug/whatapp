@@ -15,6 +15,57 @@ export const RTL_LANGS: Lang[] = ['he'];
 
 interface Dict {
   readOnlyBanner: string;
+  billing: {
+    myPlan: string;
+    requests: string;
+    owner: string;
+    basic: string;
+    pro: string;
+    perMonth: (price: number) => string;
+    basicDesc: (limit: number) => string;
+    proDesc: string;
+    current: string;
+    choose: string;
+    usage: (used: number, limit: number | null) => string;
+    trialLeft: (days: number) => string;
+    trialOver: string;
+    nextCharge: (date: string) => string;
+    payWithCard: string;
+    cardActive: string;
+    paymentsNotReady: string;
+    planChanged: string;
+    blockedTitle: string;
+    blockedText: string;
+    blockedManual: string;
+    requestPlaceholder: string;
+    send: string;
+    sent: string;
+    noRequests: string;
+    open: string;
+    done: string;
+    reply: string;
+    markDone: string;
+    ownerTitle: string;
+    newBarbershop: string;
+    name: string;
+    email: string;
+    password: string;
+    phone: string;
+    create: string;
+    created: (email: string) => string;
+    statusTrial: string;
+    statusPaying: string;
+    statusPastDue: string;
+    statusBlocked: string;
+    statusNoPlan: string;
+    block: string;
+    unblock: string;
+    extendTrial: string;
+    notes: string;
+    save: string;
+    openRequests: (n: number) => string;
+    error: string;
+  };
   tabs: { agenda: string; waitlist: string; waitlistShort: string; clients: string; campaigns: string; questions: string; home: string; more: string; auditLog: string };
   home: {
     greeting: string;
@@ -116,6 +167,10 @@ interface Dict {
       appointment_marked_completed: string;
       appointment_confirmed: string;
       subscription_cancelled: string;
+      billing_plan_basic: string;
+      billing_plan_pro: string;
+      owner_billing_update: string;
+      owner_create_branch: string;
     };
   };
   adminMenu: {
@@ -315,6 +370,57 @@ interface Dict {
 
 const he: Dict = {
   readOnlyBanner: '👁️ מצב צפייה בלבד — אי אפשר לשמור שינויים בחשבון הזה',
+  billing: {
+    myPlan: 'התוכנית שלי',
+    requests: 'בקשות לשינוי',
+    owner: 'ניהול לקוחות (בעלים)',
+    basic: 'בסיסי',
+    pro: 'פרו',
+    perMonth: (p) => `₪${p} לחודש`,
+    basicDesc: (l) => `עד ${l} תורים בחודש`,
+    proDesc: 'ללא הגבלת תורים',
+    current: 'התוכנית הנוכחית',
+    choose: 'לבחור בתוכנית הזו',
+    usage: (u, l) => (l ? `החודש: ${u} מתוך ${l} תורים` : `החודש: ${u} תורים`),
+    trialLeft: (d) => `נשארו ${d} ימים בתקופת הניסיון החינמית`,
+    trialOver: 'תקופת הניסיון הסתיימה',
+    nextCharge: (d) => `החיוב הבא: ${d}`,
+    payWithCard: 'הוספת כרטיס אשראי',
+    cardActive: '✅ כרטיס אשראי פעיל — החיוב אוטומטי',
+    paymentsNotReady: 'התשלומים עדיין לא מוגדרים. נעדכן בקרוב.',
+    planChanged: 'התוכנית עודכנה. השינוי חל מהחיוב הבא.',
+    blockedTitle: 'החשבון מושהה',
+    blockedText: 'התשלום לא עבר, ולכן הבוט מפנה את הלקוחות אליכם ישירות. מוסיפים כרטיס אשראי והכול חוזר לעבוד מיד.',
+    blockedManual: 'החשבון הושהה. לפרטים צרו קשר עם מנהל המערכת.',
+    requestPlaceholder: 'מה תרצו לשנות? למשל: להוסיף "תספורת + זקן ₪70", או להוסיף ספר חדש לתפריט',
+    send: 'שליחה',
+    sent: 'הבקשה נשלחה ✔',
+    noRequests: 'עדיין לא שלחתם בקשות.',
+    open: 'ממתינה',
+    done: 'בוצעה',
+    reply: 'תשובה',
+    markDone: 'סימון כבוצע',
+    ownerTitle: 'הלקוחות שלי',
+    newBarbershop: 'מספרה חדשה',
+    name: 'שם העסק',
+    email: 'מייל לכניסה',
+    password: 'סיסמה (8 תווים לפחות)',
+    phone: 'טלפון של הבעלים (להתראות)',
+    create: 'יצירה',
+    created: (e) => `נוצר! החודש החינמי התחיל. כניסה עם ${e}`,
+    statusTrial: 'בניסיון',
+    statusPaying: 'משלם',
+    statusPastDue: 'חיוב נכשל',
+    statusBlocked: 'חסום',
+    statusNoPlan: 'ללא תוכנית',
+    block: 'חסימה',
+    unblock: 'ביטול חסימה',
+    extendTrial: '+30 ימי ניסיון',
+    notes: 'הערות שלי (רק אני רואה)',
+    save: 'שמירה',
+    openRequests: (n) => `${n} בקשות ממתינות`,
+    error: 'משהו השתבש. נסו שוב.',
+  },
   tabs: { agenda: 'יומן', waitlist: 'רשימת המתנה', waitlistShort: 'המתנה', clients: 'לקוחות', campaigns: 'קמפיינים', questions: 'שאלות', home: 'בית', more: 'עוד', auditLog: 'יומן פעילות' },
   home: {
     greeting: 'שלום',
@@ -416,6 +522,10 @@ const he: Dict = {
       appointment_marked_completed: 'סימן "הושלם"',
       appointment_confirmed: 'אישר תור',
       subscription_cancelled: 'ביטל את המנוי',
+      billing_plan_basic: 'עבר לתוכנית בסיסית',
+      billing_plan_pro: 'עבר לתוכנית פרו',
+      owner_billing_update: 'מנהל המערכת עדכן את החשבון',
+      owner_create_branch: 'מנהל המערכת יצר את החשבון',
     },
   },
   adminMenu: {
@@ -615,6 +725,57 @@ const he: Dict = {
 
 const en: Dict = {
   readOnlyBanner: '👁️ View-only mode — changes can’t be saved on this account',
+  billing: {
+    myPlan: 'My plan',
+    requests: 'Change requests',
+    owner: 'Clients (owner)',
+    basic: 'Basic',
+    pro: 'Pro',
+    perMonth: (p) => `₪${p}/month`,
+    basicDesc: (l) => `Up to ${l} bookings a month`,
+    proDesc: 'Unlimited bookings',
+    current: 'Current plan',
+    choose: 'Choose this plan',
+    usage: (u, l) => (l ? `This month: ${u} of ${l} bookings` : `This month: ${u} bookings`),
+    trialLeft: (d) => `${d} days left in your free trial`,
+    trialOver: 'Your free trial has ended',
+    nextCharge: (d) => `Next charge: ${d}`,
+    payWithCard: 'Add a credit card',
+    cardActive: '✅ Card active — automatic billing',
+    paymentsNotReady: 'Payments are not set up yet. Coming soon.',
+    planChanged: 'Plan updated. It applies from the next charge.',
+    blockedTitle: 'Account paused',
+    blockedText: 'The payment did not go through, so the bot is sending your clients to you directly. Add a card and everything works again right away.',
+    blockedManual: 'This account is paused. Please contact the system administrator.',
+    requestPlaceholder: 'What would you like to change? E.g. add "Cut + beard ₪70", or add a new barber to the menu',
+    send: 'Send',
+    sent: 'Request sent ✔',
+    noRequests: 'No requests yet.',
+    open: 'Pending',
+    done: 'Done',
+    reply: 'Reply',
+    markDone: 'Mark as done',
+    ownerTitle: 'My clients',
+    newBarbershop: 'New barbershop',
+    name: 'Business name',
+    email: 'Login email',
+    password: 'Password (8+ characters)',
+    phone: "Owner's phone (for alerts)",
+    create: 'Create',
+    created: (e) => `Created! The free month has started. Login: ${e}`,
+    statusTrial: 'Trial',
+    statusPaying: 'Paying',
+    statusPastDue: 'Payment failed',
+    statusBlocked: 'Blocked',
+    statusNoPlan: 'No plan',
+    block: 'Block',
+    unblock: 'Unblock',
+    extendTrial: '+30 trial days',
+    notes: 'My notes (only I see them)',
+    save: 'Save',
+    openRequests: (n) => `${n} pending requests`,
+    error: 'Something went wrong. Try again.',
+  },
   tabs: { agenda: 'Agenda', waitlist: 'Waitlist', waitlistShort: 'Waitlist', clients: 'Clients', campaigns: 'Campaigns', questions: 'Questions', home: 'Home', more: 'More', auditLog: 'Activity log' },
   home: {
     greeting: 'Hello',
@@ -716,6 +877,10 @@ const en: Dict = {
       appointment_marked_completed: 'Marked "completed"',
       appointment_confirmed: 'Confirmed an appointment',
       subscription_cancelled: 'Cancelled the subscription',
+      billing_plan_basic: 'Switched to the Basic plan',
+      billing_plan_pro: 'Switched to the Pro plan',
+      owner_billing_update: 'System owner updated the account',
+      owner_create_branch: 'System owner created the account',
     },
   },
   adminMenu: {
@@ -915,6 +1080,57 @@ const en: Dict = {
 
 const es: Dict = {
   readOnlyBanner: '👁️ Modo solo lectura — no se pueden guardar cambios en esta cuenta',
+  billing: {
+    myPlan: 'Mi plan',
+    requests: 'Pedidos de cambio',
+    owner: 'Mis clientes (dueño)',
+    basic: 'Básico',
+    pro: 'Pro',
+    perMonth: (p) => `₪${p} por mes`,
+    basicDesc: (l) => `Hasta ${l} citas por mes`,
+    proDesc: 'Citas sin límite',
+    current: 'Plan actual',
+    choose: 'Elegir este plan',
+    usage: (u, l) => (l ? `Este mes: ${u} de ${l} citas` : `Este mes: ${u} citas`),
+    trialLeft: (d) => `Te quedan ${d} días del mes gratis`,
+    trialOver: 'Terminó el mes gratis',
+    nextCharge: (d) => `Próximo cobro: ${d}`,
+    payWithCard: 'Cargar tarjeta de crédito',
+    cardActive: '✅ Tarjeta activa — cobro automático',
+    paymentsNotReady: 'Los pagos todavía no están configurados. Pronto.',
+    planChanged: 'Plan actualizado. Vale desde el próximo cobro.',
+    blockedTitle: 'Cuenta en pausa',
+    blockedText: 'No pasó el pago, así que el bot les pide a tus clientes que te contacten directo. Cargá una tarjeta y vuelve a funcionar enseguida.',
+    blockedManual: 'Esta cuenta está en pausa. Contactá al administrador del sistema.',
+    requestPlaceholder: '¿Qué querés cambiar? Ej.: agregar "Corte + barba ₪70" o sumar un peluquero nuevo al menú',
+    send: 'Enviar',
+    sent: 'Pedido enviado ✔',
+    noRequests: 'Todavía no mandaste pedidos.',
+    open: 'Pendiente',
+    done: 'Hecho',
+    reply: 'Respuesta',
+    markDone: 'Marcar como hecho',
+    ownerTitle: 'Mis clientes',
+    newBarbershop: 'Barbería nueva',
+    name: 'Nombre del negocio',
+    email: 'Mail para entrar',
+    password: 'Contraseña (8 caracteres o más)',
+    phone: 'Teléfono del dueño (para avisos)',
+    create: 'Crear',
+    created: (e) => `¡Creada! Arrancó el mes gratis. Entra con ${e}`,
+    statusTrial: 'En prueba',
+    statusPaying: 'Pagando',
+    statusPastDue: 'Falló el cobro',
+    statusBlocked: 'Bloqueada',
+    statusNoPlan: 'Sin plan',
+    block: 'Bloquear',
+    unblock: 'Desbloquear',
+    extendTrial: '+30 días de prueba',
+    notes: 'Mis notas (solo las veo yo)',
+    save: 'Guardar',
+    openRequests: (n) => `${n} pedidos pendientes`,
+    error: 'Algo salió mal. Probá de nuevo.',
+  },
   tabs: { agenda: 'Agenda', waitlist: 'Lista de espera', waitlistShort: 'Espera', clients: 'Clientes', campaigns: 'Campañas', questions: 'Preguntas', home: 'Inicio', more: 'Más', auditLog: 'Registro de actividad' },
   home: {
     greeting: 'Hola',
@@ -1016,6 +1232,10 @@ const es: Dict = {
       appointment_marked_completed: 'Marcó "completado"',
       appointment_confirmed: 'Confirmó un turno',
       subscription_cancelled: 'Canceló la suscripción',
+      billing_plan_basic: 'Pasó al plan Básico',
+      billing_plan_pro: 'Pasó al plan Pro',
+      owner_billing_update: 'El dueño del sistema actualizó la cuenta',
+      owner_create_branch: 'El dueño del sistema creó la cuenta',
     },
   },
   adminMenu: {

@@ -7,7 +7,11 @@ export type AuditAction =
   | 'appointment_marked_no_show'
   | 'appointment_marked_completed'
   | 'appointment_confirmed'
-  | 'subscription_cancelled';
+  | 'subscription_cancelled'
+  | 'billing_plan_basic'
+  | 'billing_plan_pro'
+  | 'owner_billing_update'
+  | 'owner_create_branch';
 
 /**
  * Deja constancia de quién hizo una acción sensible desde el panel y cuándo

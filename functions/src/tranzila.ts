@@ -3,6 +3,7 @@ import { createHmac, timingSafeEqual } from 'crypto';
 import { db } from './admin';
 import type { Branch } from './types';
 import { requireBranchWriteAccess } from './access';
+import { PLANS } from './plans';
 import { logAudit } from './audit';
 
 /**
@@ -66,10 +67,9 @@ function verifyNotifyToken(branchId: string, token: string): boolean {
 function getConfig() {
   const terminal = process.env.TRANZILA_TERMINAL_NAME;
   const password = process.env.TRANZILA_PASSWORD;
-  const sum = process.env.TRANZILA_SUBSCRIPTION_SUM;
   const baseUrl = process.env.FUNCTIONS_BASE_URL;
-  if (!terminal || !password || !sum || !baseUrl) return null;
-  return { terminal, password, sum, baseUrl };
+  if (!terminal || !password || !baseUrl) return null;
+  return { terminal, password, baseUrl };
 }
 
 /** Callable: arma la URL de la página de pago alojada por Tranzila para suscribirse. */
@@ -88,8 +88,12 @@ export const tranzilaCreateCheckoutUrl = onCall(async (request) => {
   const notifyUrl = `${config.baseUrl}/tranzilaNotify?branchId=${encodeURIComponent(branchId)}&token=${notifyToken}`;
   const doneUrl = `${config.baseUrl}/tranzilaCheckoutDone`;
 
+  // Se cobra el precio del plan elegido. Si todavía está en el mes gratis,
+  // el cobro de hoy cubre el primer mes DESPUÉS de la prueba (ver
+  // tranzilaNotify): no pierde los días gratis por cargar la tarjeta antes.
+  const plan = branch.billing?.plan ?? 'basic';
   const params = new URLSearchParams({
-    sum: config.sum,
+    sum: String(PLANS[plan].price),
     currency: '1', // 1 = ILS
     tranmode: 'V', // verifica la tarjeta, cobra y genera un token en un solo paso
     cred_type: '1', // pago único (no cuotas)
@@ -135,7 +139,9 @@ export const tranzilaNotify = onRequest(async (req, res) => {
   const success = body?.Response === '000';
 
   if (branchId && success) {
-    const nextMonth = Date.now() + 30 * 24 * 3600000;
+    const branchSnap = await db.collection('branches').doc(branchId).get();
+    const trialEndsAt = (branchSnap.get('billing.trialEndsAt') as number | null | undefined) ?? 0;
+    const nextMonth = Math.max(Date.now(), trialEndsAt) + 30 * 24 * 3600000;
     await db
       .collection('branches')
       .doc(branchId)
@@ -145,6 +151,10 @@ export const tranzilaNotify = onRequest(async (req, res) => {
         'subscription.tranzilaToken': body.TranzilaTK ?? null,
         'subscription.tranzilaExpDate': body.expdate ?? null,
         'subscription.currentPeriodEnd': nextMonth,
+        'billing.blocked': false,
+        'billing.blockedReason': null,
+        'billing.pastDueSince': null,
+        'billing.lastChargeAmount': Number(body.sum) || null,
       });
   } else if (branchId) {
     // No se loguea el body completo: TranzilaTK es un token de tarjeta
@@ -160,7 +170,7 @@ export const tranzilaNotify = onRequest(async (req, res) => {
  * Cobra el token guardado de una sucursal (usado por el cron mensual en
  * crons.ts). Devuelve true si el cobro fue exitoso.
  */
-export async function chargeTranzilaToken(branch: Branch): Promise<boolean> {
+export async function chargeTranzilaToken(branch: Branch, amount: number): Promise<boolean> {
   const config = getConfig();
   const token = branch.subscription?.tranzilaToken;
   const expdate = branch.subscription?.tranzilaExpDate;
@@ -171,7 +181,7 @@ export async function chargeTranzilaToken(branch: Branch): Promise<boolean> {
     TranzilaPW: config.password,
     TranzilaTK: token,
     expdate,
-    sum: config.sum,
+    sum: String(amount),
     currency: '1',
     cred_type: '1',
   });

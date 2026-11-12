@@ -22,6 +22,8 @@ export default function SettingsStackLayout() {
       <Stack.Screen name="services" options={{ title: t.adminMenu.services }} />
       <Stack.Screen name="schedule" options={{ title: t.schedule.weeklyHours }} />
       <Stack.Screen name="general" options={{ title: t.settings.title }} />
+      <Stack.Screen name="plan" options={{ title: t.billing.myPlan }} />
+      <Stack.Screen name="requests" options={{ title: t.billing.requests }} />
     </Stack>
   );
 }

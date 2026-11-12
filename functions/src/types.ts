@@ -26,6 +26,28 @@ export interface Branch {
     tranzilaToken?: string;
     tranzilaExpDate?: string;
   };
+  /**
+   * Plan y estado de cuenta de la barbería como cliente del sistema (lo que
+   * paga por usar el bot). Solo lo escribe el backend o el dueño del sistema
+   * (super administrador) — ver firestore.rules. Precios y límites en
+   * functions/src/plans.ts.
+   */
+  billing?: {
+    plan: 'basic' | 'pro';
+    /** Fin del mes gratis (epoch ms). Pasada esta fecha sin tarjeta cargada, se bloquea. */
+    trialEndsAt?: number | null;
+    /** Cuenta bloqueada: no entra al panel y el bot no atiende (deriva al peluquero). */
+    blocked?: boolean;
+    blockedReason?: 'unpaid' | 'manual' | null;
+    /** Desde cuándo falla el cobro (epoch ms); a los 3 días se bloquea. */
+    pastDueSince?: number | null;
+    /** Mes ('YYYY-MM') en que ya se avisó que llegó al 80% del plan Básico. */
+    usageWarnedMonth?: string | null;
+    /** Ya se avisó que el mes gratis está por terminar. */
+    trialWarned?: boolean;
+    /** Monto cobrado en el último cobro (₪), para mostrarlo. */
+    lastChargeAmount?: number | null;
+  };
   /** Campaña de días flojos (ej. domingo/lunes después de Shabat):
    *  descuento automático en el precio de los servicios reservados esos
    *  días. El peluquero la prende/apaga y ajusta desde Campañas. */
@@ -177,3 +199,16 @@ export interface OutboundNotification {
 export const LOYALTY_THRESHOLD = 10;
 export const NO_SHOW_DEPOSIT_THRESHOLD = 2;
 export const REMINDER_WINDOWS_HOURS = [24, 2, 0.5];
+
+/** Pedido de la barbería al dueño del sistema para cambiar algo de su app
+ * (ej. agregar un tipo de corte o un peluquero al menú). */
+export interface ChangeRequest {
+  id: string;
+  branchId: string;
+  text: string;
+  createdAt: number;
+  createdByEmail?: string | null;
+  status: 'open' | 'done';
+  reply?: string | null;
+  doneAt?: number | null;
+}

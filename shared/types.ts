@@ -46,6 +46,28 @@ export interface Branch {
     tranzilaToken?: string;
     tranzilaExpDate?: string; // 'MMYY'
   };
+  /**
+   * Plan y estado de cuenta de la barbería como cliente del sistema (lo que
+   * paga por usar el bot). Solo lo escribe el backend o el dueño del sistema
+   * (super administrador) — ver firestore.rules. Precios y límites en
+   * functions/src/plans.ts.
+   */
+  billing?: {
+    plan: 'basic' | 'pro';
+    /** Fin del mes gratis (epoch ms). Pasada esta fecha sin tarjeta cargada, se bloquea. */
+    trialEndsAt?: number | null;
+    /** Cuenta bloqueada: no entra al panel y el bot no atiende (deriva al peluquero). */
+    blocked?: boolean;
+    blockedReason?: 'unpaid' | 'manual' | null;
+    /** Desde cuándo falla el cobro (epoch ms); a los 3 días se bloquea. */
+    pastDueSince?: number | null;
+    /** Mes ('YYYY-MM') en que ya se avisó que llegó al 80% del plan Básico. */
+    usageWarnedMonth?: string | null;
+    /** Ya se avisó que el mes gratis está por terminar. */
+    trialWarned?: boolean;
+    /** Monto cobrado en el último cobro (₪), para mostrarlo. */
+    lastChargeAmount?: number | null;
+  };
   /** Campaña de días flojos (ej. domingo/lunes después de Shabat):
    *  descuento automático en el precio de los servicios reservados esos
    *  días. El peluquero la prende/apaga y ajusta desde Campañas. */
@@ -222,7 +244,11 @@ export interface AuditLogEntry {
     | 'appointment_marked_no_show'
     | 'appointment_marked_completed'
     | 'appointment_confirmed'
-    | 'subscription_cancelled';
+    | 'subscription_cancelled'
+    | 'billing_plan_basic'
+    | 'billing_plan_pro'
+    | 'owner_billing_update'
+    | 'owner_create_branch';
   details?: Record<string, unknown>;
   createdAt: number;
 }
@@ -287,3 +313,16 @@ export interface Campaign {
 export const LOYALTY_THRESHOLD = 10; // cortes para desbloquear descuento
 export const NO_SHOW_DEPOSIT_THRESHOLD = 2; // no-shows antes de exigir depósito
 export const REMINDER_WINDOWS_HOURS = [24, 2, 0.5]; // recordatorios antes de la cita (horas; 0.5 = 30 min)
+
+/** Pedido de la barbería al dueño del sistema para cambiar algo de su app
+ * (ej. agregar un tipo de corte o un peluquero al menú). */
+export interface ChangeRequest {
+  id: string;
+  branchId: string;
+  text: string;
+  createdAt: number;
+  createdByEmail?: string | null;
+  status: 'open' | 'done';
+  reply?: string | null;
+  doneAt?: number | null;
+}
