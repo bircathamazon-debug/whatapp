@@ -312,7 +312,9 @@ export interface Campaign {
 
 export const LOYALTY_THRESHOLD = 10; // cortes para desbloquear descuento
 export const NO_SHOW_DEPOSIT_THRESHOLD = 2; // no-shows antes de exigir depósito
-export const REMINDER_WINDOWS_HOURS = [24, 2, 0.5]; // recordatorios antes de la cita (horas; 0.5 = 30 min)
+// Un solo recordatorio, 45 min antes (decisión del usuario 12-11-2026: menos
+// mensajes de WhatsApp = menos costo de Meta por cita). Antes: [24, 2, 0.5].
+export const REMINDER_WINDOWS_HOURS = [0.75]; // horas antes de la cita
 
 /** Pedido de la barbería al dueño del sistema para cambiar algo de su app
  * (ej. agregar un tipo de corte o un peluquero al menú). */

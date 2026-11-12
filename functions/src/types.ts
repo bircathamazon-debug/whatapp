@@ -198,7 +198,7 @@ export interface OutboundNotification {
 
 export const LOYALTY_THRESHOLD = 10;
 export const NO_SHOW_DEPOSIT_THRESHOLD = 2;
-export const REMINDER_WINDOWS_HOURS = [24, 2, 0.5];
+export const REMINDER_WINDOWS_HOURS = [0.75];
 
 /** Pedido de la barbería al dueño del sistema para cambiar algo de su app
  * (ej. agregar un tipo de corte o un peluquero al menú). */

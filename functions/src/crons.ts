@@ -8,7 +8,7 @@ import { toEpoch, getStaffServiceDuration } from './availability';
 import { chargeTranzilaToken } from './tranzila';
 import { amountForPeriod } from './plans';
 
-/** Cada 15 minutos: recordatorios 24h y 2h antes, por el canal preferido del cliente. */
+/** Cada 15 minutos: recordatorio 45 min antes (REMINDER_WINDOWS_HOURS), por el canal preferido del cliente. */
 export const sendReminders = onSchedule({ schedule: 'every 15 minutes', timeZone: 'Asia/Jerusalem' }, async () => {
   const now = Date.now();
 
