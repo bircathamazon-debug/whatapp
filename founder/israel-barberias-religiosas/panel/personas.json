@@ -1,0 +1,222 @@
+[
+ {
+  "id": "P001",
+  "name": "Omar",
+  "age": 25,
+  "segment": "Barbería con 2-3 sillas",
+  "income": 94000,
+  "behaviour": "Sin turnos",
+  "behaviour_how": "Trabaja por orden de llegada; los clientes esperan sentados.",
+  "objection": "¿Y si se cae el sistema un viernes lleno?",
+  "habit": "atendés el teléfono con la máquina en la mano"
+ },
+ {
+  "id": "P002",
+  "name": "Raj",
+  "age": 41,
+  "segment": "Barbero solo, agenda llena",
+  "income": 48000,
+  "behaviour": "Boca en boca",
+  "behaviour_how": "Solo prueba algo si se lo recomienda otro peluquero de la comunidad.",
+  "objection": "Es otro pago mensual más",
+  "habit": "los padres traen a varios hijos juntos"
+ },
+ {
+  "id": "P003",
+  "name": "Emil",
+  "age": 59,
+  "segment": "Barbero solo, agenda llena",
+  "income": 51000,
+  "behaviour": "Ahorrador",
+  "behaviour_how": "Compara precios, evita pagos mensuales y prefiere lo gratis.",
+  "objection": "¿Y si se cae el sistema un viernes lleno?",
+  "habit": "antes de Pesaj y Rosh Hashaná se llena todo"
+ },
+ {
+  "id": "P004",
+  "name": "Owen",
+  "age": 33,
+  "segment": "Barbería con 2-3 sillas",
+  "income": 105000,
+  "behaviour": "Sin turnos",
+  "behaviour_how": "Trabaja por orden de llegada; los clientes esperan sentados.",
+  "objection": "¿Y si se cae el sistema un viernes lleno?",
+  "habit": "el viernes antes de Shabat no das abasto"
+ },
+ {
+  "id": "P005",
+  "name": "Sana",
+  "age": 54,
+  "segment": "Barbero solo, poco movimiento",
+  "income": 38000,
+  "behaviour": "Todo en la cabeza",
+  "behaviour_how": "Lleva los turnos en una libreta o de memoria y atiende el teléfono mientras corta.",
+  "objection": "Ya tengo una app de turnos",
+  "habit": "los padres traen a varios hijos juntos"
+ },
+ {
+  "id": "P006",
+  "name": "Maya",
+  "age": 50,
+  "segment": "Barbero solo, poco movimiento",
+  "income": 29000,
+  "behaviour": "Sin turnos",
+  "behaviour_how": "Trabaja por orden de llegada; los clientes esperan sentados.",
+  "objection": "Muchos de mis clientes tienen teléfono kasher, no usan WhatsApp",
+  "habit": "los padres traen a varios hijos juntos"
+ },
+ {
+  "id": "P007",
+  "name": "Selin",
+  "age": 50,
+  "segment": "Barbería con 2-3 sillas",
+  "income": 73000,
+  "behaviour": "Desconfía de la tecnología",
+  "behaviour_how": "No usa apps, prefiere hablar con el cliente.",
+  "objection": "Muchos de mis clientes tienen teléfono kasher, no usan WhatsApp",
+  "habit": "atendés el teléfono con la máquina en la mano"
+ },
+ {
+  "id": "P008",
+  "name": "Ruby",
+  "age": 53,
+  "segment": "Barbero solo, poco movimiento",
+  "income": 25000,
+  "behaviour": "Ahorrador",
+  "behaviour_how": "Compara precios, evita pagos mensuales y prefiere lo gratis.",
+  "objection": "No quiero que salgan mensajes en Shabat",
+  "habit": "el viernes antes de Shabat no das abasto"
+ },
+ {
+  "id": "P009",
+  "name": "Nora",
+  "age": 31,
+  "segment": "Barbero solo, agenda llena",
+  "income": 40000,
+  "behaviour": "Sin turnos",
+  "behaviour_how": "Trabaja por orden de llegada; los clientes esperan sentados.",
+  "objection": "Es otro pago mensual más",
+  "habit": "el viernes antes de Shabat no das abasto"
+ },
+ {
+  "id": "P010",
+  "name": "Fatima",
+  "age": 48,
+  "segment": "Barbero solo, poco movimiento",
+  "income": 33000,
+  "behaviour": "Ya usa una app",
+  "behaviour_how": "Paga una app de turnos (Calmark, Simple Tor u otra) y no quiere cambiar.",
+  "objection": "Muchos de mis clientes tienen teléfono kasher, no usan WhatsApp",
+  "habit": "atendés el teléfono con la máquina en la mano"
+ },
+ {
+  "id": "P011",
+  "name": "Tariq",
+  "age": 49,
+  "segment": "Barbero solo, agenda llena",
+  "income": 44000,
+  "behaviour": "Todo en la cabeza",
+  "behaviour_how": "Lleva los turnos en una libreta o de memoria y atiende el teléfono mientras corta.",
+  "objection": "No quiero que salgan mensajes en Shabat",
+  "habit": "antes de Pesaj y Rosh Hashaná se llena todo"
+ },
+ {
+  "id": "P012",
+  "name": "Felix",
+  "age": 48,
+  "segment": "Barbero solo, poco movimiento",
+  "income": 31000,
+  "behaviour": "Ya usa una app",
+  "behaviour_how": "Paga una app de turnos (Calmark, Simple Tor u otra) y no quiere cambiar.",
+  "objection": "Muchos de mis clientes tienen teléfono kasher, no usan WhatsApp",
+  "habit": "los padres traen a varios hijos juntos"
+ },
+ {
+  "id": "P013",
+  "name": "Zoe",
+  "age": 54,
+  "segment": "Barbería con 2-3 sillas",
+  "income": 94000,
+  "behaviour": "Boca en boca",
+  "behaviour_how": "Solo prueba algo si se lo recomienda otro peluquero de la comunidad.",
+  "objection": "No quiero que salgan mensajes en Shabat",
+  "habit": "el viernes antes de Shabat no das abasto"
+ },
+ {
+  "id": "P014",
+  "name": "Dev",
+  "age": 34,
+  "segment": "Barbero solo, poco movimiento",
+  "income": 24000,
+  "behaviour": "Ya usa una app",
+  "behaviour_how": "Paga una app de turnos (Calmark, Simple Tor u otra) y no quiere cambiar.",
+  "objection": "No quiero que salgan mensajes en Shabat",
+  "habit": "antes de Pesaj y Rosh Hashaná se llena todo"
+ },
+ {
+  "id": "P015",
+  "name": "Yusuf",
+  "age": 55,
+  "segment": "Barbero solo, agenda llena",
+  "income": 65000,
+  "behaviour": "Desconfía de la tecnología",
+  "behaviour_how": "No usa apps, prefiere hablar con el cliente.",
+  "objection": "Es otro pago mensual más",
+  "habit": "el viernes antes de Shabat no das abasto"
+ },
+ {
+  "id": "P016",
+  "name": "Theo",
+  "age": 38,
+  "segment": "Barbero solo, poco movimiento",
+  "income": 39000,
+  "behaviour": "Todo en la cabeza",
+  "behaviour_how": "Lleva los turnos en una libreta o de memoria y atiende el teléfono mientras corta.",
+  "objection": "¿Y si se cae el sistema un viernes lleno?",
+  "habit": "antes de Pesaj y Rosh Hashaná se llena todo"
+ },
+ {
+  "id": "P017",
+  "name": "Alma",
+  "age": 34,
+  "segment": "Barbero solo, poco movimiento",
+  "income": 34000,
+  "behaviour": "Todo en la cabeza",
+  "behaviour_how": "Lleva los turnos en una libreta o de memoria y atiende el teléfono mientras corta.",
+  "objection": "Muchos de mis clientes tienen teléfono kasher, no usan WhatsApp",
+  "habit": "antes de Pesaj y Rosh Hashaná se llena todo"
+ },
+ {
+  "id": "P018",
+  "name": "Freya",
+  "age": 30,
+  "segment": "Barbero solo, agenda llena",
+  "income": 61000,
+  "behaviour": "Ahorrador",
+  "behaviour_how": "Compara precios, evita pagos mensuales y prefiere lo gratis.",
+  "objection": "No quiero que salgan mensajes en Shabat",
+  "habit": "antes de Pesaj y Rosh Hashaná se llena todo"
+ },
+ {
+  "id": "P019",
+  "name": "Harper",
+  "age": 35,
+  "segment": "Barbero solo, poco movimiento",
+  "income": 28000,
+  "behaviour": "Desconfía de la tecnología",
+  "behaviour_how": "No usa apps, prefiere hablar con el cliente.",
+  "objection": "Es otro pago mensual más",
+  "habit": "antes de Pesaj y Rosh Hashaná se llena todo"
+ },
+ {
+  "id": "P020",
+  "name": "Emma",
+  "age": 39,
+  "segment": "Barbero solo, agenda llena",
+  "income": 58000,
+  "behaviour": "Todo en la cabeza",
+  "behaviour_how": "Lleva los turnos en una libreta o de memoria y atiende el teléfono mientras corta.",
+  "objection": "Es otro pago mensual más",
+  "habit": "atendés el teléfono con la máquina en la mano"
+ }
+]

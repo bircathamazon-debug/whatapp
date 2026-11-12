@@ -1,0 +1,81 @@
+{
+ "business": "Bot de citas por WhatsApp y línea telefónica para barberías",
+ "target": "Dueños de barberías de hombres en barrios religiosos/jaredíes de Israel (Bnei Brak, Jerusalén, Beit Shemesh, Modiín Illit, Beitar Illit, Elad), casi todos trabajan solos",
+ "where": "Israel, barrios jaredíes y religiosos",
+ "age": [
+  25,
+  60
+ ],
+ "segments": [
+  {
+   "name": "Barbero solo, poco movimiento",
+   "share": 0.45,
+   "income": [
+    22000,
+    40000
+   ]
+  },
+  {
+   "name": "Barbero solo, agenda llena",
+   "share": 0.35,
+   "income": [
+    40000,
+    70000
+   ]
+  },
+  {
+   "name": "Barbería con 2-3 sillas",
+   "share": 0.2,
+   "income": [
+    70000,
+    120000
+   ]
+  }
+ ],
+ "behaviours": [
+  {
+   "name": "Todo en la cabeza",
+   "share": 0.25,
+   "how": "Lleva los turnos en una libreta o de memoria y atiende el teléfono mientras corta."
+  },
+  {
+   "name": "Sin turnos",
+   "share": 0.2,
+   "how": "Trabaja por orden de llegada; los clientes esperan sentados."
+  },
+  {
+   "name": "Ya usa una app",
+   "share": 0.15,
+   "how": "Paga una app de turnos (Calmark, Simple Tor u otra) y no quiere cambiar."
+  },
+  {
+   "name": "Ahorrador",
+   "share": 0.15,
+   "how": "Compara precios, evita pagos mensuales y prefiere lo gratis."
+  },
+  {
+   "name": "Desconfía de la tecnología",
+   "share": 0.15,
+   "how": "No usa apps, prefiere hablar con el cliente."
+  },
+  {
+   "name": "Boca en boca",
+   "share": 0.1,
+   "how": "Solo prueba algo si se lo recomienda otro peluquero de la comunidad."
+  }
+ ],
+ "objections": [
+  "Muchos de mis clientes tienen teléfono kasher, no usan WhatsApp",
+  "Es otro pago mensual más",
+  "No quiero que salgan mensajes en Shabat",
+  "Mis clientes vienen sin turno, no lo necesito",
+  "¿Y si se cae el sistema un viernes lleno?",
+  "Ya tengo una app de turnos"
+ ],
+ "habits": [
+  "el viernes antes de Shabat no das abasto",
+  "atendés el teléfono con la máquina en la mano",
+  "antes de Pesaj y Rosh Hashaná se llena todo",
+  "los padres traen a varios hijos juntos"
+ ]
+}

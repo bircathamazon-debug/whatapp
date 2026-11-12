@@ -1,0 +1,222 @@
+[
+ {
+  "id": "P001",
+  "name": "Omar",
+  "age": 20,
+  "segment": "Estudio con empleadas",
+  "income": 79000,
+  "behaviour": "Todo por WhatsApp e Instagram",
+  "behaviour_how": "Recibe pedidos por mensajes y contesta entre clienta y clienta.",
+  "objection": "No tengo tiempo de configurarlo",
+  "habit": "trabajás con las manos ocupadas y no podés contestar el teléfono"
+ },
+ {
+  "id": "P002",
+  "name": "Raj",
+  "age": 28,
+  "segment": "Local propio pequeño",
+  "income": 42000,
+  "behaviour": "Boca en boca",
+  "behaviour_how": "Prueba lo que le recomienda otra manicurista.",
+  "objection": "Es otro pago mensual",
+  "habit": "cada turno dura más de una hora"
+ },
+ {
+  "id": "P003",
+  "name": "Emil",
+  "age": 37,
+  "segment": "Local propio pequeño",
+  "income": 44000,
+  "behaviour": "Muchas faltas",
+  "behaviour_how": "Le fallan clientas sin avisar y pierde la hora.",
+  "objection": "No tengo tiempo de configurarlo",
+  "habit": "cada turno dura más de una hora"
+ },
+ {
+  "id": "P004",
+  "name": "Owen",
+  "age": 50,
+  "segment": "Estudio con empleadas",
+  "income": 65000,
+  "behaviour": "Ya usa una app",
+  "behaviour_how": "Paga una app de turnos (Pink, Calmark u otra).",
+  "objection": "No tengo tiempo de configurarlo",
+  "habit": "tus clientas vuelven cada 3 o 4 semanas"
+ },
+ {
+  "id": "P005",
+  "name": "Sana",
+  "age": 40,
+  "segment": "Trabaja sola desde casa",
+  "income": 29000,
+  "behaviour": "Todo por WhatsApp e Instagram",
+  "behaviour_how": "Recibe pedidos por mensajes y contesta entre clienta y clienta.",
+  "objection": "Ya contesto yo por WhatsApp, gratis",
+  "habit": "cada turno dura más de una hora"
+ },
+ {
+  "id": "P006",
+  "name": "Maya",
+  "age": 48,
+  "segment": "Trabaja sola desde casa",
+  "income": 33000,
+  "behaviour": "Ya usa una app",
+  "behaviour_how": "Paga una app de turnos (Pink, Calmark u otra).",
+  "objection": "No tengo tiempo de configurarlo",
+  "habit": "cada turno dura más de una hora"
+ },
+ {
+  "id": "P007",
+  "name": "Selin",
+  "age": 32,
+  "segment": "Estudio con empleadas",
+  "income": 76000,
+  "behaviour": "Muchas faltas",
+  "behaviour_how": "Le fallan clientas sin avisar y pierde la hora.",
+  "objection": "Ya contesto yo por WhatsApp, gratis",
+  "habit": "cada turno dura más de una hora"
+ },
+ {
+  "id": "P008",
+  "name": "Ruby",
+  "age": 40,
+  "segment": "Trabaja sola desde casa",
+  "income": 25000,
+  "behaviour": "Ahorradora",
+  "behaviour_how": "Evita suscripciones; prefiere lo gratis.",
+  "objection": "Es otro pago mensual",
+  "habit": "trabajás con las manos ocupadas y no podés contestar el teléfono"
+ },
+ {
+  "id": "P009",
+  "name": "Nora",
+  "age": 26,
+  "segment": "Local propio pequeño",
+  "income": 46000,
+  "behaviour": "Ya usa una app",
+  "behaviour_how": "Paga una app de turnos (Pink, Calmark u otra).",
+  "objection": "Ya contesto yo por WhatsApp, gratis",
+  "habit": "cada turno dura más de una hora"
+ },
+ {
+  "id": "P010",
+  "name": "Fatima",
+  "age": 39,
+  "segment": "Trabaja sola desde casa",
+  "income": 19000,
+  "behaviour": "Ahorradora",
+  "behaviour_how": "Evita suscripciones; prefiere lo gratis.",
+  "objection": "Ya contesto yo por WhatsApp, gratis",
+  "habit": "tus clientas vuelven cada 3 o 4 semanas"
+ },
+ {
+  "id": "P011",
+  "name": "Tariq",
+  "age": 24,
+  "segment": "Trabaja sola desde casa",
+  "income": 27000,
+  "behaviour": "Todo por WhatsApp e Instagram",
+  "behaviour_how": "Recibe pedidos por mensajes y contesta entre clienta y clienta.",
+  "objection": "¿Mis clientas van a querer hablar con un bot?",
+  "habit": "tus clientas vuelven cada 3 o 4 semanas"
+ },
+ {
+  "id": "P012",
+  "name": "Felix",
+  "age": 20,
+  "segment": "Trabaja sola desde casa",
+  "income": 19000,
+  "behaviour": "Ya usa una app",
+  "behaviour_how": "Paga una app de turnos (Pink, Calmark u otra).",
+  "objection": "Es otro pago mensual",
+  "habit": "tus clientas vuelven cada 3 o 4 semanas"
+ },
+ {
+  "id": "P013",
+  "name": "Zoe",
+  "age": 32,
+  "segment": "Local propio pequeño",
+  "income": 39000,
+  "behaviour": "Boca en boca",
+  "behaviour_how": "Prueba lo que le recomienda otra manicurista.",
+  "objection": "¿Mis clientas van a querer hablar con un bot?",
+  "habit": "cada turno dura más de una hora"
+ },
+ {
+  "id": "P014",
+  "name": "Dev",
+  "age": 39,
+  "segment": "Trabaja sola desde casa",
+  "income": 24000,
+  "behaviour": "Ahorradora",
+  "behaviour_how": "Evita suscripciones; prefiere lo gratis.",
+  "objection": "Ya contesto yo por WhatsApp, gratis",
+  "habit": "trabajás con las manos ocupadas y no podés contestar el teléfono"
+ },
+ {
+  "id": "P015",
+  "name": "Yusuf",
+  "age": 47,
+  "segment": "Local propio pequeño",
+  "income": 47000,
+  "behaviour": "Muchas faltas",
+  "behaviour_how": "Le fallan clientas sin avisar y pierde la hora.",
+  "objection": "Ya tengo una app de turnos",
+  "habit": "cada turno dura más de una hora"
+ },
+ {
+  "id": "P016",
+  "name": "Theo",
+  "age": 35,
+  "segment": "Trabaja sola desde casa",
+  "income": 23000,
+  "behaviour": "Todo por WhatsApp e Instagram",
+  "behaviour_how": "Recibe pedidos por mensajes y contesta entre clienta y clienta.",
+  "objection": "Es otro pago mensual",
+  "habit": "trabajás con las manos ocupadas y no podés contestar el teléfono"
+ },
+ {
+  "id": "P017",
+  "name": "Alma",
+  "age": 43,
+  "segment": "Trabaja sola desde casa",
+  "income": 24000,
+  "behaviour": "Todo por WhatsApp e Instagram",
+  "behaviour_how": "Recibe pedidos por mensajes y contesta entre clienta y clienta.",
+  "objection": "¿Mis clientas van a querer hablar con un bot?",
+  "habit": "cada turno dura más de una hora"
+ },
+ {
+  "id": "P018",
+  "name": "Freya",
+  "age": 46,
+  "segment": "Local propio pequeño",
+  "income": 52000,
+  "behaviour": "Ahorradora",
+  "behaviour_how": "Evita suscripciones; prefiere lo gratis.",
+  "objection": "No tengo tiempo de configurarlo",
+  "habit": "trabajás con las manos ocupadas y no podés contestar el teléfono"
+ },
+ {
+  "id": "P019",
+  "name": "Harper",
+  "age": 26,
+  "segment": "Trabaja sola desde casa",
+  "income": 34000,
+  "behaviour": "Boca en boca",
+  "behaviour_how": "Prueba lo que le recomienda otra manicurista.",
+  "objection": "No tengo tiempo de configurarlo",
+  "habit": "cada turno dura más de una hora"
+ },
+ {
+  "id": "P020",
+  "name": "Emma",
+  "age": 24,
+  "segment": "Local propio pequeño",
+  "income": 52000,
+  "behaviour": "Todo por WhatsApp e Instagram",
+  "behaviour_how": "Recibe pedidos por mensajes y contesta entre clienta y clienta.",
+  "objection": "Ya contesto yo por WhatsApp, gratis",
+  "habit": "tus clientas vuelven cada 3 o 4 semanas"
+ }
+]

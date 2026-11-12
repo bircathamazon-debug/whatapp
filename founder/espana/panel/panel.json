@@ -1,0 +1,79 @@
+{
+ "n": 20,
+ "seed": 7,
+ "customer": {
+  "business": "Bot de citas por WhatsApp para barberías y centros de uñas",
+  "target": "Barberos y manicuristas autónomos o con local pequeño en España",
+  "where": "España (Madrid, Barcelona y ciudades medianas)",
+  "age": [
+   22,
+   55
+  ],
+  "segments": [
+   {
+    "name": "Barbero autónomo (corte €12-25)",
+    "share": 0.4,
+    "income": [
+     18000,
+     32000
+    ]
+   },
+   {
+    "name": "Barbería con 2-4 sillas",
+    "share": 0.25,
+    "income": [
+     32000,
+     60000
+    ]
+   },
+   {
+    "name": "Manicurista / centro de uñas (semipermanente €20-35)",
+    "share": 0.35,
+    "income": [
+     16000,
+     40000
+    ]
+   }
+  ],
+  "behaviours": [
+   {
+    "name": "Ya usa Booksy/Treatwell/Fresha",
+    "share": 0.3,
+    "how": "Paga una plataforma y se queja de comisiones o del precio."
+   },
+   {
+    "name": "Todo por WhatsApp",
+    "share": 0.25,
+    "how": "Agenda a mano por WhatsApp."
+   },
+   {
+    "name": "Ahorrador",
+    "share": 0.2,
+    "how": "Prefiere lo gratis (Timify, Koibox gratis)."
+   },
+   {
+    "name": "Muchas faltas",
+    "share": 0.15,
+    "how": "Pierde citas por clientes que no avisan."
+   },
+   {
+    "name": "Lee reseñas",
+    "share": 0.1,
+    "how": "Mira opiniones antes de contratar nada."
+   }
+  ],
+  "objections": [
+   "Ya pago Booksy y cambiar es un lío",
+   "¿Es legal mandar WhatsApp con mis datos de clientes (RGPD)?",
+   "Otro gasto mensual de autónomo",
+   "¿Y si no me atienden cuando falla?",
+   "Mis clientes prefieren la app de Booksy"
+  ],
+  "habits": [
+   "cobrás con tarjeta y Bizum",
+   "te llegan clientes nuevos por Instagram y Google Maps",
+   "pagás la cuota de autónomo cada mes"
+  ]
+ },
+ "pitch": "Bot de citas por WhatsApp para barberías y centros de uñas, en español.\nTus clientes reservan solos por WhatsApp a cualquier hora (también con nota de voz), reciben recordatorios para que no falten y se avisa a la lista de espera si alguien cancela. Sin comisiones por cliente nuevo. Ves la agenda en el móvil.\nPrimer mes gratis. Después €29 al mes + IVA (hasta 250 citas) o €59 + IVA (sin límite). Sin permanencia.\n(Los precios de tus respuestas van en euros por mes.)"
+}

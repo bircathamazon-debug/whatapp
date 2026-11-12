@@ -1,0 +1,79 @@
+{
+ "n": 20,
+ "seed": 7,
+ "customer": {
+  "business": "Bot de citas por WhatsApp para barberías y manicuristas",
+  "target": "Dueños de barberías y manicuristas en Caracas, Venezuela",
+  "where": "Caracas, Venezuela",
+  "age": [
+   20,
+   55
+  ],
+  "segments": [
+   {
+    "name": "Barbero de barrio (corte US$3-7)",
+    "share": 0.35,
+    "income": [
+     2500,
+     6000
+    ]
+   },
+   {
+    "name": "Barbería media/premium (corte US$8-20)",
+    "share": 0.3,
+    "income": [
+     6000,
+     18000
+    ]
+   },
+   {
+    "name": "Manicurista (semipermanente US$18-40)",
+    "share": 0.35,
+    "income": [
+     4000,
+     15000
+    ]
+   }
+  ],
+  "behaviours": [
+   {
+    "name": "Todo por WhatsApp/Instagram",
+    "share": 0.3,
+    "how": "Agenda a mano por mensajes."
+   },
+   {
+    "name": "Sin turnos",
+    "share": 0.2,
+    "how": "Atiende por orden de llegada."
+   },
+   {
+    "name": "Cuida cada dólar",
+    "share": 0.25,
+    "how": "Paga solo lo que le deja plata ya; evita suscripciones en dólares."
+   },
+   {
+    "name": "Usa una app gratis",
+    "share": 0.1,
+    "how": "Usa ReservaSimple u otra versión gratuita."
+   },
+   {
+    "name": "Boca en boca",
+    "share": 0.15,
+    "how": "Prueba si se lo recomienda un colega."
+   }
+  ],
+  "objections": [
+   "Pagar en dólares todos los meses es mucho",
+   "Se va la luz o el internet",
+   "Hay apps gratis",
+   "Mis clientes prefieren escribirme a mí",
+   "¿Cómo pago? No tengo tarjeta internacional"
+  ],
+  "habits": [
+   "cobrás por Pago Móvil o en efectivo",
+   "los sábados es el día más lleno",
+   "a veces se va la luz en la tarde"
+  ]
+ },
+ "pitch": "Bot de citas por WhatsApp para barberías y manicuristas, en español.\nTus clientes reservan solos por WhatsApp a cualquier hora (también con nota de voz), les llegan recordatorios para que no falten y se llena la lista de espera si alguien cancela. Vos ves la agenda en el celular.\nPrimer mes gratis. Después US$19 por mes (hasta 150 citas) o US$29 (hasta 350 citas). Se paga por Pago Móvil, Zelle o Binance. Sin contrato.\n(Los precios de tus respuestas van en dólares por mes.)"
+}

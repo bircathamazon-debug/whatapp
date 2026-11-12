@@ -1,0 +1,222 @@
+[
+ {
+  "id": "P001",
+  "name": "Omar",
+  "age": 22,
+  "segment": "Manicurista / centro de uñas (semipermanente €20-35)",
+  "income": 28000,
+  "behaviour": "Ya usa Booksy/Treatwell/Fresha",
+  "behaviour_how": "Paga una plataforma y se queja de comisiones o del precio.",
+  "objection": "Mis clientes prefieren la app de Booksy",
+  "habit": "cobrás con tarjeta y Bizum"
+ },
+ {
+  "id": "P002",
+  "name": "Raj",
+  "age": 38,
+  "segment": "Manicurista / centro de uñas (semipermanente €20-35)",
+  "income": 23000,
+  "behaviour": "Lee reseñas",
+  "behaviour_how": "Mira opiniones antes de contratar nada.",
+  "objection": "¿Es legal mandar WhatsApp con mis datos de clientes (RGPD)?",
+  "habit": "te llegan clientes nuevos por Instagram y Google Maps"
+ },
+ {
+  "id": "P003",
+  "name": "Emil",
+  "age": 45,
+  "segment": "Barbería con 2-4 sillas",
+  "income": 49000,
+  "behaviour": "Ahorrador",
+  "behaviour_how": "Prefiere lo gratis (Timify, Koibox gratis).",
+  "objection": "Otro gasto mensual de autónomo",
+  "habit": "cobrás con tarjeta y Bizum"
+ },
+ {
+  "id": "P004",
+  "name": "Owen",
+  "age": 54,
+  "segment": "Manicurista / centro de uñas (semipermanente €20-35)",
+  "income": 39000,
+  "behaviour": "Todo por WhatsApp",
+  "behaviour_how": "Agenda a mano por WhatsApp.",
+  "objection": "Ya pago Booksy y cambiar es un lío",
+  "habit": "te llegan clientes nuevos por Instagram y Google Maps"
+ },
+ {
+  "id": "P005",
+  "name": "Sana",
+  "age": 47,
+  "segment": "Barbero autónomo (corte €12-25)",
+  "income": 24000,
+  "behaviour": "Ya usa Booksy/Treatwell/Fresha",
+  "behaviour_how": "Paga una plataforma y se queja de comisiones o del precio.",
+  "objection": "¿Y si no me atienden cuando falla?",
+  "habit": "cobrás con tarjeta y Bizum"
+ },
+ {
+  "id": "P006",
+  "name": "Maya",
+  "age": 52,
+  "segment": "Barbero autónomo (corte €12-25)",
+  "income": 27000,
+  "behaviour": "Todo por WhatsApp",
+  "behaviour_how": "Agenda a mano por WhatsApp.",
+  "objection": "Ya pago Booksy y cambiar es un lío",
+  "habit": "cobrás con tarjeta y Bizum"
+ },
+ {
+  "id": "P007",
+  "name": "Selin",
+  "age": 26,
+  "segment": "Manicurista / centro de uñas (semipermanente €20-35)",
+  "income": 40000,
+  "behaviour": "Muchas faltas",
+  "behaviour_how": "Pierde citas por clientes que no avisan.",
+  "objection": "¿Y si no me atienden cuando falla?",
+  "habit": "cobrás con tarjeta y Bizum"
+ },
+ {
+  "id": "P008",
+  "name": "Ruby",
+  "age": 29,
+  "segment": "Barbero autónomo (corte €12-25)",
+  "income": 23000,
+  "behaviour": "Ahorrador",
+  "behaviour_how": "Prefiere lo gratis (Timify, Koibox gratis).",
+  "objection": "Ya pago Booksy y cambiar es un lío",
+  "habit": "cobrás con tarjeta y Bizum"
+ },
+ {
+  "id": "P009",
+  "name": "Nora",
+  "age": 22,
+  "segment": "Manicurista / centro de uñas (semipermanente €20-35)",
+  "income": 30000,
+  "behaviour": "Todo por WhatsApp",
+  "behaviour_how": "Agenda a mano por WhatsApp.",
+  "objection": "Mis clientes prefieren la app de Booksy",
+  "habit": "cobrás con tarjeta y Bizum"
+ },
+ {
+  "id": "P010",
+  "name": "Fatima",
+  "age": 45,
+  "segment": "Barbero autónomo (corte €12-25)",
+  "income": 27000,
+  "behaviour": "Ahorrador",
+  "behaviour_how": "Prefiere lo gratis (Timify, Koibox gratis).",
+  "objection": "Ya pago Booksy y cambiar es un lío",
+  "habit": "cobrás con tarjeta y Bizum"
+ },
+ {
+  "id": "P011",
+  "name": "Tariq",
+  "age": 46,
+  "segment": "Barbería con 2-4 sillas",
+  "income": 36000,
+  "behaviour": "Ya usa Booksy/Treatwell/Fresha",
+  "behaviour_how": "Paga una plataforma y se queja de comisiones o del precio.",
+  "objection": "Otro gasto mensual de autónomo",
+  "habit": "te llegan clientes nuevos por Instagram y Google Maps"
+ },
+ {
+  "id": "P012",
+  "name": "Felix",
+  "age": 45,
+  "segment": "Barbero autónomo (corte €12-25)",
+  "income": 25000,
+  "behaviour": "Todo por WhatsApp",
+  "behaviour_how": "Agenda a mano por WhatsApp.",
+  "objection": "Ya pago Booksy y cambiar es un lío",
+  "habit": "te llegan clientes nuevos por Instagram y Google Maps"
+ },
+ {
+  "id": "P013",
+  "name": "Zoe",
+  "age": 51,
+  "segment": "Manicurista / centro de uñas (semipermanente €20-35)",
+  "income": 28000,
+  "behaviour": "Lee reseñas",
+  "behaviour_how": "Mira opiniones antes de contratar nada.",
+  "objection": "Otro gasto mensual de autónomo",
+  "habit": "cobrás con tarjeta y Bizum"
+ },
+ {
+  "id": "P014",
+  "name": "Dev",
+  "age": 31,
+  "segment": "Barbería con 2-4 sillas",
+  "income": 35000,
+  "behaviour": "Todo por WhatsApp",
+  "behaviour_how": "Agenda a mano por WhatsApp.",
+  "objection": "Otro gasto mensual de autónomo",
+  "habit": "pagás la cuota de autónomo cada mes"
+ },
+ {
+  "id": "P015",
+  "name": "Yusuf",
+  "age": 38,
+  "segment": "Manicurista / centro de uñas (semipermanente €20-35)",
+  "income": 27000,
+  "behaviour": "Muchas faltas",
+  "behaviour_how": "Pierde citas por clientes que no avisan.",
+  "objection": "¿Es legal mandar WhatsApp con mis datos de clientes (RGPD)?",
+  "habit": "pagás la cuota de autónomo cada mes"
+ },
+ {
+  "id": "P016",
+  "name": "Theo",
+  "age": 23,
+  "segment": "Barbero autónomo (corte €12-25)",
+  "income": 21000,
+  "behaviour": "Ya usa Booksy/Treatwell/Fresha",
+  "behaviour_how": "Paga una plataforma y se queja de comisiones o del precio.",
+  "objection": "Mis clientes prefieren la app de Booksy",
+  "habit": "te llegan clientes nuevos por Instagram y Google Maps"
+ },
+ {
+  "id": "P017",
+  "name": "Alma",
+  "age": 31,
+  "segment": "Barbero autónomo (corte €12-25)",
+  "income": 28000,
+  "behaviour": "Ya usa Booksy/Treatwell/Fresha",
+  "behaviour_how": "Paga una plataforma y se queja de comisiones o del precio.",
+  "objection": "Ya pago Booksy y cambiar es un lío",
+  "habit": "pagás la cuota de autónomo cada mes"
+ },
+ {
+  "id": "P018",
+  "name": "Freya",
+  "age": 41,
+  "segment": "Barbería con 2-4 sillas",
+  "income": 59000,
+  "behaviour": "Ahorrador",
+  "behaviour_how": "Prefiere lo gratis (Timify, Koibox gratis).",
+  "objection": "Ya pago Booksy y cambiar es un lío",
+  "habit": "pagás la cuota de autónomo cada mes"
+ },
+ {
+  "id": "P019",
+  "name": "Harper",
+  "age": 38,
+  "segment": "Barbero autónomo (corte €12-25)",
+  "income": 25000,
+  "behaviour": "Muchas faltas",
+  "behaviour_how": "Pierde citas por clientes que no avisan.",
+  "objection": "¿Es legal mandar WhatsApp con mis datos de clientes (RGPD)?",
+  "habit": "te llegan clientes nuevos por Instagram y Google Maps"
+ },
+ {
+  "id": "P020",
+  "name": "Emma",
+  "age": 36,
+  "segment": "Barbería con 2-4 sillas",
+  "income": 47000,
+  "behaviour": "Ya usa Booksy/Treatwell/Fresha",
+  "behaviour_how": "Paga una plataforma y se queja de comisiones o del precio.",
+  "objection": "Mis clientes prefieren la app de Booksy",
+  "habit": "te llegan clientes nuevos por Instagram y Google Maps"
+ }
+]

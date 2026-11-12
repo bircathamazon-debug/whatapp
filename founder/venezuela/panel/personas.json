@@ -1,0 +1,222 @@
+[
+ {
+  "id": "P001",
+  "name": "Omar",
+  "age": 20,
+  "segment": "Manicurista (semipermanente US$18-40)",
+  "income": 9000,
+  "behaviour": "Todo por WhatsApp/Instagram",
+  "behaviour_how": "Agenda a mano por mensajes.",
+  "objection": "¿Cómo pago? No tengo tarjeta internacional",
+  "habit": "cobrás por Pago Móvil o en efectivo"
+ },
+ {
+  "id": "P002",
+  "name": "Raj",
+  "age": 36,
+  "segment": "Manicurista (semipermanente US$18-40)",
+  "income": 7000,
+  "behaviour": "Boca en boca",
+  "behaviour_how": "Prueba si se lo recomienda un colega.",
+  "objection": "Se va la luz o el internet",
+  "habit": "los sábados es el día más lleno"
+ },
+ {
+  "id": "P003",
+  "name": "Emil",
+  "age": 54,
+  "segment": "Barbería media/premium (corte US$8-20)",
+  "income": 10000,
+  "behaviour": "Cuida cada dólar",
+  "behaviour_how": "Paga solo lo que le deja plata ya; evita suscripciones en dólares.",
+  "objection": "¿Cómo pago? No tengo tarjeta internacional",
+  "habit": "los sábados es el día más lleno"
+ },
+ {
+  "id": "P004",
+  "name": "Owen",
+  "age": 28,
+  "segment": "Manicurista (semipermanente US$18-40)",
+  "income": 12000,
+  "behaviour": "Sin turnos",
+  "behaviour_how": "Atiende por orden de llegada.",
+  "objection": "¿Cómo pago? No tengo tarjeta internacional",
+  "habit": "a veces se va la luz en la tarde"
+ },
+ {
+  "id": "P005",
+  "name": "Sana",
+  "age": 23,
+  "segment": "Barbería media/premium (corte US$8-20)",
+  "income": 11000,
+  "behaviour": "Todo por WhatsApp/Instagram",
+  "behaviour_how": "Agenda a mano por mensajes.",
+  "objection": "¿Cómo pago? No tengo tarjeta internacional",
+  "habit": "los sábados es el día más lleno"
+ },
+ {
+  "id": "P006",
+  "name": "Maya",
+  "age": 45,
+  "segment": "Barbero de barrio (corte US$3-7)",
+  "income": 4000,
+  "behaviour": "Sin turnos",
+  "behaviour_how": "Atiende por orden de llegada.",
+  "objection": "Pagar en dólares todos los meses es mucho",
+  "habit": "los sábados es el día más lleno"
+ },
+ {
+  "id": "P007",
+  "name": "Selin",
+  "age": 45,
+  "segment": "Manicurista (semipermanente US$18-40)",
+  "income": 5000,
+  "behaviour": "Usa una app gratis",
+  "behaviour_how": "Usa ReservaSimple u otra versión gratuita.",
+  "objection": "Pagar en dólares todos los meses es mucho",
+  "habit": "cobrás por Pago Móvil o en efectivo"
+ },
+ {
+  "id": "P008",
+  "name": "Ruby",
+  "age": 48,
+  "segment": "Barbero de barrio (corte US$3-7)",
+  "income": 3000,
+  "behaviour": "Cuida cada dólar",
+  "behaviour_how": "Paga solo lo que le deja plata ya; evita suscripciones en dólares.",
+  "objection": "Hay apps gratis",
+  "habit": "a veces se va la luz en la tarde"
+ },
+ {
+  "id": "P009",
+  "name": "Nora",
+  "age": 23,
+  "segment": "Manicurista (semipermanente US$18-40)",
+  "income": 5000,
+  "behaviour": "Sin turnos",
+  "behaviour_how": "Atiende por orden de llegada.",
+  "objection": "¿Cómo pago? No tengo tarjeta internacional",
+  "habit": "cobrás por Pago Móvil o en efectivo"
+ },
+ {
+  "id": "P010",
+  "name": "Fatima",
+  "age": 54,
+  "segment": "Barbero de barrio (corte US$3-7)",
+  "income": 3000,
+  "behaviour": "Cuida cada dólar",
+  "behaviour_how": "Paga solo lo que le deja plata ya; evita suscripciones en dólares.",
+  "objection": "Hay apps gratis",
+  "habit": "a veces se va la luz en la tarde"
+ },
+ {
+  "id": "P011",
+  "name": "Tariq",
+  "age": 21,
+  "segment": "Barbería media/premium (corte US$8-20)",
+  "income": 7000,
+  "behaviour": "Todo por WhatsApp/Instagram",
+  "behaviour_how": "Agenda a mano por mensajes.",
+  "objection": "Se va la luz o el internet",
+  "habit": "a veces se va la luz en la tarde"
+ },
+ {
+  "id": "P012",
+  "name": "Felix",
+  "age": 44,
+  "segment": "Barbero de barrio (corte US$3-7)",
+  "income": 3000,
+  "behaviour": "Sin turnos",
+  "behaviour_how": "Atiende por orden de llegada.",
+  "objection": "Hay apps gratis",
+  "habit": "los sábados es el día más lleno"
+ },
+ {
+  "id": "P013",
+  "name": "Zoe",
+  "age": 43,
+  "segment": "Manicurista (semipermanente US$18-40)",
+  "income": 9000,
+  "behaviour": "Boca en boca",
+  "behaviour_how": "Prueba si se lo recomienda un colega.",
+  "objection": "Pagar en dólares todos los meses es mucho",
+  "habit": "los sábados es el día más lleno"
+ },
+ {
+  "id": "P014",
+  "name": "Dev",
+  "age": 49,
+  "segment": "Barbería media/premium (corte US$8-20)",
+  "income": 12000,
+  "behaviour": "Cuida cada dólar",
+  "behaviour_how": "Paga solo lo que le deja plata ya; evita suscripciones en dólares.",
+  "objection": "Hay apps gratis",
+  "habit": "cobrás por Pago Móvil o en efectivo"
+ },
+ {
+  "id": "P015",
+  "name": "Yusuf",
+  "age": 29,
+  "segment": "Manicurista (semipermanente US$18-40)",
+  "income": 5000,
+  "behaviour": "Usa una app gratis",
+  "behaviour_how": "Usa ReservaSimple u otra versión gratuita.",
+  "objection": "Hay apps gratis",
+  "habit": "a veces se va la luz en la tarde"
+ },
+ {
+  "id": "P016",
+  "name": "Theo",
+  "age": 36,
+  "segment": "Barbero de barrio (corte US$3-7)",
+  "income": 4000,
+  "behaviour": "Todo por WhatsApp/Instagram",
+  "behaviour_how": "Agenda a mano por mensajes.",
+  "objection": "Se va la luz o el internet",
+  "habit": "a veces se va la luz en la tarde"
+ },
+ {
+  "id": "P017",
+  "name": "Alma",
+  "age": 21,
+  "segment": "Barbero de barrio (corte US$3-7)",
+  "income": 3000,
+  "behaviour": "Todo por WhatsApp/Instagram",
+  "behaviour_how": "Agenda a mano por mensajes.",
+  "objection": "¿Cómo pago? No tengo tarjeta internacional",
+  "habit": "los sábados es el día más lleno"
+ },
+ {
+  "id": "P018",
+  "name": "Freya",
+  "age": 29,
+  "segment": "Barbería media/premium (corte US$8-20)",
+  "income": 14000,
+  "behaviour": "Cuida cada dólar",
+  "behaviour_how": "Paga solo lo que le deja plata ya; evita suscripciones en dólares.",
+  "objection": "Pagar en dólares todos los meses es mucho",
+  "habit": "a veces se va la luz en la tarde"
+ },
+ {
+  "id": "P019",
+  "name": "Harper",
+  "age": 39,
+  "segment": "Barbero de barrio (corte US$3-7)",
+  "income": 6000,
+  "behaviour": "Boca en boca",
+  "behaviour_how": "Prueba si se lo recomienda un colega.",
+  "objection": "Pagar en dólares todos los meses es mucho",
+  "habit": "a veces se va la luz en la tarde"
+ },
+ {
+  "id": "P020",
+  "name": "Emma",
+  "age": 36,
+  "segment": "Barbería media/premium (corte US$8-20)",
+  "income": 12000,
+  "behaviour": "Todo por WhatsApp/Instagram",
+  "behaviour_how": "Agenda a mano por mensajes.",
+  "objection": "Se va la luz o el internet",
+  "habit": "los sábados es el día más lleno"
+ }
+]
