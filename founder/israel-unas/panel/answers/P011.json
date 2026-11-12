@@ -1,0 +1,13 @@
+{
+  "id": "P011",
+  "buys": true,
+  "purchases_first_month": 1,
+  "reason_code": "trust",
+  "reason": "Lo probaria porque el primer mes es gratis y sin contrato, y los recordatorios me ahorrarian algunas faltas. Pero solo sigo pagando si mis clientas lo usan de verdad y no se quejan.",
+  "objection": "¿Mis clientas van a querer hablar con un bot? Yo contesto por WhatsApp con mi estilo y no quiero que se sientan tratadas como un numero.",
+  "would_change_my_mind": "Ver que el bot suena natural en hebreo y que puedo pausarlo o contestar yo misma cuando quiera, sin perder la clienta.",
+  "price_too_cheap": 30,
+  "price_cheap": 60,
+  "price_expensive": 120,
+  "price_too_expensive": 200
+}

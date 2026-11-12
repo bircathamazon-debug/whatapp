@@ -1,0 +1,13 @@
+{
+  "id": "P017",
+  "buys": true,
+  "purchases_first_month": 1,
+  "reason_code": "convenience",
+  "reason": "Contesto mensajes entre clienta y clienta y pierdo tiempo coordinando turnos, así que algo que lo haga solo me sirve. Como el primer mes es gratis y sin contrato, lo pruebo; si no me gusta, lo dejo.",
+  "objection": "¿Mis clientas van a querer hablar con un bot? Si se confunden o se sienten tratadas como un número, prefiero seguir yo por WhatsApp y no perder a ninguna.",
+  "would_change_my_mind": "Ver cómo se ve la conversación con una clienta real, que sea fácil de entender para mujeres que no son de tecnología, y poder pasar a hablar yo directo cuando quiera.",
+  "price_too_cheap": 30,
+  "price_cheap": 60,
+  "price_expensive": 120,
+  "price_too_expensive": 200
+}

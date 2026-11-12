@@ -1,0 +1,13 @@
+{
+  "id": "P016",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "price",
+  "reason": "Trabajo sola y ya tengo bastantes pagos fijos al mes; otro más, aunque sea ₪99 + IVA, no me cierra. Con WhatsApp e Instagram ya me arreglo, contesto entre clienta y clienta.",
+  "objection": "Es otro pago mensual y no sé si me va a ahorrar tanto como cuesta. Además mis clientas ya me escriben por WhatsApp y están acostumbradas a hablar conmigo, no sé si van a querer hablar con un bot.",
+  "would_change_my_mind": "Que el precio fuera bastante menor (alrededor de ₪40-50) o que pudiera probarlo varios meses gratis y ver con mis propias clientas que de verdad me ahorra tiempo.",
+  "price_too_cheap": 20,
+  "price_cheap": 45,
+  "price_expensive": 80,
+  "price_too_expensive": 120
+}

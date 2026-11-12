@@ -1,0 +1,13 @@
+{
+  "id": "P001",
+  "buys": true,
+  "purchases_first_month": 1,
+  "reason_code": "convenience",
+  "reason": "Con las manos ocupadas no puedo contestar y las clientas me escriben a toda hora, así que algo que reserve solo me sirve. El primer mes es gratis y sin contrato, lo pruebo; si me da trabajo o no anda bien, lo dejo.",
+  "objection": "No tengo tiempo de configurarlo. Si tengo que cargar servicios, horarios y a mis empleadas yo sola y encima algo falla y las clientas se confunden, pierdo más de lo que gano.",
+  "would_change_my_mind": "Que me lo dejen configurado ellos (servicios, precios, horarios) en una sola sesión corta, así no tengo que tocar nada para empezar.",
+  "price_too_cheap": 30,
+  "price_cheap": 70,
+  "price_expensive": 150,
+  "price_too_expensive": 250
+}

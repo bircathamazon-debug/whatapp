@@ -1,0 +1,13 @@
+{
+  "id": "P012",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "Ya pago una app de turnos y mis clientas ya saben usarla; es otro pago mensual y tendria que pasarlas a todas a WhatsApp. Trabajo sola y vuelven cada 3 o 4 semanas, no me da tanto lio como para cambiar.",
+  "objection": "Ya tengo una app que funciona, no voy a pagar dos ni a hacer el cambio con todas mis clientas por unos recordatorios. Y ₪99 mas IVA en realidad son casi ₪116 cada mes.",
+  "would_change_my_mind": "Que reemplace a la app que pago hoy a menor precio, que me importe la agenda y las clientas sin trabajo mio, y que no tenga IVA aparte.",
+  "price_too_cheap": 25,
+  "price_cheap": 60,
+  "price_expensive": 110,
+  "price_too_expensive": 160
+}

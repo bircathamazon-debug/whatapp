@@ -1,0 +1,13 @@
+{
+  "id": "P009",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "Ya pago una app de turnos y mis clientas ya me escriben por WhatsApp, que contesto yo gratis. Con turnos de más de una hora tengo pocas citas por día, así que no me duele tanto contestar.",
+  "objection": "Ya tengo una app que funciona y contestar yo por WhatsApp no me cuesta nada. Pagar otros 99 más IVA por algo que ya cubro no me cierra, y cambiar de sistema me da pereza.",
+  "would_change_my_mind": "Que reemplace la app que ya pago (que sea más barato que lo que pago hoy, no un gasto extra) y que me deje traer mi agenda y mis clientas sin cargar todo de nuevo.",
+  "price_too_cheap": 25,
+  "price_cheap": 50,
+  "price_expensive": 110,
+  "price_too_expensive": 180
+}

@@ -1,0 +1,13 @@
+{
+  "id": "P005",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "Ya contesto yo por WhatsApp, gratis, entre una clienta y otra. Mis clientas me conocen y me escriben a mí, no me imagino pagando ₪99 por algo que hago sola sin problema.",
+  "objection": "Que un bot hable con mis clientas en mi nombre y se equivoque con un turno de más de una hora, y yo quedo mal. Además ₪99 más IVA cada mes por algo que hoy me cuesta cero.",
+  "would_change_my_mind": "Que fuera gratis o muy barato para siempre con pocas citas, y que viera funcionando con otra manicurista que el bot no se equivoca con la duración de los turnos.",
+  "price_too_cheap": 15,
+  "price_cheap": 35,
+  "price_expensive": 70,
+  "price_too_expensive": 110
+}

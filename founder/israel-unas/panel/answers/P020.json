@@ -1,0 +1,13 @@
+{
+  "id": "P020",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "Ya contesto yo por WhatsApp entre clienta y clienta y me funciona, mis clientas vuelven cada 3 o 4 semanas y no tengo tanto lio de agenda como para pagar todos los meses. Prefiero seguir como estoy gratis.",
+  "objection": "No siento que me quite un problema grande; contestar mensajes es parte de como trato a mis clientas y pagar ₪99 mas IVA cada mes por algo que ya hago gratis no me cierra.",
+  "would_change_my_mind": "Que fuera gratis o casi gratis para mi volumen chico, o ver que de verdad me llena huecos y reduce las que faltan, con una prueba donde yo vea mas citas.",
+  "price_too_cheap": 15,
+  "price_cheap": 35,
+  "price_expensive": 80,
+  "price_too_expensive": 120
+}

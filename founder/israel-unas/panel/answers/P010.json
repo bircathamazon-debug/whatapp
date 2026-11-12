@@ -1,0 +1,13 @@
+{
+  "id": "P010",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "price",
+  "reason": "Yo ya contesto por WhatsApp gratis y mis clientas vuelven cada 3 o 4 semanas, no tengo tantas citas como para pagar una suscripción cada mes. Evito pagar mensualidades si puedo hacerlo gratis.",
+  "objection": "Pagar 99 shekels más IVA todos los meses por algo que hago yo misma sin costo, con pocas clientas.",
+  "would_change_my_mind": "Que fuera gratis o muy barato (unos 30 shekels) para pocas citas, o que me mostrara que me ahorra horas reales cada semana.",
+  "price_too_cheap": 10,
+  "price_cheap": 30,
+  "price_expensive": 60,
+  "price_too_expensive": 99
+}

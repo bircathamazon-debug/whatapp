@@ -1,0 +1,13 @@
+{
+  "id": "P014",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "price",
+  "reason": "Trabajo sola, con las manos ocupadas, y contesto yo por WhatsApp cuando puedo, gratis. Pagar ₪99 + IVA todos los meses por algo que ya hago sola me cuesta, evito las suscripciones.",
+  "objection": "Es una suscripción más. Con las manos ocupadas igual podría contestar después, y las clientas ya me escriben por WhatsApp normal. No veo que ₪99 al mes me devuelva eso.",
+  "would_change_my_mind": "Un plan gratis o de unos ₪30-40 por mes para pocas citas, y ver que realmente me ahorra perder clientas cuando tengo las manos ocupadas.",
+  "price_too_cheap": 15,
+  "price_cheap": 35,
+  "price_expensive": 70,
+  "price_too_expensive": 110
+}

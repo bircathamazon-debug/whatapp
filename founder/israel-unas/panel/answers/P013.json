@@ -1,0 +1,13 @@
+{
+  "id": "P013",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "trust",
+  "reason": "Ningun colega me lo recomendo y yo pruebo cosas por boca en boca. Con turnos de mas de una hora tengo pocas citas al dia y ya las acomodo por WhatsApp yo misma, asi que no siento que me quite tanto trabajo.",
+  "objection": "¿Mis clientas van a querer hablar con un bot? Si una se confunde o se molesta, la perdi y nadie me lo va a decir.",
+  "would_change_my_mind": "Que otra manicurista de confianza ya lo use y me cuente que sus clientas reservan sin problema, o poder ver el bot andando con una clienta mia antes de pagar.",
+  "price_too_cheap": 30,
+  "price_cheap": 60,
+  "price_expensive": 120,
+  "price_too_expensive": 200
+}

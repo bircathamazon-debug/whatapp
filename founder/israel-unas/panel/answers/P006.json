@@ -1,0 +1,13 @@
+{
+  "id": "P006",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "Ya pago una app de turnos y mis clientas ya saben usarla. Cambiar todo me da pereza y no tengo tiempo de configurar nada, aunque el mes gratis suene bien.",
+  "objection": "No tengo tiempo de configurarlo, y ya tengo Pink. Pasar a mis clientas a otro sistema es un lío, y trabajo sola con turnos largos, no recibo tantas reservas como para necesitarlo.",
+  "would_change_my_mind": "Que lo deje armado alguien por mí (servicios, horarios, mis clientas ya cargadas) en un rato, y que cueste menos o lo mismo que lo que ya pago.",
+  "price_too_cheap": 30,
+  "price_cheap": 50,
+  "price_expensive": 90,
+  "price_too_expensive": 130
+}

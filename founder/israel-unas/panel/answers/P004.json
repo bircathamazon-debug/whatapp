@@ -1,0 +1,13 @@
+{
+  "id": "P004",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "Ya pago una app de turnos y mis clientas ya estan acostumbradas a ella. Cambiar todo, cargar servicios y horarios de nuevo y manejar a las empleadas es un dolor de cabeza que no tengo tiempo de hacer.",
+  "objection": "No tengo tiempo de configurarlo, y ya tengo una app que funciona. Si cambio y algo sale mal, pierdo citas de clientas que vuelven cada 3 o 4 semanas.",
+  "would_change_my_mind": "Que me lo dejen configurado ellos, que importe mi agenda y mis clientas de la app actual sin trabajo mio, y que cueste claramente menos de lo que pago hoy.",
+  "price_too_cheap": 30,
+  "price_cheap": 70,
+  "price_expensive": 130,
+  "price_too_expensive": 200
+}
