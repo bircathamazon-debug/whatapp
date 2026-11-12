@@ -1,0 +1,13 @@
+{
+  "id": "P011",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "Ya tengo mi plataforma con todo montado y mis clientes ya reservan ahí; meter otra cosa y pagar otros 35 euros con el IVA es otro gasto fijo más. Lo de sin comisiones suena bien, pero no me cambia el día a día.",
+  "objection": "Mis clientes nuevos me llegan por Instagram y Google Maps y reservan por el enlace de siempre. No me queda claro que un bot de WhatsApp sustituya a lo que ya pago, así que sería pagar los dos. Y si WhatsApp me bloquea el número, me quedo sin citas.",
+  "would_change_my_mind": "Que me demuestren que puedo quitar la otra plataforma y ahorrar más de lo que cuesta esto, o que se conecte con mi enlace de Google Maps e Instagram para que me reserven desde ahí.",
+  "price_too_cheap": 8,
+  "price_cheap": 15,
+  "price_expensive": 35,
+  "price_too_expensive": 55
+}

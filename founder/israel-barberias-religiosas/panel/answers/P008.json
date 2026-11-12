@@ -1,0 +1,13 @@
+{
+  "id": "P008",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "price",
+  "reason": "Trabajo solo y tengo poco movimiento, salvo el viernes. Pagar 99 shekels al mes más IVA por algo que me atiende el teléfono no me cierra, prefiero seguir con lo gratis o con la libreta.",
+  "objection": "No quiero pagar una mensualidad por poca gente, y me da miedo que salga un mensaje en Shabat aunque digan que no manda nada.",
+  "would_change_my_mind": "Que fuera gratis o casi gratis mientras tengo pocos clientes, y que me demuestren que en Shabat y Yom Tov no sale ni un mensaje.",
+  "price_too_cheap": 15,
+  "price_cheap": 40,
+  "price_expensive": 70,
+  "price_too_expensive": 99
+}

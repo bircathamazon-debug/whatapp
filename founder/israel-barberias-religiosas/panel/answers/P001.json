@@ -1,0 +1,13 @@
+{
+  "id": "P001",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "Yo trabajo por orden de llegada, los clientes vienen y se sientan. No tengo turnos y mis clientes no están acostumbrados a reservar. El precio no me preocupa, pero no veo por qué cambiaría algo que ya funciona.",
+  "objection": "¿Y si se cae el sistema un viernes lleno? Ese día me juego la semana y no puedo tener un lío con clientes que reservaron y yo con la máquina en la mano.",
+  "would_change_my_mind": "Que sea solo para atender el teléfono (que me diga horarios y que quede abierto, sin obligarme a trabajar con turnos) y que, si falla, el cliente pase directo conmigo sin perder a nadie.",
+  "price_too_cheap": 30,
+  "price_cheap": 70,
+  "price_expensive": 150,
+  "price_too_expensive": 300
+}

@@ -1,0 +1,13 @@
+{
+  "id": "P018",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "Ya tengo Booksy funcionando y cambiar todo con mis clientes es un lío. Y además yo busco lo gratis, pagar otra cuota mensual más la de autónomo no me apetece.",
+  "objection": "Ya pago Booksy y cambiar es un lío; no sé si mis clientes se acostumbrarían a reservar por WhatsApp y encima son 35 euros con el IVA cada mes.",
+  "would_change_my_mind": "Que fuera gratis o muy barato de verdad, o que me importaran mi agenda y mis clientes de Booksy sin esfuerzo y me demostraran que me ahorro lo que pago ahora.",
+  "price_too_cheap": 5,
+  "price_cheap": 12,
+  "price_expensive": 22,
+  "price_too_expensive": 35
+}

@@ -1,0 +1,13 @@
+{
+  "id": "P012",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "Ya pago una app de turnos y funciona, no voy a cambiar por un bot nuevo de alguien que no conozco. Y trabajo solo con poco movimiento, 99 shekels más IVA por mes es plata que noto.",
+  "objection": "Muchos de mis clientes tienen teléfono kasher y no usan WhatsApp. Y ya tengo una app pagada, cambiar es dolor de cabeza por poco movimiento.",
+  "would_change_my_mind": "Que me lo den gratis o casi gratis para siempre, o que reemplace mi app actual sin que yo pierda mis clientes y agenda cargada, y que lo vea funcionando con un teléfono kasher de verdad.",
+  "price_too_cheap": 30,
+  "price_cheap": 50,
+  "price_expensive": 90,
+  "price_too_expensive": 130
+}

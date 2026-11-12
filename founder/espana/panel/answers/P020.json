@@ -1,0 +1,13 @@
+{
+  "id": "P020",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "Ya pago Booksy y mis clientes nuevos llegan por Instagram y Google Maps, y ahí reservan en la app que conocen. Un bot de WhatsApp suena bien, pero no es lo que pido en una semana normal.",
+  "objection": "Mis clientes prefieren la app de Booksy; si pago €29 más encima de lo que ya pago, tengo dos sistemas y no me llegan clientes nuevos por este bot.",
+  "would_change_my_mind": "Que se conecte con mi agenda de Booksy/Google Maps y me deje quitar la plataforma que pago ahora, con un precio claramente menor que lo que me cobra hoy.",
+  "price_too_cheap": 8,
+  "price_cheap": 15,
+  "price_expensive": 35,
+  "price_too_expensive": 55
+}

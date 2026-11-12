@@ -1,0 +1,13 @@
+{
+  "id": "P020",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "Llevo todo en la cabeza y en mi libreta desde siempre y me funciona, la agenda está llena igual. Es otro pago mensual más y no siento que me falte algo.",
+  "objection": "Es otro pago mensual más, y yo ya tengo la agenda llena sin esto. Además no sé si mis clientes, que llaman y me hablan directo, van a usar un menú de teclas o un bot.",
+  "would_change_my_mind": "Que lo pueda probar un mes gratis sin cargar nada y ver con mis propios clientes que realmente me sacan las llamadas de encima mientras corto, y que alguien me lo deje armado sin que yo tenga que tocar nada.",
+  "price_too_cheap": 30,
+  "price_cheap": 50,
+  "price_expensive": 100,
+  "price_too_expensive": 150
+}

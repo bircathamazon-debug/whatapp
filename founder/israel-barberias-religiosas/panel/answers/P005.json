@@ -1,0 +1,13 @@
+{
+  "id": "P005",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "Ya tengo mi forma de llevar los turnos, la libreta y la memoria, y con poco movimiento no siento que me falte nada. Pagar cien shekels por mes por algo que hoy resuelvo gratis no me cierra.",
+  "objection": "Tengo poco trabajo, para qué voy a pagar todos los meses por algo que ya manejo yo. Y los padres que traen a varios hijos juntos, no sé si el bot sabe sacar turno para tres chicos seguidos.",
+  "would_change_my_mind": "Que me lo dejen gratis o muy barato mientras tengo poco movimiento, y que pueda sacar turno para varios hijos juntos de una sola vez.",
+  "price_too_cheap": 15,
+  "price_cheap": 35,
+  "price_expensive": 70,
+  "price_too_expensive": 110
+}

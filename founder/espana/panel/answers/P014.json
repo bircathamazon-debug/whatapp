@@ -1,0 +1,13 @@
+{
+  "id": "P014",
+  "buys": true,
+  "purchases_first_month": 1,
+  "reason_code": "convenience",
+  "reason": "Ya llevo todo por WhatsApp y apuntar citas a mano me quita tiempo con las manos ocupadas, así que probaría el mes gratis. Si veo que los clientes lo usan y faltan menos, me quedo con el de 29.",
+  "objection": "Otro gasto mensual más encima de la cuota de autónomo, y no sé si mis clientes de siempre se van a poner a reservar con un bot en vez de escribirme a mí.",
+  "would_change_my_mind": "",
+  "price_too_cheap": 8,
+  "price_cheap": 15,
+  "price_expensive": 35,
+  "price_too_expensive": 55
+}

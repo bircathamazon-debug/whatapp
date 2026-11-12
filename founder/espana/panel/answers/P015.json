@@ -1,0 +1,13 @@
+{
+  "id": "P015",
+  "buys": true,
+  "purchases_first_month": 1,
+  "reason_code": "need",
+  "reason": "Pierdo citas cada semana por clientas que no avisan y eso me cuesta dinero; si los recordatorios las reducen, los 29 euros salen solos. Con el primer mes gratis y sin permanencia pruebo, no pierdo nada.",
+  "objection": "¿Es legal mandar WhatsApp con los datos de mis clientas según el RGPD? No quiero una multa ni líos por esto, ya bastante pago de autónoma cada mes.",
+  "would_change_my_mind": "Que me expliquen claro y por escrito cómo cumple el RGPD (consentimiento, dónde se guardan los datos) y que me enseñen otra manicurista usándolo.",
+  "price_too_cheap": 8,
+  "price_cheap": 15,
+  "price_expensive": 35,
+  "price_too_expensive": 55
+}

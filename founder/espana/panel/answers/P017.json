@@ -1,0 +1,13 @@
+{
+  "id": "P017",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "Ya pago Booksy y tengo mis clientes y mi agenda ahí; cambiar es un lío y no me quiero pasar semanas migrando para ahorrar unos euros. Entre la cuota de autónomo y todo lo demás, no me apetece añadir otra herramienta.",
+  "objection": "Tendría que pagar esto además de Booksy, o dejar Booksy y perder los clientes nuevos que me llegan por ahí. Y si el bot se cae o entiende mal a un cliente, me quedo sin citas.",
+  "would_change_my_mind": "Que me importe mis clientes y mi agenda de Booksy sin hacer nada y que probándolo gratis un mes vea que de verdad me ahorra más de lo que pago de comisiones.",
+  "price_too_cheap": 7,
+  "price_cheap": 15,
+  "price_expensive": 29,
+  "price_too_expensive": 45
+}

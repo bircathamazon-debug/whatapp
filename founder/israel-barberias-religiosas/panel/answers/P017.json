@@ -1,0 +1,13 @@
+{
+  "id": "P017",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "Tengo poco movimiento y los turnos los llevo de memoria o en la libreta, nunca me hizo falta nada más. Atender el teléfono mientras corto no me pesa tanto como para pagar todos los meses.",
+  "objection": "Muchos de mis clientes tienen teléfono kasher y no usan WhatsApp. Aunque haya línea con menú de voz, no sé si van a llamar y apretar teclas en vez de llamarme a mí como siempre, y yo no pago por algo que ya hago gratis.",
+  "would_change_my_mind": "Ver que un colega de mi barrio que ya lo usa deje de perder turnos, y que los clientes de teléfono kasher reserven solos por la línea sin quejarse.",
+  "price_too_cheap": 25,
+  "price_cheap": 50,
+  "price_expensive": 100,
+  "price_too_expensive": 150
+}

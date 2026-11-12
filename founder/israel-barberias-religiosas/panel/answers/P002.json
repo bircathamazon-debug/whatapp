@@ -1,0 +1,13 @@
+{
+  "id": "P002",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "trust",
+  "reason": "Soy solo, tengo la agenda llena y los padres me traen a varios hijos juntos, asi que ya me arreglo con el telefono. No pruebo nada que no me haya recomendado otro peluquero de la comunidad, y esto es otro pago mensual mas.",
+  "objection": "Es otro pago mensual mas, y nadie de la comunidad me dijo que le funciona. Si algo falla y el padre se queda sin su turno con varios hijos, pierdo clientes.",
+  "would_change_my_mind": "Que otro peluquero de mi barrio, al que conozco, me diga que lo usa hace meses y que le ahorra tiempo, y que me lo muestre andando en su celular.",
+  "price_too_cheap": 30,
+  "price_cheap": 60,
+  "price_expensive": 110,
+  "price_too_expensive": 160
+}

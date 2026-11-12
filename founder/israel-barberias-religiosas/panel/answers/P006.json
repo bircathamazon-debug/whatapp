@@ -1,0 +1,13 @@
+{
+  "id": "P006",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "Yo trabajo por orden de llegada, la gente viene y se sienta, y así les gusta. Con poco movimiento no tengo llamadas ni mensajes que me quiten tiempo, no veo qué problema me resuelve.",
+  "objection": "Muchos de mis clientes tienen teléfono kasher y no usan WhatsApp, y los padres traen a varios hijos juntos: no sé cómo reservarían tres cortes seguidos apretando teclas. Y con poco movimiento, 99 más IVA cada mes es plata que se nota.",
+  "would_change_my_mind": "Que me demuestren que una barbería como la mía, sin turnos, llena huecos y gana más clientes, y que la línea telefónica deje reservar a una familia entera de una vez; y que cueste claramente menos de lo que gano con un solo corte extra por semana.",
+  "price_too_cheap": 15,
+  "price_cheap": 40,
+  "price_expensive": 80,
+  "price_too_expensive": 130
+}

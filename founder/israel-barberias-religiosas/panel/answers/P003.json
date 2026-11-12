@@ -1,0 +1,13 @@
+{
+  "id": "P003",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "price",
+  "reason": "Ya tengo la agenda llena y los clientes me conocen, no me falta quien me llame. Pagar ₪99 por mes mas IVA, todos los meses, por algo que hoy hago gratis con el telefono y mi libreta, no me cierra.",
+  "objection": "¿Y si se cae el sistema un viernes lleno? Antes de Pesaj o Rosh Hashana no puedo permitirme que se pierdan citas o que se mezclen, y encima estoy pagando por eso.",
+  "would_change_my_mind": "Que fuera gratis o casi gratis para siempre con un limite chico, o que me dejaran probarlo un par de meses de verdad en mi barberia y que, si falla, mis clientes sigan pudiendo llamarme directo sin perder nada.",
+  "price_too_cheap": 15,
+  "price_cheap": 35,
+  "price_expensive": 70,
+  "price_too_expensive": 110
+}

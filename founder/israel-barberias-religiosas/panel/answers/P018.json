@@ -1,0 +1,13 @@
+{
+  "id": "P018",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "price",
+  "reason": "Trabajo solo, mi agenda ya se llena sola antes de las fiestas y no pago mensualidades por algo que puedo hacer con WhatsApp gratis. Cien shekels por mes todo el año, por algo que solo me sirve unas semanas bien llenas, no me cierra.",
+  "objection": "Tengo miedo de que un mensaje salga en Shabat o Yom Tov por un error, y mis clientes se enojen conmigo. Y encima es un pago mensual para algo que hoy hago gratis.",
+  "would_change_my_mind": "Que sea gratis o casi gratis hasta cierto numero de citas, o un plan solo por temporada de fiestas, con garantia clara de que nunca manda nada en Shabat.",
+  "price_too_cheap": 15,
+  "price_cheap": 35,
+  "price_expensive": 70,
+  "price_too_expensive": 110
+}

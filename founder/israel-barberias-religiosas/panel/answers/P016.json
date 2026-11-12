@@ -1,0 +1,13 @@
+{
+  "id": "P016",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "need",
+  "reason": "Tengo poco movimiento y los turnos los llevo en la libreta y de memoria, me alcanza. Atender el teléfono mientras corto no me mata, y pagar todos los meses por algo que no me llena la agenda no me cierra.",
+  "objection": "¿Y si se cae el sistema un viernes lleno? Si el cliente reserva y yo no me entero, me quedo con dos sentados a la misma hora y quedo mal con la gente del barrio.",
+  "would_change_my_mind": "Que otro barbero del barrio que conozco lo use hace meses sin caídas, y que si falla me llegue un aviso al celular y pueda seguir con la libreta de respaldo.",
+  "price_too_cheap": 30,
+  "price_cheap": 60,
+  "price_expensive": 100,
+  "price_too_expensive": 150
+}

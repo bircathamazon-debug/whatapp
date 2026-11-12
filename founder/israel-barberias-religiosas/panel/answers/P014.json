@@ -1,0 +1,13 @@
+{
+  "id": "P014",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "Ya pago una app de turnos y funciona. Soy barbero solo y con poco movimiento, no voy a cambiar todo para ahorrarme un poco, y ₪99 más IVA cada mes es plata que se nota.",
+  "objection": "Ya tengo mi app, mis clientes ya la conocen. Cambiar es trabajo y riesgo, y no veo qué me da esto que no tenga ya. Además no quiero que salgan mensajes en Shabat, y no me alcanza con que me digan que no mandan nada.",
+  "would_change_my_mind": "Que fuera claramente más barato que lo que pago hoy, que me lo migren todo gratis, y que pueda ver y probar que en Shabat y Yom Tov no sale nada.",
+  "price_too_cheap": 20,
+  "price_cheap": 45,
+  "price_expensive": 80,
+  "price_too_expensive": 110
+}

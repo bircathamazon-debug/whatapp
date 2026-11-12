@@ -1,0 +1,13 @@
+{
+  "id": "P010",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "Ya pago una app de turnos y funciona, no tengo ganas de cambiar. Trabajo solo, tengo poco movimiento y atiendo el teléfono con la máquina en la mano, así que no me sobra el tiempo ni la paciencia para armar otra cosa.",
+  "objection": "Muchos de mis clientes tienen teléfono kasher y no usan WhatsApp. Y ya pago una app; ¿para qué voy a pagar dos?",
+  "would_change_my_mind": "Que reemplace lo que ya pago sin que yo tenga que migrar nada, y que me muestren que mis clientes de teléfono kasher de verdad reservan por la línea de voz.",
+  "price_too_cheap": 30,
+  "price_cheap": 60,
+  "price_expensive": 100,
+  "price_too_expensive": 150
+}

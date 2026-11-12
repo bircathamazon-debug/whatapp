@@ -1,0 +1,13 @@
+{
+  "id": "P013",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "trust",
+  "reason": "Yo no pruebo nada que no me recomiende otro peluquero de la comunidad, y esto me llega de un desconocido. Los viernes antes de Shabat no doy abasto, pero lo resuelvo a mi manera, no con un bot que habla con mis clientes.",
+  "objection": "No quiero que salgan mensajes en Shabat. Dicen que no manda nada, pero si una vez se equivoca y un cliente recibe un mensaje en Shabat, quedo mal yo con mi gente y con mi comunidad.",
+  "would_change_my_mind": "Que otro dueño de barbería de mi comunidad, alguien que conozco, me diga que lo usa hace meses y que nunca mandó nada en Shabat ni en Yom Tov.",
+  "price_too_cheap": 30,
+  "price_cheap": 70,
+  "price_expensive": 130,
+  "price_too_expensive": 200
+}

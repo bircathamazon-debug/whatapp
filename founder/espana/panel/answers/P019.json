@@ -1,0 +1,13 @@
+{
+  "id": "P019",
+  "buys": true,
+  "purchases_first_month": 1,
+  "reason_code": "need",
+  "reason": "Pierdo citas cada semana por gente que no avisa, y si los recordatorios me salvan dos cortes al mes ya me paga los 29 euros. Como el primer mes es gratis y no hay permanencia, lo pruebo.",
+  "objection": "¿Es legal mandar WhatsApp con los datos de mis clientes (RGPD)? No quiero una multa ni que me bloqueen el número por mandar mensajes que no han pedido.",
+  "would_change_my_mind": "Que me expliquen claro y por escrito cómo cumple el RGPD (consentimiento del cliente, dónde se guardan los datos) y que no me van a bloquear el número de WhatsApp.",
+  "price_too_cheap": 7,
+  "price_cheap": 15,
+  "price_expensive": 40,
+  "price_too_expensive": 65
+}

@@ -1,0 +1,13 @@
+{
+  "id": "P004",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "Yo trabajo por orden de llegada, la gente entra y se sienta, y así me va bien. El viernes antes de Shabat no doy abasto y un sistema de turnos me ordenaría poco, porque ese día la gente igual viene a la carrera sin avisar.",
+  "objection": "¿Y si se cae el sistema un viernes lleno? Con 2-3 sillas y la fila en la puerta no puedo arriesgar que un bot se rompa justo ese día, y además mis clientes están acostumbrados a llegar y esperar.",
+  "would_change_my_mind": "Ver funcionando en otra barbería como la mía, un viernes lleno, sin una sola caída, y que sea una opción que pueda prender solo para los días que yo quiera sin cambiar el orden de llegada.",
+  "price_too_cheap": 30,
+  "price_cheap": 70,
+  "price_expensive": 150,
+  "price_too_expensive": 300
+}

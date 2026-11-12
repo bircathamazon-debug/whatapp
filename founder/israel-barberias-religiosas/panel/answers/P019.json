@@ -1,0 +1,13 @@
+{
+  "id": "P019",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "Yo trabajo solo, con poco movimiento, y me gusta hablar con el cliente. No uso apps y no confío en la tecnología; es otro pago mensual más por algo que no necesito en un mes normal.",
+  "objection": "Es otro pago mensual más, y yo no uso apps. Si se rompe o el cliente no entiende, me quedo con un lío y encima pago.",
+  "would_change_my_mind": "Que alguien de confianza de mi barrio ya lo use, que me lo configure él y que fuera gratis o casi gratis fuera de las semanas de Pesaj y Rosh Hashaná.",
+  "price_too_cheap": 20,
+  "price_cheap": 40,
+  "price_expensive": 80,
+  "price_too_expensive": 120
+}

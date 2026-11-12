@@ -1,0 +1,13 @@
+{
+  "id": "P015",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "Yo hablo con mi cliente, no uso apps ni bots. Es otro pago mensual más, y yo ya sé quién viene y cuándo.",
+  "objection": "No confío en la tecnología y no quiero un pago más cada mes por algo que yo resuelvo con una llamada. Si falla un viernes antes de Shabat, pierdo clientes.",
+  "would_change_my_mind": "Que alguien de confianza de mi barrio ya lo use y me lo instale y configure él, sin que yo toque nada, y que el viernes me saque trabajo de encima de verdad.",
+  "price_too_cheap": 20,
+  "price_cheap": 50,
+  "price_expensive": 100,
+  "price_too_expensive": 150
+}

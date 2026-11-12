@@ -1,0 +1,13 @@
+{
+  "id": "P007",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "Yo atiendo el teléfono con la máquina en la mano y hablo con el cliente, así llevo años y me funciona. No uso apps y no me fío de dejar mi agenda en manos de un bot.",
+  "objection": "Muchos de mis clientes tienen teléfono kasher y no usan WhatsApp. Y los que llaman a una línea con teclas, no sé si van a querer hablar con una máquina en vez de conmigo.",
+  "would_change_my_mind": "Que un colega mío de barrio, que yo conozca, me muestre que lo usa hace meses y que sus clientes de teléfono kasher reservan sin problema, y que alguien me arme todo y me lo deje andando sin que yo toque nada.",
+  "price_too_cheap": 30,
+  "price_cheap": 60,
+  "price_expensive": 120,
+  "price_too_expensive": 200
+}
