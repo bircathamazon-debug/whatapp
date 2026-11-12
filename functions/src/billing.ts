@@ -166,7 +166,7 @@ export const ownerCreateBarbershop = onCall(async (request) => {
     createdAt: now,
   });
   const user = await auth.createUser({ email: email.trim(), password, displayName: name.trim() });
-  await db.collection('users').doc(user.uid).set({ branchIds: [branchRef.id], isSuperAdmin: false, readOnly: false });
+  await db.collection('users').doc(user.uid).set({ branchIds: [branchRef.id], isSuperAdmin: false, readOnly: false, mustChangePassword: true });
   await logAudit(uid, branchRef.id, 'owner_create_branch');
   return { branchId: branchRef.id, uid: user.uid };
 });
@@ -177,10 +177,31 @@ export const ownerCreateBarbershop = onCall(async (request) => {
  * - Cobro fallido hace más de PAST_DUE_GRACE_DAYS → bloqueo.
  * - Básico al 80 % del límite del mes → aviso (una vez por mes).
  */
+/**
+ * Adónde le llegan al dueño del sistema sus recordatorios diarios: doc
+ * `config/platform` en Firestore ({ ownerPhone, alertBranchId }), con
+ * valores por defecto. `alertBranchId` es la barbería cuyo bot de WhatsApp
+ * manda el mensaje (hoy la del piloto).
+ */
+async function ownerAlertTarget(): Promise<{ phone: string; branch: Branch } | null> {
+  const cfg = (await db.collection('config').doc('platform').get()).data() ?? {};
+  const phone = (cfg.ownerPhone as string | undefined) ?? '+972543147000';
+  const branchId = (cfg.alertBranchId as string | undefined) ?? 'lvR7XmCtJEFm1FDxW7r7';
+  const snap = await db.collection('branches').doc(branchId).get();
+  if (!snap.exists || !phone) return null;
+  return { phone, branch: { id: snap.id, ...(snap.data() as Omit<Branch, 'id'>) } as Branch };
+}
+
+function fmtDate(ms: number): string {
+  return new Date(ms).toLocaleDateString('es-AR', { timeZone: 'Asia/Jerusalem', day: '2-digit', month: '2-digit' });
+}
+
 export const billingDaily = onSchedule({ schedule: '0 9 * * *', timeZone: 'Asia/Jerusalem' }, async () => {
   const now = Date.now();
   const { from, to, key } = monthRange(now);
   const snap = await db.collection('branches').get();
+  // Resumen para el dueño del sistema: qué barberías necesitan atención hoy.
+  const digest: string[] = [];
   for (const doc of snap.docs) {
     const branch = { id: doc.id, ...(doc.data() as Omit<Branch, 'id'>) } as Branch;
     const billing = branch.billing;
@@ -193,18 +214,25 @@ export const billingDaily = onSchedule({ schedule: '0 9 * * *', timeZone: 'Asia/
         if (left <= 0) {
           await doc.ref.update({ 'billing.blocked': true, 'billing.blockedReason': 'unpaid' });
           await notifyOwner(branch, m.blocked, 'billingBlocked');
+          digest.push(`⛔ ${branch.name}: terminó el mes gratis sin tarjeta → quedó BLOQUEADA hoy`);
           continue;
         }
-        if (left <= TRIAL_WARNING_DAYS * DAY_MS && !billing.trialWarned) {
-          await doc.ref.update({ 'billing.trialWarned': true });
-          await notifyOwner(branch, m.trialEnding(Math.max(1, Math.ceil(left / DAY_MS))), 'billingTrialEnding');
+        if (left <= TRIAL_WARNING_DAYS * DAY_MS) {
+          digest.push(`⏳ ${branch.name}: el mes gratis termina el ${fmtDate(billing.trialEndsAt)} y todavía no cargó tarjeta`);
+          if (!billing.trialWarned) {
+            await doc.ref.update({ 'billing.trialWarned': true });
+            await notifyOwner(branch, m.trialEnding(Math.max(1, Math.ceil(left / DAY_MS))), 'billingTrialEnding');
+          }
         }
       }
-      if (branch.subscription?.status === 'past_due' && billing.pastDueSince && !billing.blocked
-        && now - billing.pastDueSince > PAST_DUE_GRACE_DAYS * DAY_MS) {
-        await doc.ref.update({ 'billing.blocked': true, 'billing.blockedReason': 'unpaid' });
-        await notifyOwner(branch, m.blocked, 'billingBlocked');
-        continue;
+      if (branch.subscription?.status === 'past_due' && billing.pastDueSince && !billing.blocked) {
+        if (now - billing.pastDueSince > PAST_DUE_GRACE_DAYS * DAY_MS) {
+          await doc.ref.update({ 'billing.blocked': true, 'billing.blockedReason': 'unpaid' });
+          await notifyOwner(branch, m.blocked, 'billingBlocked');
+          digest.push(`⛔ ${branch.name}: el cobro falla desde el ${fmtDate(billing.pastDueSince)} → quedó BLOQUEADA hoy`);
+          continue;
+        }
+        digest.push(`⚠️ ${branch.name}: falló el cobro el ${fmtDate(billing.pastDueSince)} (se bloquea a los ${PAST_DUE_GRACE_DAYS} días si no paga)`);
       }
       const limit = PLANS[billing.plan ?? 'basic'].monthlyLimit;
       if (limit && billing.usageWarnedMonth !== key) {
@@ -212,10 +240,33 @@ export const billingDaily = onSchedule({ schedule: '0 9 * * *', timeZone: 'Asia/
         if (used >= Math.floor(limit * 0.8)) {
           await doc.ref.update({ 'billing.usageWarnedMonth': key });
           await notifyOwner(branch, m.usage80(used, limit), 'billingUsage80');
+          digest.push(`📈 ${branch.name}: ya va ${used} de ${limit} citas del Básico este mes`);
         }
       }
     } catch (err) {
       console.error('[billingDaily] error en', branch.id, err);
     }
   }
+
+  const openRequests = await db.collection('changeRequests').where('status', '==', 'open').count().get();
+  const nOpen = openRequests.data().count;
+  if (nOpen > 0) digest.push(`📝 Tenés ${nOpen} pedido(s) de cambio sin responder (Más → Mis clientes)`);
+
+  if (digest.length > 0) {
+    const target = await ownerAlertTarget();
+    if (target) {
+      await sendNotification({
+        channel: 'whatsapp', to: target.phone, branch: target.branch, template: 'ownerDailyDigest',
+        text: `Resumen de tus barberías (${fmtDate(now)}):\n${digest.join('\n')}`, respectShabbatSilence: true,
+      });
+    }
+  }
+});
+
+/** Callable: la cuenta avisa que ya cambió la contraseña provisoria (la
+ * ficha `users/{uid}` no la puede escribir el cliente, ver firestore.rules). */
+export const accountPasswordChanged = onCall(async (request) => {
+  if (!request.auth) throw new HttpsError('unauthenticated', 'Requiere sesión.');
+  await db.collection('users').doc(request.auth.uid).set({ mustChangePassword: false }, { merge: true });
+  return { ok: true };
 });

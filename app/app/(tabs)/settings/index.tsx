@@ -13,7 +13,7 @@ export default function SettingsMenuScreen() {
   const t = useT();
   const styles = makeStyles(colors, mode);
 
-  const MENU: { icon: IconName; label: string; route: '/settings/branches' | '/settings/staff' | '/settings/services' | '/settings/schedule' | '/settings/general' | '/settings/plan' | '/settings/requests' }[] = [
+  const MENU: { icon: IconName; label: string; route: '/settings/branches' | '/settings/staff' | '/settings/services' | '/settings/schedule' | '/settings/general' | '/settings/plan' | '/settings/requests' | '/settings/password' }[] = [
     { icon: 'business', label: t.adminMenu.branches, route: '/settings/branches' },
     { icon: 'cut', label: t.adminMenu.staff, route: '/settings/staff' },
     { icon: 'sparkles', label: t.adminMenu.services, route: '/settings/services' },
@@ -21,6 +21,7 @@ export default function SettingsMenuScreen() {
     { icon: 'settings', label: t.adminMenu.settings, route: '/settings/general' },
     { icon: 'card', label: t.billing.myPlan, route: '/settings/plan' },
     { icon: 'chatbox-ellipses', label: t.billing.requests, route: '/settings/requests' },
+    { icon: 'key', label: t.billing.changePassword, route: '/settings/password' },
   ];
 
   return (

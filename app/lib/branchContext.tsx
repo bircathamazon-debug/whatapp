@@ -18,6 +18,9 @@ interface BranchContextValue {
   readOnly: boolean;
   /** Dueño del sistema (users/{uid}.isSuperAdmin): ve el panel de dueño con todas las barberías. */
   isSuperAdmin: boolean;
+  /** La cuenta todavía tiene la contraseña provisoria que le dio el dueño: hay que cambiarla antes de seguir. */
+  mustChangePassword: boolean;
+  setMustChangePassword: (v: boolean) => void;
 }
 
 const BranchContext = createContext<BranchContextValue>({
@@ -28,6 +31,8 @@ const BranchContext = createContext<BranchContextValue>({
   reload: async () => {},
   readOnly: false,
   isSuperAdmin: false,
+  mustChangePassword: false,
+  setMustChangePassword: () => {},
 });
 
 export function BranchProvider({ children }: { children: React.ReactNode }) {
@@ -36,6 +41,7 @@ export function BranchProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [readOnly, setReadOnly] = useState(false);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
+  const [mustChangePassword, setMustChangePassword] = useState(false);
 
   const reload = useCallback(async () => {
     setLoading(true);
@@ -56,6 +62,7 @@ export function BranchProvider({ children }: { children: React.ReactNode }) {
           .then((snap) => {
             setReadOnly(snap.data()?.readOnly === true);
             setIsSuperAdmin(snap.data()?.isSuperAdmin === true);
+            setMustChangePassword(snap.data()?.mustChangePassword === true);
           })
           .catch(() => {
             setReadOnly(false);
@@ -66,13 +73,14 @@ export function BranchProvider({ children }: { children: React.ReactNode }) {
         setBranchId(null);
         setReadOnly(false);
         setIsSuperAdmin(false);
+        setMustChangePassword(false);
         setLoading(false);
       }
     });
     return unsub;
   }, [reload]);
 
-  return <BranchContext.Provider value={{ branches, branchId, setBranchId, loading, reload, readOnly, isSuperAdmin }}>{children}</BranchContext.Provider>;
+  return <BranchContext.Provider value={{ branches, branchId, setBranchId, loading, reload, readOnly, isSuperAdmin, mustChangePassword, setMustChangePassword }}>{children}</BranchContext.Provider>;
 }
 
 export function useBranch() {

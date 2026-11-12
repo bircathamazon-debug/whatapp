@@ -6,6 +6,7 @@ import { BranchProvider, useBranch } from '../lib/branchContext';
 import { useTheme, WEB_SHELL_MAX_WIDTH } from '../lib/theme';
 import { useLang, isRtl, useT } from '../lib/i18n';
 import { createTranzilaCheckoutUrl } from '../lib/tranzila';
+import ChangePasswordForm from '../components/ChangePasswordForm';
 
 // Por defecto arranca en RTL (hebreo, el mercado actual) hasta que se sepa
 // el idioma real de la sucursal — eso requiere haber iniciado sesión y
@@ -19,7 +20,7 @@ function ThemedStack() {
   const { mode, colors } = useTheme();
   const lang = useLang();
   const t = useT();
-  const { readOnly, isSuperAdmin, branches, branchId } = useBranch();
+  const { readOnly, isSuperAdmin, branches, branchId, mustChangePassword, setMustChangePassword } = useBranch();
   const currentBranch = branches.find((b) => b.id === branchId);
   const blocked = !isSuperAdmin && currentBranch?.billing?.blocked === true;
 
@@ -75,6 +76,17 @@ function ThemedStack() {
     </View>
   ) : null;
 
+  // Primera entrada de una barbería nueva: tiene la contraseña provisoria
+  // que le dio el dueño y tiene que elegir una propia antes de seguir.
+  const firstLoginView = mustChangePassword && !readOnly ? (
+    <View style={{ flex: 1, justifyContent: 'center', padding: 24, backgroundColor: colors.bg }}>
+      <Text style={{ fontSize: 24, fontWeight: '800', color: colors.text, textAlign: 'center' }}>{t.billing.firstLoginTitle}</Text>
+      <Text style={{ fontSize: 15, color: colors.textMuted, textAlign: 'center', marginTop: 8, marginBottom: 18, lineHeight: 22 }}>{t.billing.firstLoginText}</Text>
+      <ChangePasswordForm onDone={() => setMustChangePassword(false)} />
+    </View>
+  ) : null;
+  const gate = firstLoginView ?? blockedView;
+
   const banner = readOnly ? (
     <View style={{ backgroundColor: colors.statusPending, paddingVertical: 6, paddingHorizontal: 12 }}>
       <Text style={{ color: '#fff', fontSize: 12, fontWeight: '700', textAlign: 'center' }}>{t.readOnlyBanner}</Text>
@@ -103,11 +115,11 @@ function ThemedStack() {
               shadowOffset: { width: 0, height: 0 },
             }}
           >
-            {blockedView ?? stack}
+            {gate ?? stack}
           </View>
         </View>
       ) : (
-        blockedView ?? stack
+        gate ?? stack
       )}
     </>
   );

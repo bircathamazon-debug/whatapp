@@ -1,5 +1,6 @@
 import { httpsCallable } from 'firebase/functions';
 import { collection, addDoc, doc, getDoc, getDocs, query, where, orderBy, setDoc, updateDoc } from 'firebase/firestore';
+import { EmailAuthProvider, reauthenticateWithCredential, updatePassword } from 'firebase/auth';
 import { db, functions, auth } from './firebase';
 import type { ChangeRequest } from '../../shared/types';
 
@@ -74,4 +75,13 @@ export async function createChangeRequest(branchId: string, text: string): Promi
 
 export async function resolveChangeRequest(id: string, reply: string): Promise<void> {
   await updateDoc(doc(db, 'changeRequests', id), { status: 'done', reply: reply.trim() || null, doneAt: Date.now() });
+}
+
+/** Cambia la contraseña de la cuenta logueada (pide la actual, como exige Firebase). */
+export async function changeMyPassword(current: string, next: string): Promise<void> {
+  const user = auth.currentUser;
+  if (!user?.email) throw new Error('no-user');
+  await reauthenticateWithCredential(user, EmailAuthProvider.credential(user.email, current));
+  await updatePassword(user, next);
+  await httpsCallable(functions, 'accountPasswordChanged')({});
 }

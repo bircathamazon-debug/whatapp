@@ -65,6 +65,15 @@ interface Dict {
     save: string;
     openRequests: (n: number) => string;
     error: string;
+    changePassword: string;
+    firstLoginTitle: string;
+    firstLoginText: string;
+    currentPassword: string;
+    newPassword: string;
+    repeatPassword: string;
+    passwordsDontMatch: string;
+    wrongPassword: string;
+    passwordChanged: string;
   };
   tabs: { agenda: string; waitlist: string; waitlistShort: string; clients: string; campaigns: string; questions: string; home: string; more: string; auditLog: string };
   home: {
@@ -420,6 +429,15 @@ const he: Dict = {
     save: 'שמירה',
     openRequests: (n) => `${n} בקשות ממתינות`,
     error: 'משהו השתבש. נסו שוב.',
+    changePassword: 'שינוי סיסמה',
+    firstLoginTitle: 'ברוכים הבאים!',
+    firstLoginText: 'לפני שמתחילים, בחרו סיסמה חדשה משלכם במקום הסיסמה הזמנית.',
+    currentPassword: 'סיסמה נוכחית',
+    newPassword: 'סיסמה חדשה (8 תווים לפחות)',
+    repeatPassword: 'סיסמה חדשה שוב',
+    passwordsDontMatch: 'הסיסמאות לא זהות',
+    wrongPassword: 'הסיסמה הנוכחית לא נכונה',
+    passwordChanged: 'הסיסמה עודכנה ✔',
   },
   tabs: { agenda: 'יומן', waitlist: 'רשימת המתנה', waitlistShort: 'המתנה', clients: 'לקוחות', campaigns: 'קמפיינים', questions: 'שאלות', home: 'בית', more: 'עוד', auditLog: 'יומן פעילות' },
   home: {
@@ -775,6 +793,15 @@ const en: Dict = {
     save: 'Save',
     openRequests: (n) => `${n} pending requests`,
     error: 'Something went wrong. Try again.',
+    changePassword: 'Change password',
+    firstLoginTitle: 'Welcome!',
+    firstLoginText: 'Before you start, choose your own password instead of the temporary one.',
+    currentPassword: 'Current password',
+    newPassword: 'New password (8+ characters)',
+    repeatPassword: 'Repeat new password',
+    passwordsDontMatch: 'Passwords do not match',
+    wrongPassword: 'The current password is wrong',
+    passwordChanged: 'Password updated ✔',
   },
   tabs: { agenda: 'Agenda', waitlist: 'Waitlist', waitlistShort: 'Waitlist', clients: 'Clients', campaigns: 'Campaigns', questions: 'Questions', home: 'Home', more: 'More', auditLog: 'Activity log' },
   home: {
@@ -1130,6 +1157,15 @@ const es: Dict = {
     save: 'Guardar',
     openRequests: (n) => `${n} pedidos pendientes`,
     error: 'Algo salió mal. Probá de nuevo.',
+    changePassword: 'Cambiar contraseña',
+    firstLoginTitle: '¡Bienvenido!',
+    firstLoginText: 'Antes de empezar, elegí tu propia contraseña en lugar de la provisoria.',
+    currentPassword: 'Contraseña actual',
+    newPassword: 'Contraseña nueva (8 caracteres o más)',
+    repeatPassword: 'Repetí la contraseña nueva',
+    passwordsDontMatch: 'Las contraseñas no coinciden',
+    wrongPassword: 'La contraseña actual no es correcta',
+    passwordChanged: 'Contraseña actualizada ✔',
   },
   tabs: { agenda: 'Agenda', waitlist: 'Lista de espera', waitlistShort: 'Espera', clients: 'Clientes', campaigns: 'Campañas', questions: 'Preguntas', home: 'Inicio', more: 'Más', auditLog: 'Registro de actividad' },
   home: {

@@ -24,6 +24,7 @@ export default function SettingsStackLayout() {
       <Stack.Screen name="general" options={{ title: t.settings.title }} />
       <Stack.Screen name="plan" options={{ title: t.billing.myPlan }} />
       <Stack.Screen name="requests" options={{ title: t.billing.requests }} />
+      <Stack.Screen name="password" options={{ title: t.billing.changePassword }} />
     </Stack>
   );
 }
