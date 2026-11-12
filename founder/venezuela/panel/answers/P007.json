@@ -1,0 +1,13 @@
+{
+  "id": "P007",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "price",
+  "reason": "Ya uso ReservaSimple gratis y con $5.000 al año pagar US$19 todos los meses me parece mucho. Un mes gratis está bien, pero después no lo sigo pagando.",
+  "objection": "Pagar en dólares todos los meses es mucho; con lo que gano, $19 son como un par de manicuras y ya tengo una app gratis que me sirve.",
+  "would_change_my_mind": "Un plan gratis o de unos US$5-8 al mes que incluya WhatsApp, o ver que me trae más clientes de los que me cuesta.",
+  "price_too_cheap": 3,
+  "price_cheap": 6,
+  "price_expensive": 12,
+  "price_too_expensive": 19
+}

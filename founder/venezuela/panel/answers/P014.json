@@ -1,0 +1,13 @@
+{
+  "id": "P014",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "price",
+  "reason": "Hay apps gratis y yo cuido cada dólar. Pagar US$19 fijos todos los meses en dólares por algo que no me deja plata ya no me cierra, y con las citas que manejo por WhatsApp me las arreglo igual.",
+  "objection": "Es una suscripción en dólares por algo que hoy resuelvo gratis. No me aseguran que me traiga más clientes ni que valga lo que cuesta.",
+  "would_change_my_mind": "Que el plan básico fuera gratis o muy barato, o que me demuestren con números que recupero los US$19 en el primer mes con menos citas perdidas.",
+  "price_too_cheap": 2,
+  "price_cheap": 5,
+  "price_expensive": 12,
+  "price_too_expensive": 19
+}

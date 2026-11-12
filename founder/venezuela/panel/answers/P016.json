@@ -1,0 +1,13 @@
+{
+  "id": "P016",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "price",
+  "reason": "Yo cobro 3 a 7 dólares por corte y saco como 4.000 al año; 19 al mes son como 4 o 5 cortes y no sé si me los devuelve. Ya llevo mi agenda por WhatsApp a mano y me funciona.",
+  "objection": "Se va la luz y el internet en la tarde, y si el bot se cae o falla justo cuando el cliente escribe, pierdo la cita y pago igual. Y 19 dólares es mucho para lo que cobro.",
+  "would_change_my_mind": "Que costara 5 o 6 dólares al mes, o que se cobrara solo por cita realmente reservada, y que lo probara un colega del barrio que me diga que sí le llena la agenda.",
+  "price_too_cheap": 2,
+  "price_cheap": 5,
+  "price_expensive": 9,
+  "price_too_expensive": 15
+}

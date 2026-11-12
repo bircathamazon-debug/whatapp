@@ -1,0 +1,13 @@
+{
+  "id": "P015",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "price",
+  "reason": "Yo ya uso una app gratis para las citas y con lo que gano al año, pagar 19 dólares al mes me duele. Si un mes saco poco, eso es casi un semipermanente completo.",
+  "objection": "Hay apps gratis y con lo que gano no justifico pagar 19 al mes. Además a veces se va la luz en la tarde y no sé si el bot sigue funcionando.",
+  "would_change_my_mind": "Que costara 5 o 6 dólares al mes, o que hubiera un plan gratis para pocas citas con recordatorios incluidos.",
+  "price_too_cheap": 2,
+  "price_cheap": 5,
+  "price_expensive": 9,
+  "price_too_expensive": 15
+}

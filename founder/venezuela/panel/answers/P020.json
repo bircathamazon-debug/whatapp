@@ -1,0 +1,13 @@
+{
+  "id": "P020",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "trust",
+  "reason": "Ya agendo todo por WhatsApp e Instagram a mano y me funciona; los sábados los clientes me escriben igual. Con lo que gano no me pongo a depender de un bot si se va la luz o el internet y me deja a los clientes sin respuesta.",
+  "objection": "Se va la luz o el internet y el bot se cae; me quedo con las citas mezcladas o sin atender y pierdo clientes el sábado, que es mi día más lleno.",
+  "would_change_my_mind": "Que me demuestre que sigue funcionando o avisa a los clientes cuando hay corte, y que me lo dejen gratis o a unos US$10 para probarlo varios meses sin riesgo.",
+  "price_too_cheap": 4,
+  "price_cheap": 8,
+  "price_expensive": 15,
+  "price_too_expensive": 25
+}

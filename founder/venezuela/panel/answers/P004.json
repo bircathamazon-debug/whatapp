@@ -1,0 +1,13 @@
+{
+  "id": "P004",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "Yo atiendo por orden de llegada, no manejo turnos, y mis clientas ya me escriben o llegan directo. No me hace falta una agenda y cambiar eso me da pereza.",
+  "objection": "No tengo tarjeta internacional y no sé si pagar por Pago Móvil sería fácil cada mes. Además a veces se va la luz en la tarde y no quiero depender de algo que falle.",
+  "would_change_my_mind": "Que fuera gratis o muy barato para siempre y que mis clientas lo pidieran ellas mismas, para pagar solo por Pago Móvil en bolívares.",
+  "price_too_cheap": 2,
+  "price_cheap": 5,
+  "price_expensive": 12,
+  "price_too_expensive": 19
+}

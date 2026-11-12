@@ -1,0 +1,13 @@
+{
+  "id": "P003",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "trust",
+  "reason": "Cuido cada dólar y no uso suscripciones en dólares. Aunque dicen que se paga por Pago Móvil, no sé a qué tasa me cobrarían ni si me van a estar reclamando cada mes, y los sábados me las arreglo con el cuaderno.",
+  "objection": "¿Cómo pago? No tengo tarjeta internacional, y no quiero una suscripción en dólares que me toque estar persiguiendo cada mes.",
+  "would_change_my_mind": "Que me lo cobren en bolívares por Pago Móvil sin enredos y me lo prueben un mes gratis viendo que de verdad los sábados me llenan la agenda sin que yo conteste mensajes.",
+  "price_too_cheap": 3,
+  "price_cheap": 7,
+  "price_expensive": 15,
+  "price_too_expensive": 25
+}

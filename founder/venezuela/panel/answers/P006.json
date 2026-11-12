@@ -1,0 +1,13 @@
+{
+  "id": "P006",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "need",
+  "reason": "Yo atiendo por orden de llegada, no doy turnos. No necesito que nadie me reserve por WhatsApp, el que llega se sienta y ya. Con cortes de 3 a 7 dólares, 19 al mes es varios cortes.",
+  "objection": "Pagar en dólares todos los meses es mucho, y yo no trabajo con citas, así que no sé para qué me serviría.",
+  "would_change_my_mind": "Que cueste muy poquito, como 5 dólares, y que me demuestren que los sábados llenos se organizan mejor sin perder clientes.",
+  "price_too_cheap": 2,
+  "price_cheap": 4,
+  "price_expensive": 8,
+  "price_too_expensive": 15
+}

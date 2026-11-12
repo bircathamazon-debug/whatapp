@@ -1,0 +1,13 @@
+{
+  "id": "P001",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "habit",
+  "reason": "Ya manejo mis citas por WhatsApp e Instagram y mis clientas me escriben directo, así que no siento que me falte algo. Probaría el mes gratis, pero pagar US$19 todos los meses por algo que hoy hago a mano gratis me cuesta, es casi un servicio de uñas completo.",
+  "objection": "No sé si mis clientas se van a adaptar a reservar con un bot en vez de escribirme a mí, y no confío en que sea fijo si se cae o se bloquea el WhatsApp.",
+  "would_change_my_mind": "Que lo pudiera usar un par de meses gratis sin compromiso y viera que de verdad me ahorra tiempo y que las clientas faltan menos, o que costara alrededor de US$8-10.",
+  "price_too_cheap": 3,
+  "price_cheap": 7,
+  "price_expensive": 15,
+  "price_too_expensive": 25
+}

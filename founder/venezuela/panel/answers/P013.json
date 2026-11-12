@@ -1,0 +1,13 @@
+{
+  "id": "P013",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "price",
+  "reason": "Con lo que gano, pagar 19 dólares todos los meses es mucho, son como un par de semipermanentes solo para tener una agenda. Los sábados me organizo sola por WhatsApp y hasta ahora me funciona.",
+  "objection": "Pagar en dólares todos los meses es mucho para lo que yo ya hago gratis con mi WhatsApp y mi libreta. No sé si mis clientas se van a acostumbrar a reservar con un bot.",
+  "would_change_my_mind": "Que una colega de confianza me cuente que le funcionó y le llenó los sábados, y que el precio baje a unos 8 o 10 dólares.",
+  "price_too_cheap": 3,
+  "price_cheap": 7,
+  "price_expensive": 12,
+  "price_too_expensive": 19
+}

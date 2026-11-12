@@ -1,0 +1,156 @@
+{
+ "business": "Bot de citas por WhatsApp para barberías y manicuristas",
+ "seed": 7,
+ "dealt": 20,
+ "answered": 20,
+ "skipped": [],
+ "buys": 1,
+ "passes": 19,
+ "buy_rate": 0.05,
+ "by_segment": [
+  [
+   "Barbería media/premium (corte US$8-20)",
+   6,
+   0.16666666666666666
+  ],
+  [
+   "Manicurista (semipermanente US$18-40)",
+   7,
+   0.0
+  ],
+  [
+   "Barbero de barrio (corte US$3-7)",
+   7,
+   0.0
+  ]
+ ],
+ "by_behaviour": [
+  [
+   "Todo por WhatsApp/Instagram",
+   6,
+   0.16666666666666666
+  ],
+  [
+   "Boca en boca",
+   3,
+   0.0
+  ],
+  [
+   "Cuida cada dólar",
+   5,
+   0.0
+  ],
+  [
+   "Sin turnos",
+   4,
+   0.0
+  ],
+  [
+   "Usa una app gratis",
+   2,
+   0.0
+  ]
+ ],
+ "by_income": [
+  [
+   "$9,000 and up",
+   8,
+   0.125
+  ],
+  [
+   "$5,000 to $9,000",
+   6,
+   0.0
+  ],
+  [
+   "under $5,000",
+   6,
+   0.0
+  ]
+ ],
+ "why_not": [
+  [
+   "price",
+   10,
+   [
+    "Ya uso ReservaSimple gratis y con $5.000 al año pagar US$19 todos los meses me parece mucho. Un mes gratis está bien, pero después no lo sigo pagando.",
+    "Yo cobro 3 a 7 dólares por corte y casi no me sobra plata; 19 dólares al mes son varios cortes y no me los pago así. Además hay apps gratis y la luz se me va en la tarde."
+   ],
+   [
+    "P007",
+    "P008"
+   ]
+  ],
+  [
+   "trust",
+   4,
+   [
+    "Yo agendo por WhatsApp normal y los sábados ya tengo todo lleno, no me falta quien me escriba. Algo que no me recomendó una colega no lo pruebo, y menos si depende de que no se vaya la luz o el internet.",
+    "Cuido cada dólar y no uso suscripciones en dólares. Aunque dicen que se paga por Pago Móvil, no sé a qué tasa me cobrarían ni si me van a estar reclamando cada mes, y los sábados me las arreglo con el cuaderno."
+   ],
+   [
+    "P002",
+    "P003"
+   ]
+  ],
+  [
+   "habit",
+   3,
+   [
+    "Ya manejo mis citas por WhatsApp e Instagram y mis clientas me escriben directo, así que no siento que me falte algo. Probaría el mes gratis, pero pagar US$19 todos los meses por algo que hoy hago a mano gratis me cuesta, es casi un servicio de uñas completo.",
+    "Yo atiendo por orden de llegada, no manejo turnos, y mis clientas ya me escriben o llegan directo. No me hace falta una agenda y cambiar eso me da pereza."
+   ],
+   [
+    "P001",
+    "P004"
+   ]
+  ],
+  [
+   "need",
+   2,
+   [
+    "Yo atiendo por orden de llegada, no doy turnos. No necesito que nadie me reserve por WhatsApp, el que llega se sienta y ya. Con cortes de 3 a 7 dólares, 19 al mes es varios cortes.",
+    "Yo atiendo por orden de llegada, no doy turnos, así que no necesito agenda. Con lo que gano, 19 dólares al mes son como cuatro o cinco cortes míos, es mucho."
+   ],
+   [
+    "P006",
+    "P012"
+   ]
+  ]
+ ],
+ "why_yes": [
+  [
+   "convenience",
+   1,
+   [
+    "Los sábados me llegan mil mensajes y agendo todo a mano, así que que los clientes reserven solos me quita un dolor de cabeza. Como se paga por Pago Móvil y el primer mes es gratis, lo pruebo sin arriesgar nada."
+   ],
+   [
+    "P005"
+   ]
+  ]
+ ],
+ "flip": [
+  "Que lo pudiera usar un par de meses gratis sin compromiso y viera que de verdad me ahorra tiempo y que las clientas faltan menos, o que costara alrededor de US$8-10.",
+  "Que una colega manicurista de Caracas que conozco me diga que lo usa hace meses, que no se cayó y que le llenó los huecos de la semana.",
+  "Que me lo cobren en bolívares por Pago Móvil sin enredos y me lo prueben un mes gratis viendo que de verdad los sábados me llenan la agenda sin que yo conteste mensajes.",
+  "Que fuera gratis o muy barato para siempre y que mis clientas lo pidieran ellas mismas, para pagar solo por Pago Móvil en bolívares.",
+  "Que cueste muy poquito, como 5 dólares, y que me demuestren que los sábados llenos se organizan mejor sin perder clientes.",
+  "Un plan gratis o de unos US$5-8 al mes que incluya WhatsApp, o ver que me trae más clientes de los que me cuesta.",
+  "Que fuera gratis o por menos de 5 dólares, y que me demuestren que me llegan clientes nuevos que pagan.",
+  "Que fuera gratis o muy barato (menos de US$8) y que pudiera ver que me trae clientas nuevas o me ahorra el tiempo de contestar mensajes, no solo una agenda.",
+  "Que fuera gratis o que costara unos 5 dólares y solo me cobraran si me llegan citas.",
+  "Que me demuestren que sigue funcionando aunque se vaya la luz en mi local (corre en la nube, no en mi telefono) y probarlo un mes gratis sin perder ni una cita.",
+  "Que fuera gratis, o que costara 2 o 3 dólares y me llenara los días flojos con clientes nuevos sin que yo haga nada.",
+  "Que una colega de confianza me cuente que le funcionó y le llenó los sábados, y que el precio baje a unos 8 o 10 dólares.",
+  "Que el plan básico fuera gratis o muy barato, o que me demuestren con números que recupero los US$19 en el primer mes con menos citas perdidas.",
+  "Que costara 5 o 6 dólares al mes, o que hubiera un plan gratis para pocas citas con recordatorios incluidos.",
+  "Que costara 5 o 6 dólares al mes, o que se cobrara solo por cita realmente reservada, y que lo probara un colega del barrio que me diga que sí le llena la agenda.",
+  "Un plan gratis o de unos 5 dolares al mes pagando por Pago Movil en bolivares, y ver que funciona con otro barbero que conozca.",
+  "Un precio de unos US$9-10 al mes, o ver que con el primer mes gratis me llenó huecos de la agenda y recuperé el costo en clientes que antes se me caían.",
+  "Que un colega mío de confianza lo use y me diga que le llenó la agenda, y que costara bastante menos, como 5 dólares.",
+  "Que me demuestre que sigue funcionando o avisa a los clientes cuando hay corte, y que me lo dejen gratis o a unos US$10 para probarlo varios meses sin riesgo."
+ ],
+ "purchases_first_month_per_buyer": 1.0,
+ "price_answers": 20
+}

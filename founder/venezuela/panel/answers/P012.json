@@ -1,0 +1,13 @@
+{
+  "id": "P012",
+  "buys": false,
+  "purchases_first_month": 0,
+  "reason_code": "need",
+  "reason": "Yo atiendo por orden de llegada, no doy turnos, así que no necesito agenda. Con lo que gano, 19 dólares al mes son como cuatro o cinco cortes míos, es mucho.",
+  "objection": "No trabajo con citas, la gente llega y espera su turno. Y hay apps gratis. Pagar 19 dólares por algo que no uso no tiene sentido.",
+  "would_change_my_mind": "Que fuera gratis, o que costara 2 o 3 dólares y me llenara los días flojos con clientes nuevos sin que yo haga nada.",
+  "price_too_cheap": 1,
+  "price_cheap": 2,
+  "price_expensive": 5,
+  "price_too_expensive": 9
+}
