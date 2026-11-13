@@ -65,7 +65,10 @@ service cloud.firestore {
         // "billing" (plan, mes gratis, bloqueo por falta de pago) tampoco:
         // solo lo cambian las Cloud Functions (billing.ts), así nadie se
         // desbloquea solo ni se pone un plan sin pagarlo.
-        && request.resource.data.get('billing', null) == resource.data.get('billing', null);
+        && request.resource.data.get('billing', null) == resource.data.get('billing', null)
+        // Ni el número de WhatsApp oficial: el bot reparte los mensajes por
+        // ese campo, cambiarlo sería quedarse con los mensajes de otro.
+        && request.resource.data.get('whatsappPhoneNumberId', null) == resource.data.get('whatsappPhoneNumberId', null);
     }
 
     // Pedidos de la barbería al dueño del sistema ("agregá tal corte", "sumá

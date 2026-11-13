@@ -1302,6 +1302,30 @@ detalle técnico completo de arquitectura y setup.
     `bot/.env` y los logins de Railway/Firebase. `app/.env` se reconstruyó
     con la config pública del sitio publicado. Railway se volvió a loguear
     (`railway login --browserless`).
+- 🧰 **Skill `/nuevo-cliente` (13-11-2026) — PROGRAMADA, sin usar todavía.**
+  Pedido del usuario: "te digo tengo un nuevo cliente y me generás todo".
+  `.claude/skills/nuevo-cliente/` (SKILL.md + `crear-cuenta.mjs` +
+  `conectar-whatsapp.mjs`): cuenta del panel con mes gratis, peluquero y
+  servicios → número de Telnyx con IVR propio (pide permiso antes de comprar)
+  → el mismo número en la API oficial → mensaje de bienvenida para copiar.
+  - El bot oficial (`bot/index.js` + `bot/cloudApi.js`) ahora atiende VARIOS
+    números desde un solo servidor: reparte cada mensaje por
+    `branches.whatsappPhoneNumberId` (en vivo, sin redesplegar; campo
+    bloqueado en `firestore.rules`). Conversaciones separadas por barbería
+    (`waConversations/{branchId}:{phone}`; la del piloto sigue en
+    `{phone}`), y "cancelar" solo muestra citas de esa barbería (antes un
+    cliente de 2 barberías veía las citas de las dos — arreglado).
+  - ⬜ Falta redesplegar `bot-oficial-prueba` (y el de producción para el
+    arreglo de "cancelar") — ninguno es urgente con una sola barbería.
+  - Límite de Meta a recordar: sin verificación del negocio, máximo 2
+    números por cuenta; y `register` exige la cuenta aprobada (sigue
+    PENDING al 13-11).
+- 📊 **Panel simulado de 80 compradores — COMPLETO (12-11-2026).** Resumen
+  en `reports/Panel simulado 4 segmentos.md`: España 4/20 (€29 entra),
+  barberías religiosas 0/20 (el freno es el modelo sin turnos, no el
+  precio), manicuristas de Israel 4/20 (₪99 entra), Venezuela 1/20 (US$19
+  queda arriba; probar US$9-12 con barberías de US$10+). Son simulados, no
+  clientes — sirven para elegir qué probar.
 - **Ideas para el backlog (más adelante, el usuario lo aclaró
   explícitamente — no bloquean el piloto):**
   - Página web y video publicitario explicando el ahorro de tiempo/dinero

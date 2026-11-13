@@ -5,8 +5,13 @@
  * respondemos llamando a la Graph API. Así no hay sesión que se pueda
  * "desvincular" ni código/QR que renovar.
  *
+ * Un solo servidor puede atender VARIOS números (una barbería por número):
+ * cada aviso de Meta trae el phone_number_id al que escribió el cliente, y
+ * `servesNumber(id)` decide si es nuestro. Se responde desde ese mismo número
+ * con `sockFor(id)`.
+ *
  * Variables de entorno:
- *   WA_PHONE_NUMBER_ID  identificador del número en Meta (no es secreto)
+ *   WA_PHONE_NUMBER_ID  número de la sucursal original (no es secreto)
  *   WA_ACCESS_TOKEN     token de acceso de la app (SECRETO)
  *   WA_APP_SECRET       "clave secreta de la app" de Meta, para verificar que
  *                       cada aviso del webhook viene de verdad de Meta (SECRETO)
@@ -18,13 +23,13 @@ import { createHmac, timingSafeEqual } from 'node:crypto';
 
 const GRAPH = 'https://graph.facebook.com/v21.0';
 
-export function createCloudTransport({ phoneNumberId, accessToken, appSecret, verifyToken }) {
-  for (const [name, value] of Object.entries({ WA_PHONE_NUMBER_ID: phoneNumberId, WA_ACCESS_TOKEN: accessToken, WA_APP_SECRET: appSecret, WA_VERIFY_TOKEN: verifyToken })) {
+export function createCloudTransport({ accessToken, appSecret, verifyToken, servesNumber }) {
+  for (const [name, value] of Object.entries({ WA_ACCESS_TOKEN: accessToken, WA_APP_SECRET: appSecret, WA_VERIFY_TOKEN: verifyToken })) {
     if (!value) throw new Error(`[cloud] Falta ${name}`);
   }
   const auth = { Authorization: `Bearer ${accessToken}` };
 
-  async function sendText(phoneDigits, text) {
+  async function sendText(phoneNumberId, phoneDigits, text) {
     const res = await fetch(`${GRAPH}/${phoneNumberId}/messages`, {
       method: 'POST',
       headers: { ...auth, 'Content-Type': 'application/json' },
@@ -46,10 +51,17 @@ export function createCloudTransport({ phoneNumberId, accessToken, appSecret, ve
     return { buffer: Buffer.from(await file.arrayBuffer()), mimeType: mime_type };
   }
 
-  /** Igual que sock.sendMessage de Baileys, para reusar el resto del bot. */
-  const sock = {
-    sendMessage: (jid, { text }) => sendText(jid.split('@')[0].replace(/\D/g, ''), text),
-  };
+  /** Igual que sock.sendMessage de Baileys (para reusar el resto del bot),
+   * mandando desde el número `phoneNumberId`. */
+  const socks = new Map();
+  function sockFor(phoneNumberId) {
+    if (!socks.has(phoneNumberId)) {
+      socks.set(phoneNumberId, {
+        sendMessage: (jid, { text }) => sendText(phoneNumberId, jid.split('@')[0].replace(/\D/g, ''), text),
+      });
+    }
+    return socks.get(phoneNumberId);
+  }
 
   function validSignature(raw, header) {
     if (!header?.startsWith('sha256=')) return false;
@@ -59,7 +71,7 @@ export function createCloudTransport({ phoneNumberId, accessToken, appSecret, ve
   }
 
   /**
-   * Arranca el servidor. onMessage({ id, from, name, type, text, mediaId })
+   * Arranca el servidor. onMessage({ phoneNumberId, id, from, name, type, text, mediaId })
    * se llama por cada mensaje entrante de un cliente.
    */
   function start(onMessage, port = Number(process.env.PORT) || 8080) {
@@ -112,8 +124,9 @@ export function createCloudTransport({ phoneNumberId, accessToken, appSecret, ve
                 mensajes: (value.messages ?? []).map((m) => ({ de: m.from, tipo: m.type })),
                 estados: (value.statuses ?? []).map((st) => st.status),
               }));
-              if (value.metadata?.phone_number_id !== phoneNumberId) {
-                console.warn(`[cloud] aviso para otro número (${value.metadata?.phone_number_id}), se ignora; este bot atiende ${phoneNumberId}`);
+              const phoneNumberId = value.metadata?.phone_number_id;
+              if (!servesNumber(phoneNumberId)) {
+                console.warn(`[cloud] aviso para un número que ninguna barbería tiene asignado (${phoneNumberId}), se ignora`);
                 continue;
               }
               for (const st of value.statuses ?? []) {
@@ -128,7 +141,7 @@ export function createCloudTransport({ phoneNumberId, accessToken, appSecret, ve
                   m.interactive?.list_reply?.title ??
                   '';
                 Promise.resolve(
-                  onMessage({ id: m.id, from: m.from, name: names[m.from], type: m.type, text, mediaId: m.audio?.id })
+                  onMessage({ phoneNumberId, id: m.id, from: m.from, name: names[m.from], type: m.type, text, mediaId: m.audio?.id })
                 ).catch((err) => console.error('[cloud] error manejando mensaje', err));
               }
             }
@@ -143,5 +156,5 @@ export function createCloudTransport({ phoneNumberId, accessToken, appSecret, ve
     return server;
   }
 
-  return { sock, start, downloadMedia };
+  return { sockFor, start, downloadMedia };
 }

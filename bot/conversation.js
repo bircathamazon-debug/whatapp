@@ -1,12 +1,15 @@
 /**
  * Máquina de estados de la conversación de reserva por WhatsApp.
- * El estado de cada cliente se persiste en Firestore (waConversations/{phone})
- * para sobrevivir reinicios del bot.
+ * El estado de cada cliente se persiste en Firestore para sobrevivir
+ * reinicios del bot: waConversations/{phone} para la sucursal original
+ * (BRANCH_ID), y waConversations/{branchId}:{phone} para las demás — un mismo
+ * cliente puede escribirle a dos barberías distintas sin que se mezclen.
  *
  * Los textos que ve el cliente salen de i18n.js según branch.language
  * (hebreo por defecto). Los comentarios del código quedan en español para
  * quien mantiene el proyecto.
  */
+import { AsyncLocalStorage } from 'node:async_hooks';
 import { db } from './firebaseClient.js';
 import { getAvailableSlots, getStaffServiceDuration, toEpoch } from './availability.js';
 import * as api from './botApiClient.js';
@@ -42,14 +45,22 @@ function normalizePhone(jid) {
   return `+${jid.split('@')[0].replace(/\D/g, '')}`;
 }
 
+/** Sucursal del mensaje que se está procesando (para separar conversaciones). */
+const currentBranch = new AsyncLocalStorage();
+
+function convDocId(phone) {
+  const branchId = currentBranch.getStore();
+  return !branchId || branchId === process.env.BRANCH_ID ? phone : `${branchId}:${phone}`;
+}
+
 async function getConversation(phone) {
-  const snap = await db.collection(CONV_COL).doc(phone).get();
+  const snap = await db.collection(CONV_COL).doc(convDocId(phone)).get();
   if (snap.exists) return snap.data();
   return { step: 'MAIN_MENU', data: {} };
 }
 
 async function saveConversation(phone, state) {
-  await db.collection(CONV_COL).doc(phone).set({ ...state, updatedAt: Date.now() });
+  await db.collection(CONV_COL).doc(convDocId(phone)).set({ ...state, updatedAt: Date.now() });
 }
 
 async function resetToMainMenu(phone) {
@@ -116,6 +127,10 @@ async function logUnansweredMessage(branch, phone, text, step) {
  * de respuesta a enviar (el bot los envía en orden).
  */
 export async function handleIncomingMessage(jid, rawText, branchId, pushName) {
+  return currentBranch.run(branchId, () => handleForBranch(jid, rawText, branchId, pushName));
+}
+
+async function handleForBranch(jid, rawText, branchId, pushName) {
   const phone = normalizePhone(jid);
   const text = (rawText || '').trim();
   const branch = await getBranch(branchId);
@@ -145,7 +160,7 @@ export async function handleIncomingMessage(jid, rawText, branchId, pushName) {
   // "hola" para empezar de cero y después "1"), ese "1" es una opción del
   // menú nueva, no una respuesta tardía a un aviso de hace rato.
   if (state.step === 'MAIN_MENU' && (text === '1' || text === '2')) {
-    const pendingReply = await findAwaitingReply(phone, state.updatedAt);
+    const pendingReply = await findAwaitingReply(phone, state.updatedAt, branchId);
     if (pendingReply) return handlePendingReply(phone, pendingReply, text, branch);
   }
 
@@ -178,7 +193,7 @@ export async function handleIncomingMessage(jid, rawText, branchId, pushName) {
   }
 }
 
-async function findAwaitingReply(phone, convUpdatedAt) {
+async function findAwaitingReply(phone, convUpdatedAt, branchId) {
   const snap = await db
     .collection('notifications')
     .where('to', '==', phone)
@@ -190,6 +205,7 @@ async function findAwaitingReply(phone, convUpdatedAt) {
   for (const doc of snap.docs) {
     const data = doc.data();
     if (!data.awaitingReply || data.replyHandledAt) continue;
+    if (data.branchId && data.branchId !== branchId) continue; // aviso de otra barbería
     // Si el cliente ya saludó/usó el menú (lo que actualiza
     // waConversations.updatedAt) DESPUÉS de que se mandó este aviso, significa
     // que decidió arrancar de cero por su cuenta — este "1"/"2" es una opción
@@ -919,9 +935,11 @@ async function upcomingAppointments(phone, branch) {
     .where('clientPhone', '==', phone)
     .where('status', 'in', ['confirmed', 'pending_deposit'])
     .orderBy('startsAt', 'asc')
-    .limit(5)
+    .limit(20)
     .get();
-  return snap.docs.map((d) => {
+  // Solo las citas de ESTA barbería: si el mismo cliente reservó en otra,
+  // no tiene que poder verlas ni cancelarlas desde acá.
+  return snap.docs.filter((d) => d.data().branchId === branch.id).slice(0, 5).map((d) => {
     const a = d.data();
     return { id: d.id, label: `${formatDate(a.startsAt, branch)} ${formatTime(a.startsAt, branch)}` };
   });

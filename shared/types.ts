@@ -47,6 +47,14 @@ export interface Branch {
     tranzilaExpDate?: string; // 'MMYY'
   };
   /**
+   * Número de WhatsApp de la barbería en la API oficial de Meta
+   * (phone_number_id). El bot oficial usa este campo para saber a qué
+   * barbería va cada mensaje. Solo lo escribe el backend / el dueño del
+   * sistema (ver firestore.rules), para que nadie se "robe" los mensajes de
+   * otro número.
+   */
+  whatsappPhoneNumberId?: string;
+  /**
    * Plan y estado de cuenta de la barbería como cliente del sistema (lo que
    * paga por usar el bot). Solo lo escribe el backend o el dueño del sistema
    * (super administrador) — ver firestore.rules. Precios y límites en

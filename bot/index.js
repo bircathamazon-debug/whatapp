@@ -12,8 +12,10 @@
  * Primera ejecución: escanea el QR con el número de WhatsApp de la sucursal.
  * La sesión se guarda en ./auth_info_baileys/ para las siguientes ejecuciones.
  *
- * Cada instancia del bot atiende UNA sucursal (ver BRANCH_ID en .env). Para
- * varias sucursales, corre una instancia por cada número de WhatsApp.
+ * Con Baileys, cada instancia atiende UNA sucursal (BRANCH_ID en .env). Con la
+ * API oficial, una sola instancia atiende la sucursal de BRANCH_ID (número
+ * WA_PHONE_NUMBER_ID) y además cada barbería que tenga
+ * `whatsappPhoneNumberId` en Firestore (lo carga la skill /nuevo-cliente).
  */
 import makeWASocket, { Browsers, DisconnectReason, fetchLatestWaWebVersion, useMultiFileAuthState } from '@whiskeysockets/baileys';
 import { Boom } from '@hapi/boom';
@@ -134,40 +136,43 @@ function isQuickMenuReply(text) {
   return /^[0-9]$/.test(text.trim());
 }
 
-function enqueueMessage(sock, jid, text, pushName) {
-  const entry = pendingByJid.get(jid);
+function enqueueMessage(sock, jid, text, pushName, branchId = BRANCH_ID) {
+  // La cola es por cliente Y barbería: el mismo cliente puede escribirle a
+  // dos barberías a la vez sin que sus mensajes se junten.
+  const key = `${branchId}|${jid}`;
+  const entry = pendingByJid.get(key);
   // Si no hay nada ya esperando a juntarse y el mensaje es un dígito suelto,
   // se procesa al instante en vez de esperar los 4 segundos del debounce.
   if ((!entry || entry.parts.length === 0) && isQuickMenuReply(text)) {
-    pendingByJid.delete(jid);
-    runSerialized(jid, () => processMessage(sock, jid, text, pushName));
+    pendingByJid.delete(key);
+    runSerialized(key, () => processMessage(sock, jid, text, pushName, branchId));
     return;
   }
 
   let queued = entry;
   if (!queued) {
-    queued = { parts: [], pushName, timer: null };
-    pendingByJid.set(jid, queued);
+    queued = { parts: [], pushName, timer: null, sock, jid, branchId };
+    pendingByJid.set(key, queued);
   }
   queued.parts.push(text);
   if (pushName) queued.pushName = pushName;
   if (queued.timer) clearTimeout(queued.timer);
-  queued.timer = setTimeout(() => flushPending(sock, jid), MESSAGE_DEBOUNCE_MS);
+  queued.timer = setTimeout(() => flushPending(key), MESSAGE_DEBOUNCE_MS);
 }
 
-async function flushPending(sock, jid) {
-  const entry = pendingByJid.get(jid);
+async function flushPending(key) {
+  const entry = pendingByJid.get(key);
   if (!entry) return;
-  pendingByJid.delete(jid);
+  pendingByJid.delete(key);
   const text = entry.parts.join(' ').trim();
   if (!text) return;
-  await runSerialized(jid, () => processMessage(sock, jid, text, entry.pushName));
+  await runSerialized(key, () => processMessage(entry.sock, entry.jid, text, entry.pushName, entry.branchId));
 }
 
-async function processMessage(sock, jid, text, pushName) {
+async function processMessage(sock, jid, text, pushName, branchId) {
   try {
-    const replies = await handleIncomingMessage(jid, text, BRANCH_ID, pushName);
-    if (TRANSPORT === 'cloud') console.log(`[bot] ${jid.split('@')[0]} escribió ${JSON.stringify(text.slice(0, 80))} → ${replies.length} respuesta(s)`);
+    const replies = await handleIncomingMessage(jid, text, branchId, pushName);
+    if (TRANSPORT === 'cloud') console.log(`[bot] [${branchId}] ${jid.split('@')[0]} escribió ${JSON.stringify(text.slice(0, 80))} → ${replies.length} respuesta(s)`);
     for (const reply of replies) {
       await sock.sendMessage(jid, { text: reply });
     }
@@ -298,15 +303,57 @@ async function connectToWhatsApp() {
 
 /** Bot por la API oficial de Meta (WA_TRANSPORT=cloud). */
 function startCloud() {
+  // phone_number_id de Meta -> sucursal. La original sale de las variables de
+  // entorno; las demás, del campo branches.whatsappPhoneNumberId (en vivo:
+  // una barbería nueva empieza a atenderse sin redesplegar).
+  const envNumber = process.env.WA_PHONE_NUMBER_ID;
+  const fromEnv = envNumber ? [[envNumber, BRANCH_ID]] : [];
+  let routes = new Map(fromEnv);
+
   const cloud = createCloudTransport({
-    phoneNumberId: process.env.WA_PHONE_NUMBER_ID,
     accessToken: process.env.WA_ACCESS_TOKEN,
     appSecret: process.env.WA_APP_SECRET,
     verifyToken: process.env.WA_VERIFY_TOKEN,
+    servesNumber: (id) => routes.has(id),
   });
+
+  // Recordatorios y avisos: un "despachador" por sucursal, que manda desde el
+  // número que la sucursal tenga asignado en ese momento. En modo prueba no
+  // se despacha la sucursal original (ya la atiende el bot de Baileys).
+  const watched = new Set();
+  const numberOf = (branchId) => [...routes].find(([, b]) => b === branchId)?.[0];
+  function watch(branchId) {
+    if (watched.has(branchId) || (TEST_MODE && branchId === BRANCH_ID)) return;
+    watched.add(branchId);
+    startNotificationsWatcher(
+      {
+        sendMessage: (jid, msg) => {
+          const number = numberOf(branchId);
+          if (!number) return Promise.reject(new Error(`la sucursal ${branchId} ya no tiene número de WhatsApp`));
+          return cloud.sockFor(number).sendMessage(jid, msg);
+        },
+      },
+      branchId
+    );
+  }
+
+  db.collection('branches')
+    .where('whatsappPhoneNumberId', '>', '')
+    .onSnapshot(
+      (snap) => {
+        const next = new Map(fromEnv);
+        for (const doc of snap.docs) next.set(doc.get('whatsappPhoneNumberId'), doc.id);
+        routes = next;
+        for (const branchId of new Set(routes.values())) watch(branchId);
+        console.log('[bot] números atendidos:', JSON.stringify(Object.fromEntries(routes)));
+      },
+      (err) => console.error('[bot] no se pudo leer los números de las barberías', err)
+    );
 
   cloud.start(async (m) => {
     if (alreadyProcessed(m.id)) return; // Meta reintenta avisos: no responder dos veces
+    const branchId = routes.get(m.phoneNumberId);
+    if (!branchId) return;
     const jid = `${m.from.replace(/\D/g, '')}@s.whatsapp.net`;
     let text = (m.text || '').trim();
     if (!text && m.type === 'audio' && m.mediaId) {
@@ -320,14 +367,11 @@ function startCloud() {
           })) || '[nota de voz — no se pudo transcribir]';
     }
     if (!text) return;
-    enqueueMessage(cloud.sock, jid, text, m.name);
+    enqueueMessage(cloud.sockFor(m.phoneNumberId), jid, text, m.name, branchId);
   });
 
-  console.log(`[bot] API oficial de WhatsApp lista para la sucursal ${BRANCH_ID}${TEST_MODE ? ' (modo prueba: sin recordatorios ni latido)' : ''}`);
-  if (!TEST_MODE) {
-    startNotificationsWatcher(cloud.sock, BRANCH_ID);
-    startHeartbeat();
-  }
+  console.log(`[bot] API oficial de WhatsApp lista (sucursal original ${BRANCH_ID})${TEST_MODE ? ' (modo prueba: sin recordatorios ni latido para la sucursal original)' : ''}`);
+  if (!TEST_MODE) startHeartbeat();
 }
 
 if (TRANSPORT === 'cloud') startCloud();
