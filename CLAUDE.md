@@ -1319,7 +1319,18 @@ detalle técnico completo de arquitectura y setup.
     arreglo de "cancelar") — ninguno es urgente con una sola barbería.
   - Límite de Meta a recordar: sin verificación del negocio, máximo 2
     números por cuenta; y `register` exige la cuenta aprobada (sigue
-    PENDING al 13-11).
+    PENDING al 16-11).
+  - 📌 Explicado al usuario (15/16-11): recomendación = sacar עוסק פטור →
+    verificación del negocio en Meta (el nombre del documento tiene que
+    coincidir EXACTO con el portafolio "Azulay Digital"; 3 intentos) +
+    ticket al soporte de Meta. Con la verificación: hasta 20 números por
+    portafolio (a veces hay que pedirlo) y cada número nuevo se activa en
+    minutos, pero su nombre visible lo revisa Meta y puede rechazar un
+    nombre de barbería que no coincide con el negocio verificado. Plan
+    acordado: primeras 1-3 barberías en la cuenta propia (/nuevo-cliente);
+    antes de ~5, inscribirse como **Tech Provider** de Meta y programar el
+    "registro integrado" (cada barbería con su propia cuenta de WhatsApp
+    conectada a la app) — sin tope de 20 ni problemas de nombre.
 - 📊 **Panel simulado de 80 compradores — COMPLETO (12-11-2026).** Resumen
   en `reports/Panel simulado 4 segmentos.md`: España 4/20 (€29 entra),
   barberías religiosas 0/20 (el freno es el modelo sin turnos, no el
