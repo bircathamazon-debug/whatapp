@@ -385,6 +385,7 @@
     if (t === 'auto') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme', t);
     const dark = t === 'dark' || (t === 'auto' && matchMedia('(prefers-color-scheme: dark)').matches);
     document.querySelector('meta[name=theme-color]').setAttribute('content', dark ? '#000000' : '#f2f2f7');
+    document.querySelector('meta[name=color-scheme]').setAttribute('content', t === 'dark' ? 'dark' : t === 'auto' ? 'light dark' : 'light');
     $('themeBtn').textContent = THEMES[t];
   }
   $('themeBtn').onclick = () => applyTheme({ light: 'dark', dark: 'auto', auto: 'light' }[getTheme()]);
