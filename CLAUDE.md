@@ -1251,8 +1251,10 @@ detalle técnico completo de arquitectura y setup.
       en revisión (`account_review_status: PENDING`, error "cuenta de
       WhatsApp Business no aprobada"). El PIN de 2 pasos ya está generado
       y guardado en Railway (`WA_REGISTRATION_PIN`, bot-oficial-prueba).
-      Hay un chequeo automático programado en esta sesión que registra
-      el número apenas Meta apruebe la cuenta.
+      El chequeo automático cada 6 h se **detuvo el 22-11 por pedido del
+      usuario** (seguía PENDING; un `register` de prueba el 19-11 dio
+      "cuenta de WhatsApp Business no verificada"). Retomar cuando el
+      usuario tenga el עוסק פטור / verificación del negocio.
     - El nombre visible quedó "Azulay Digital" — cambiarlo a
       "המספרה של יעקב" cuando la cuenta esté aprobada (Meta lo revisa).
   - ⬜ Falta: (1) `register` del 076 y nombre visible (ver arriba) y
