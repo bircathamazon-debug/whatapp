@@ -1,23 +1,23 @@
-/* Dirección: iOS. Fondo gris agrupado, tarjetas blancas, tipografía del sistema, encabezado translúcido,
-   control segmentado, hojas con esquinas grandes y un solo acento azul. Cambiar --accent cambia toda la marca. */
+/* Dirección: iOS en blanco rosado. Fondo blush, tarjetas blancas, tipografía del sistema, encabezado translúcido,
+   hojas con esquinas grandes y un solo acento rosa. Cambiar --accent cambia toda la marca. */
 :root{
-  --bg:#f2f2f7; --surface:#ffffff; --ink:#1c1c1e; --mute:#8a8a8e; --sep:rgba(60,60,67,.16);
-  --fill:rgba(118,118,128,.12); --fill2:rgba(118,118,128,.2);
-  --accent:#007aff; --accent-ink:#ffffff; --tint:rgba(0,122,255,.12);
-  --danger:#ff3b30; --ok:#248a3d; --glass:rgba(242,242,247,.78); --shadow:0 1px 2px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.05);
+  --bg:#fff5f8; --surface:#ffffff; --ink:#2b1d24; --mute:#8f7a84; --sep:rgba(130,60,90,.14);
+  --fill:rgba(190,100,135,.10); --fill2:rgba(190,100,135,.2);
+  --accent:#d6336c; --accent-ink:#ffffff; --tint:rgba(214,51,108,.11);
+  --danger:#d92d20; --ok:#1f8a4c; --glass:rgba(255,245,248,.82); --shadow:0 1px 2px rgba(120,40,70,.06),0 6px 18px rgba(120,40,70,.07);
   --sans:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Heebo","Segoe UI",system-ui,sans-serif;
   --serif:var(--sans);
   --r:12px;
   color-scheme:only light;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#000; --surface:#1c1c1e; --ink:#f5f5f7; --mute:#98989f; --sep:rgba(84,84,88,.5);
-  --fill:rgba(118,118,128,.24); --fill2:rgba(118,118,128,.36);
-  --accent:#0a84ff; --tint:rgba(10,132,255,.2); --danger:#ff453a; --ok:#30d158; --glass:rgba(0,0,0,.72); --shadow:none; color-scheme:dark}}
+  --bg:#160e12; --surface:#241a20; --ink:#fbeff3; --mute:#b79da9; --sep:rgba(255,200,220,.14);
+  --fill:rgba(255,160,195,.12); --fill2:rgba(255,160,195,.22);
+  --accent:#ff6b9a; --accent-ink:#2b0f1a; --tint:rgba(255,107,154,.2); --danger:#ff7b72; --ok:#4ade80; --glass:rgba(22,14,18,.78); --shadow:none; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#000; --surface:#1c1c1e; --ink:#f5f5f7; --mute:#98989f; --sep:rgba(84,84,88,.5);
-  --fill:rgba(118,118,128,.24); --fill2:rgba(118,118,128,.36);
-  --accent:#0a84ff; --tint:rgba(10,132,255,.2); --danger:#ff453a; --ok:#30d158; --glass:rgba(0,0,0,.72); --shadow:none; color-scheme:dark}
+  --bg:#160e12; --surface:#241a20; --ink:#fbeff3; --mute:#b79da9; --sep:rgba(255,200,220,.14);
+  --fill:rgba(255,160,195,.12); --fill2:rgba(255,160,195,.22);
+  --accent:#ff6b9a; --accent-ink:#2b0f1a; --tint:rgba(255,107,154,.2); --danger:#ff7b72; --ok:#4ade80; --glass:rgba(22,14,18,.78); --shadow:none; color-scheme:dark}
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0}
@@ -148,7 +148,7 @@ textarea{width:100%;resize:vertical}
 .ev-d{margin:0;font-size:15px}
 .ev-a{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:4px}
 .pill{display:inline-block;background:var(--fill);border-radius:99px;padding:2px 11px;font-size:13px;color:var(--mute);font-weight:500}
-.pill.ok{background:rgba(52,199,89,.15);color:var(--ok)}
+.pill.ok{background:rgba(31,138,76,.12);color:var(--ok)}
 .pill.warn{background:var(--tint);color:var(--accent)}
 .pill.wrapt{border-radius:12px;padding:8px 12px;display:block}
 .shabbat{border-radius:16px;padding:16px 18px;margin-bottom:14px;background:var(--surface);box-shadow:var(--shadow)}

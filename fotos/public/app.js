@@ -384,13 +384,13 @@
     try { localStorage.setItem('theme', t); } catch {}
     if (t === 'auto') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme', t);
     const dark = t === 'dark' || (t === 'auto' && matchMedia('(prefers-color-scheme: dark)').matches);
-    document.querySelector('meta[name=theme-color]').setAttribute('content', dark ? '#000000' : '#f2f2f7');
+    document.querySelector('meta[name=theme-color]').setAttribute('content', dark ? '#160e12' : '#fff5f8');
     document.querySelector('meta[name=color-scheme]').setAttribute('content', t === 'dark' ? 'dark' : t === 'auto' ? 'light dark' : 'only light');
     $('themeBtn').textContent = THEMES[t];
   }
   $('themeBtn').onclick = () => applyTheme({ light: 'dark', dark: 'auto', auto: 'light' }[getTheme()]);
   applyTheme(getTheme());
-  const BUILD = 'גרסה 5';
+  const BUILD = 'גרסה 6';
   $('ver').textContent = BUILD + ' · הטלפון במצב ' + (matchMedia('(prefers-color-scheme: dark)').matches ? 'כהה' : 'בהיר');
 
   // ---------- התקנה כאפליקציה ----------
