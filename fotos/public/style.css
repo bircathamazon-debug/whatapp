@@ -8,7 +8,7 @@
   --sans:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Heebo","Segoe UI",system-ui,sans-serif;
   --serif:var(--sans);
   --r:12px;
-  color-scheme:light;
+  color-scheme:only light;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#000; --surface:#1c1c1e; --ink:#f5f5f7; --mute:#98989f; --sep:rgba(84,84,88,.5);
@@ -258,3 +258,5 @@ main:not([hidden]){animation:fade .22s ease-out}
 .in-t{display:flex;flex-direction:column;gap:2px}.in-t b{font-size:17px}.in-t span{font-size:14px;color:var(--mute)}
 .in-a{display:flex;align-items:center;gap:14px}
 @media (display-mode:standalone){.install{display:none!important}}
+
+.ver{margin:0;text-align:center;color:var(--mute);font-size:12px}

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#f2f2f7">
-  <meta name="color-scheme" content="light">
+  <meta name="color-scheme" content="only light">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -14,7 +14,7 @@
     // Claro por defecto (aunque el teléfono esté en modo oscuro). Se cambia en "עוד".
     (function () { var t = 'light'; try { t = localStorage.getItem('theme') || 'light'; } catch (e) {}
       if (t !== 'auto') document.documentElement.setAttribute('data-theme', t);
-      document.querySelector('meta[name=color-scheme]').setAttribute('content', t === 'dark' ? 'dark' : t === 'auto' ? 'light dark' : 'light'); })();
+      document.querySelector('meta[name=color-scheme]').setAttribute('content', t === 'dark' ? 'dark' : t === 'auto' ? 'light dark' : 'only light'); })();
   </script>
   <meta name="robots" content="noindex, nofollow">
   <title>התמונות שלנו</title>
@@ -128,6 +128,7 @@
         <button id="adminBtn" hidden>ניהול גישה</button>
         <button id="logoutBtn" class="red">יציאה</button>
       </div>
+      <p class="ver" id="ver"></p>
     </section>
   </div>
 

@@ -1,5 +1,5 @@
 // Service worker: app instalable, funciona sin conexión (carcasa) y recibe fotos desde "Compartir" (Android).
-const VERSION = 'v4';
+const VERSION = 'v5';
 const SHELL = ['/', '/style.css', '/app.js', '/extra.js', '/home.js', '/icon-192.png', '/icon-512.png', '/apple-touch-icon.png', '/manifest.webmanifest'];
 const SHARE_CACHE = 'shared-photos';
 
