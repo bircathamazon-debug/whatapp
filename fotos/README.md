@@ -36,6 +36,14 @@ Después, en el panel de Cloudflare: **Workers & Pages → tmunot → Settings �
 
 Tu sitio quedará en `https://tmunot.pages.dev`. Más adelante puedes conectar un dominio propio desde el mismo panel.
 
+## Alternativa sin terminal: subir un zip por el panel
+
+1. Ejecuta `./build-zip.sh` (o usa el `tmunot-cloudflare.zip` ya generado).
+2. Cloudflare → **Workers & Pages → Create → Pages → Upload assets**. Nombre del proyecto: `tmunot`. Sube el zip y pulsa **Deploy**.
+3. Abre el proyecto → **Settings → Bindings → Add → R2 bucket**: variable `PHOTOS`, bucket `tmunot-photos` (créalo antes en **R2 → Create bucket**).
+4. **Settings → Variables and Secrets → Add**: nombre `ADMIN_PIN`, tipo *Secret*, y el PIN de la administradora.
+5. Vuelve a subir el zip (**Deployments → Create new deployment**) para que tome los cambios del 3 y el 4.
+
 ### Seguridad recomendada
 - Elige un `ADMIN_PIN` largo (8 dígitos o más). Los códigos de las amigas son de 6 dígitos y es el enlace el que se comparte, no el código escrito a mano.
 - En Cloudflare, **Security → WAF → Rate limiting**: limita `POST /api/login` a unos 10 intentos por minuto por IP. Así nadie puede adivinar códigos.
