@@ -4,7 +4,7 @@
   const RANK = { member: 1, helper: 2, admin: 3 };
   const ROLE_HE = { admin: 'אחראית', helper: 'עוזרת', member: 'חברה' };
 
-  const S = { me: null, cats: [], suggestions: [], cat: '', items: [], cursor: null, queue: [], viewIdx: -1, uploading: false, pickCat: '' };
+  const S = { me: null, cats: [], suggestions: [], cat: '', items: [], cursor: null, queue: [], viewIdx: -1, uploading: false, pickCat: '', sec: 'photos', sel: null, settings: { wa: '', city: 'jerusalem' } };
   const can = (role) => S.me && RANK[S.me.role] >= RANK[role];
   const catName = (id) => (S.cats.find((c) => c.id === id) || {}).name || '';
 
@@ -22,9 +22,10 @@
   const el = (tag, attrs = {}, ...kids) => {
     const n = document.createElement(tag);
     for (const [k, v] of Object.entries(attrs)) {
+      if (v == null) continue;
       if (k === 'class') n.className = v; else if (k.startsWith('on')) n.addEventListener(k.slice(2), v); else n.setAttribute(k, v);
     }
-    n.append(...kids); return n;
+    n.append(...kids.filter((k) => k != null && k !== false)); return n;
   };
   const fmtDate = (ms) => new Date(ms).toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: 'numeric' });
 
@@ -66,6 +67,9 @@
     $('whoName').textContent = S.me.label;
     $('whoRole').textContent = ROLE_HE[S.me.role];
     $('adminBtn').hidden = S.me.role !== 'admin';
+    $('settingsBtn').hidden = S.me.role !== 'admin';
+    $('selToggle').hidden = !can('helper');
+    await loadSettings();
     await loadCats();
     await loadPhotos(true);
     consumeShare();
@@ -82,6 +86,7 @@
     const tabs = $('tabs'); tabs.replaceChildren();
     const mk = (id, name) => el('button', { class: 'tab', role: 'tab', 'aria-selected': String(S.cat === id), onclick: () => { S.cat = id; renderTabs(); loadPhotos(true); } }, name);
     tabs.append(mk('', 'הכל'), ...S.cats.map((c) => mk(c.id, c.name)));
+    tabs.hidden = S.sec !== 'photos';
   }
 
   // ---------- fotos ----------
@@ -98,9 +103,11 @@
     const g = $('grid'); g.replaceChildren();
     S.items.forEach((it, i) => {
       const img = el('img', { src: '/api/img/thumb/' + it.name, loading: 'lazy', alt: '' });
-      g.append(el('button', { class: 'cell', 'aria-label': 'פתיחת תמונה', onclick: () => openViewer(i) }, img));
+      const on = S.sel && S.sel.has(it.name);
+      g.append(el('button', { class: 'cell' + (on ? ' sel' : ''), 'aria-label': 'פתיחת תמונה', 'aria-pressed': S.sel ? String(!!on) : null, onclick: () => (S.sel ? toggleSel(it.name) : openViewer(i)) }, img));
     });
     $('empty').hidden = S.items.length > 0;
+    updateSel();
     $('more').hidden = !S.cursor;
   }
   $('more').addEventListener('click', () => loadPhotos(false));
@@ -148,13 +155,13 @@
   // ---------- העלאה ----------
   function openSheet() {
     $('sheet').hidden = false; document.body.style.overflow = 'hidden';
-    S.pickCat = S.pickCat || S.cat || '';
+    S.pickCat = S.pickCat || (S.cat && S.cat !== 'pending' ? S.cat : '');
     renderPick(); updateQueue();
     $('catAdd').hidden = !can('helper'); $('catHint').hidden = can('helper');
   }
   function closeSheet() { if (S.uploading) return; $('sheet').hidden = true; document.body.style.overflow = ''; }
   function renderPick() {
-    const box = $('catPick'); box.replaceChildren(...S.cats.map((c) => el('button', { class: 'opt', type: 'button', 'aria-pressed': String(S.pickCat === c.id), onclick: () => { S.pickCat = c.id; renderPick(); updateQueue(); } }, c.name)));
+    const box = $('catPick'); box.replaceChildren(...S.cats.filter((c) => c.id !== 'pending').map((c) => el('button', { class: 'opt', type: 'button', 'aria-pressed': String(S.pickCat === c.id), onclick: () => { S.pickCat = S.pickCat === c.id ? '' : c.id; renderPick(); updateQueue(); } }, c.name)));
     const sg = $('sugg'); sg.replaceChildren(...S.suggestions.slice(0, 6).map((s) => el('button', { class: 'opt', type: 'button', onclick: () => addCategory(s) }, '+ ' + s)));
   }
   async function addCategory(name) {
@@ -173,8 +180,8 @@
     const n = S.queue.length, info = $('queueInfo'), go = $('go');
     info.hidden = n === 0; go.hidden = n === 0;
     if (n) {
-      info.textContent = S.pickCat ? `${n} תמונות מוכנות להעלאה אל "${catName(S.pickCat)}"` : `${n} תמונות נבחרו. בחרי קטגוריה כדי להמשיך`;
-      go.disabled = !S.pickCat || S.uploading;
+      info.textContent = S.pickCat ? `${n} תמונות מוכנות להעלאה אל "${catName(S.pickCat)}"` : `${n} תמונות מוכנות. בלי קטגוריה הן ימתינו לסידור`;
+      go.disabled = S.uploading;
     }
   }
 
@@ -191,12 +198,12 @@
   async function uploadOne(item) {
     const [full, thumb] = await Promise.all([toJpeg(item.file, 2000, 0.85), toJpeg(item.file, 480, 0.8)]);
     const fd = new FormData();
-    fd.append('file', full, 'p.jpg'); fd.append('thumb', thumb, 't.jpg'); fd.append('cat', S.pickCat); fd.append('date', String(item.date));
+    fd.append('file', full, 'p.jpg'); fd.append('thumb', thumb, 't.jpg'); fd.append('cat', S.pickCat || 'pending'); fd.append('date', String(item.date));
     const res = await fetch('/api/upload', { method: 'POST', body: fd, credentials: 'same-origin' });
     if (!res.ok) throw new Error('upload');
   }
   $('go').addEventListener('click', async () => {
-    if (S.uploading || !S.pickCat || !S.queue.length) return;
+    if (S.uploading || !S.queue.length) return;
     S.uploading = true; $('go').disabled = true; $('prog').hidden = false;
     const total = S.queue.length; let done = 0, failed = [];
     const bar = $('prog').firstElementChild;
@@ -259,6 +266,93 @@
     e.preventDefault();
     try { await post('codes', { label: $('codeLabel').value, role: $('codeRole').value }); $('codeLabel').value = ''; renderCodes(); } catch { toast('יצירת הקוד נכשלה'); }
   });
+
+  // ---------- ajustes y WhatsApp ----------
+  async function loadSettings() {
+    try { S.settings = await api('settings'); } catch {}
+    const a = $('waBtn');
+    a.hidden = !S.settings.wa;
+    if (S.settings.wa) a.href = S.settings.wa;
+  }
+  $('settingsBtn').onclick = () => formSheet({
+    title: 'הגדרות',
+    fields: [
+      { name: 'wa', label: 'קישור להזמנה לקבוצת הוואטסאפ', type: 'url', value: S.settings.wa, placeholder: 'https://chat.whatsapp.com/…' },
+      { name: 'city', label: 'עיר (לזמני הדלקת נרות)', type: 'select', value: S.settings.city, options: Object.entries(window.CITIES || {}).map(([k, v]) => [k, v.name]) },
+    ],
+    onSubmit: async (v) => { S.settings = await post('settings', { wa: v.wa, city: v.city }, 'PUT'); await loadSettings(); toast('ההגדרות נשמרו'); if (App.onSettings) App.onSettings(); },
+  });
+
+  // ---------- בחירה מרובה (עוזרות ואחראית) ----------
+  function toggleSel(name) { S.sel.has(name) ? S.sel.delete(name) : S.sel.add(name); renderGrid(); }
+  function updateSel() {
+    const on = !!S.sel;
+    $('selBar').hidden = !on; $('selToggle').hidden = on || !can('helper') || S.sec !== 'photos';
+    if (on) $('selCount').textContent = S.sel.size ? `נבחרו ${S.sel.size}` : 'בחרי תמונות';
+    $('selGo').disabled = !S.sel || !S.sel.size;
+  }
+  $('selToggle').onclick = () => {
+    S.sel = new Set();
+    $('selCat').replaceChildren(...S.cats.map((c) => el('option', { value: c.id }, c.name)));
+    renderGrid();
+  };
+  $('selCancel').onclick = () => { S.sel = null; renderGrid(); };
+  $('selGo').onclick = async () => {
+    const cat = $('selCat').value, names = [...S.sel];
+    $('selGo').disabled = true;
+    let ok = 0;
+    for (const n of names) { try { await post('photos/' + n, { cat }, 'PATCH'); ok++; } catch {} }
+    toast(`${ok} תמונות הועברו אל "${catName(cat)}"`);
+    S.sel = null; loadPhotos(true);
+  };
+
+  // ---------- טופס כללי ----------
+  function openOv(id) { $(id).hidden = false; document.body.style.overflow = 'hidden'; }
+  function closeOv(id) { $(id).hidden = true; if (!document.querySelector('.overlay:not([hidden])')) document.body.style.overflow = ''; }
+  let formHandler = null;
+  function formSheet({ title, fields, onSubmit, submit = 'שמירה' }) {
+    $('formT').textContent = title; $('formSubmit').textContent = submit; $('formErr').hidden = true;
+    const body = $('formBody'); body.replaceChildren();
+    for (const f of fields) {
+      const id = 'f_' + f.name;
+      let input;
+      if (f.type === 'textarea') input = el('textarea', { id, rows: f.rows || 3, maxlength: f.max || 400 });
+      else if (f.type === 'select') { input = el('select', { id }); for (const [v, l] of f.options) input.append(el('option', { value: v }, l)); }
+      else input = el('input', { id, type: f.type || 'text', maxlength: f.max || 120 });
+      if (f.placeholder) input.placeholder = f.placeholder;
+      if (f.required) input.required = true;
+      if (f.type === 'number') { input.min = '0'; input.step = '0.5'; input.inputMode = 'decimal'; }
+      if (f.type === 'url') input.dir = 'ltr';
+      input.value = f.value ?? '';
+      body.append(el('label', { class: 'fld', for: id }, el('span', { class: 'lbl' }, f.label), input));
+    }
+    formHandler = async () => {
+      const v = {}; for (const f of fields) v[f.name] = $('f_' + f.name).value;
+      try { await onSubmit(v); closeOv('form'); } catch (e) { const er = $('formErr'); er.textContent = 'לא הצלחנו לשמור. בדקי את הפרטים ונסי שוב.'; er.hidden = false; }
+    };
+    openOv('form');
+    setTimeout(() => body.querySelector('input,textarea,select')?.focus(), 50);
+  }
+  $('formEl').addEventListener('submit', (e) => { e.preventDefault(); formHandler && formHandler(); });
+  $('formClose').onclick = () => closeOv('form');
+  $('form').addEventListener('click', (e) => { if (e.target === $('form')) closeOv('form'); });
+
+  // ---------- אזורים ----------
+  const SECTIONS = ['photos', 'cal', 'trips', 'music'];
+  function setSection(name) {
+    S.sec = name;
+    for (const s of SECTIONS) $('sec-' + s).hidden = s !== name;
+    document.querySelectorAll('.sec').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.sec === name)));
+    $('tabs').hidden = name !== 'photos';
+    document.querySelector('.dock').hidden = name !== 'photos';
+    updateSel();
+    window.scrollTo(0, 0);
+    if (name !== 'photos' && App.load && App.load[name]) App.load[name]();
+  }
+  document.querySelectorAll('.sec').forEach((b) => b.addEventListener('click', () => setSection(b.dataset.sec)));
+
+  const App = { S, api, post, el, toast, can, fmtDate, formSheet, openOv, closeOv, catName, load: {} };
+  window.App = App;
 
   init();
 })();

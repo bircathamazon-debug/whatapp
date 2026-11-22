@@ -65,6 +65,23 @@ El chip NFC **no guarda las fotos**, guarda solo un enlace. Las fotos están en 
 
 Recomendaciones: usa etiquetas NTAG215 o NTAG216 (aprox. 1 USD cada una). El enlace queda grabado, así que si quieres cambiar el acceso de esa niña, cancela su código y graba uno nuevo.
 
+## Secciones (Etapa 1)
+
+| Sección | Qué hace | Quién edita |
+|---|---|---|
+| **תמונות** | Álbum por categorías. Si una niña sube sin elegir categoría, las fotos van a **"ממתינות לסידור"** (solo la ve ella y el equipo de orden). Con **"בחירה מרובה"** se mueven muchas a la vez. | Mover y ordenar: administradora y ayudantes |
+| **לוח שנה** | Actividades y cumpleaños (se repiten cada año) con **fecha hebrea y civil**, "voy" de cada niña y **horario de Shabat** de la ciudad elegida (datos de Hebcal). | Crear y editar: administradora y ayudantes |
+| **טיולים** | Precio por niña, quién va, **cuánto pagó cada una** y totales (cobrado, falta, esperado). Lista de **quién lleva qué** (bebidas, snacks, altavoz, parrilla…) con las cosas sin responsable resaltadas. Cada niña ve solo su propio pago. | Pagos: administradora y ayudantes. Anotarse a llevar algo: todas |
+| **מוזיקה** | Enlaces de YouTube o Spotify que se reproducen dentro de la página. Los de las amigas esperan aprobación. | Aprobar: administradora y ayudantes |
+
+La página solo **lleva la cuenta** de los pagos. El dinero se paga fuera (efectivo, Bit, etc.).
+
+### Botón del grupo de WhatsApp y ciudad
+La administradora entra a **"הגדרות"** (arriba), pega el enlace de invitación del grupo (`https://chat.whatsapp.com/...`) y elige la ciudad para los horarios de Shabat. El botón **"קבוצה"** aparece para todas.
+
+### Datos
+Calendario, viajes y música se guardan como archivos JSON dentro del mismo bucket R2 (`_meta/`). No se necesita ninguna base de datos extra.
+
 ## Cómo suben las fotos
 
 - **Botón "העלאת תמונות"**: elige varias fotos de la galería o toma una con la cámara. Funciona en cualquier teléfono.
@@ -81,9 +98,11 @@ La administradora y las ayudantes pueden crear más (יום הולדת, סמינ
 ```
 fotos/
 ├── public/                 Web estática (HTML, CSS, JS), app instalable
-│   ├── index.html  style.css  app.js
+│   ├── index.html  style.css  app.js  extra.js
 │   ├── sw.js  manifest.webmanifest  icon.svg
-├── functions/api/[[path]].js   API (Cloudflare Pages Function + R2)
+├── functions/api/[[path]].js   API principal (fotos, roles, códigos)
+├── lib/extras.js           API de ajustes, calendario, viajes y música
+├── worker-entry.js  build-zip.sh   Genera el zip para subir por el panel
 └── wrangler.toml           Configuración de Cloudflare
 ```
 

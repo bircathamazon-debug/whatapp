@@ -20,22 +20,57 @@
     <div class="bar-row">
       <h1 class="mark">התמונות שלנו</h1>
       <div class="who" id="who" hidden>
+        <a id="waBtn" class="wa" href="#" target="_blank" rel="noopener noreferrer" hidden aria-label="לקבוצת הוואטסאפ">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.6-1.2A9 9 0 1 0 12 3z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+          <span>קבוצה</span>
+        </a>
         <span id="whoName"></span>
         <span id="whoRole" class="role"></span>
+        <button id="settingsBtn" class="link" hidden>הגדרות</button>
         <button id="adminBtn" class="link" hidden>ניהול גישה</button>
         <button id="logoutBtn" class="link">יציאה</button>
       </div>
     </div>
+    <nav id="sections" class="sections" aria-label="אזורים">
+      <button class="sec" data-sec="photos" aria-selected="true">תמונות</button>
+      <button class="sec" data-sec="cal" aria-selected="false">לוח שנה</button>
+      <button class="sec" data-sec="trips" aria-selected="false">טיולים</button>
+      <button class="sec" data-sec="music" aria-selected="false">מוזיקה</button>
+    </nav>
     <nav id="tabs" class="tabs" aria-label="קטגוריות"></nav>
   </header>
 
-  <main>
+  <main id="sec-photos">
+    <div id="selBar" class="selbar" hidden>
+      <span id="selCount"></span>
+      <select id="selCat" aria-label="העברה לקטגוריה"></select>
+      <button id="selGo" class="btn solid small">העברה</button>
+      <button id="selCancel" class="btn line small">ביטול</button>
+    </div>
+    <button id="selToggle" class="link selt" hidden>בחירה מרובה</button>
     <div id="grid" class="grid"></div>
     <div id="empty" class="empty" hidden>
       <p class="empty-t">עדיין אין כאן תמונות</p>
       <p class="empty-s">לחצי על "העלאת תמונות" כדי להתחיל את האלבום.</p>
     </div>
     <button id="more" class="btn line" hidden>טעינת עוד תמונות</button>
+  </main>
+
+  <main id="sec-cal" hidden>
+    <div id="shabbat" class="shabbat" hidden></div>
+    <div class="sec-h"><h2>הקרוב בלוח</h2><button id="addEvent" class="btn solid small" hidden>הוספה</button></div>
+    <ul id="eventList" class="list"></ul>
+  </main>
+
+  <main id="sec-trips" hidden>
+    <div class="sec-h"><h2>טיולים</h2><button id="addTrip" class="btn solid small" hidden>טיול חדש</button></div>
+    <ul id="tripList" class="list"></ul>
+  </main>
+
+  <main id="sec-music" hidden>
+    <div class="sec-h"><h2>מוזיקה</h2><button id="addSong" class="btn solid small">הוספת שיר</button></div>
+    <p class="hint">הדביקי קישור של YouTube או Spotify. שירים של חברות מופיעים אחרי אישור של האחראית או של עוזרת.</p>
+    <ul id="songList" class="list"></ul>
   </main>
 
   <div class="dock"><button id="fab" class="btn solid wide">העלאת תמונות</button></div>
@@ -86,6 +121,24 @@
     </section>
   </div>
 
+  <!-- טופס כללי -->
+  <div id="form" class="overlay" hidden>
+    <form class="sheet" id="formEl">
+      <header class="sheet-h"><h2 id="formT"></h2><button type="button" class="x" id="formClose" aria-label="סגירה">✕</button></header>
+      <div id="formBody" class="fields"></div>
+      <p id="formErr" class="err" role="alert" hidden></p>
+      <button class="btn solid wide" id="formSubmit">שמירה</button>
+    </form>
+  </div>
+
+  <!-- טיול -->
+  <div id="trip" class="overlay" hidden>
+    <section class="sheet tall" role="dialog" aria-modal="true">
+      <header class="sheet-h"><h2 id="tripT"></h2><button class="x" id="tripClose" aria-label="סגירה">✕</button></header>
+      <div id="tripBody" class="tripbody"></div>
+    </section>
+  </div>
+
   <!-- תצוגה במסך מלא -->
   <div id="viewer" class="viewer" hidden>
     <button class="x on-dark" id="vClose" aria-label="סגירה">✕</button>
@@ -114,5 +167,6 @@
 
   <div id="toast" class="toast" role="status" hidden></div>
   <script src="/app.js"></script>
+  <script src="/extra.js"></script>
 </body>
 </html>

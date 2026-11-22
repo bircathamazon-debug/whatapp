@@ -1,3 +1,5 @@
+import { extraRoutes } from '../../lib/extras.js';
+
 // API de la galería · Cloudflare Pages Function + R2 (binding: PHOTOS)
 //
 // Roles:
@@ -5,6 +7,7 @@
 //   helper (עוזרת)   – código generado por la admin. Ve, sube, mueve, borra, crea categorías.
 //   member (חברה)    – código generado por la admin. Ve, sube y borra SUS propias fotos.
 
+const PENDING = { id: 'pending', name: 'ממתינות לסידור' };
 const FIXED = [
   { id: 'friends', name: 'חברות' },
   { id: 'family', name: 'משפחה' },
@@ -12,10 +15,15 @@ const FIXED = [
   { id: 'trips', name: 'טיולים' },
   { id: 'selfie', name: 'סלפי' },
   { id: 'memories', name: 'זכרונות' },
+  PENDING,
 ];
 const SUGGESTIONS = ['יום הולדת', 'סמינר', 'מחנה קיץ', 'בית ספר', 'חתונה', 'אוכל', 'חיות', 'אמנות'];
 const CATS_KEY = '_meta/categories.json';
 const CODES_KEY = '_meta/codes.json';
+const SETTINGS_KEY = '_meta/settings.json';
+const EVENTS_KEY = '_meta/events.json';
+const TRIPS_KEY = '_meta/trips.json';
+const MUSIC_KEY = '_meta/music.json';
 const MAX_BYTES = 12 * 1024 * 1024;
 const RANK = { member: 1, helper: 2, admin: 3 };
 
@@ -140,6 +148,7 @@ export async function onRequest({ request, env, params }) {
   if (route === 'photos' && method === 'GET') {
     const cat = url.searchParams.get('cat') || '';
     const want = 120;
+    const staff = can(me, 'helper');
     const items = [];
     let cursor = url.searchParams.get('cursor') || undefined;
     let done = false;
@@ -148,6 +157,7 @@ export async function onRequest({ request, env, params }) {
       for (const o of res.objects) {
         const meta = o.customMetadata || {};
         if (cat && meta.cat !== cat) continue;
+        if (!staff && meta.cat === 'pending' && meta.by !== me.id) continue; // la bandeja es privada
         items.push({
           name: o.key.slice('photos/'.length),
           cat: meta.cat || '',
@@ -166,7 +176,7 @@ export async function onRequest({ request, env, params }) {
     const form = await request.formData();
     const file = form.get('file');
     const thumb = form.get('thumb');
-    const cat = String(form.get('cat') || '');
+    const cat = String(form.get('cat') || '') || 'pending';
     const takenAt = Number(form.get('date')) || Date.now();
     if (!file || typeof file === 'string' || !thumb || typeof thumb === 'string') return json({ error: 'files' }, 400);
     if (file.size > MAX_BYTES) return json({ error: 'too_big' }, 413);
@@ -206,6 +216,12 @@ export async function onRequest({ request, env, params }) {
       });
       return json({ ok: true });
     }
+  }
+
+  // ---------- Ajustes, calendario, viajes, música ----------
+  {
+    const r = await extraRoutes({ request, env, me, parts, method, json, readJson, saveJson, can });
+    if (r) return r;
   }
 
   // ---------- Imágenes ----------
