@@ -6,12 +6,23 @@ const KEYS = {
   events: '_meta/events.json',
   trips: '_meta/trips.json',
   music: '_meta/music.json',
+  posts: '_meta/posts.json',
+  profiles: '_meta/profiles.json',
+  codes: '_meta/codes.json',
+  group: '_meta/group.jpg',
 };
+const MAX_IMG = 6 * 1024 * 1024;
 const rid = (p) => p + Math.random().toString(36).slice(2, 8);
 const str = (v, max) => String(v ?? '').trim().slice(0, max);
 const num = (v) => { const n = Number(v); return Number.isFinite(n) && n >= 0 ? Math.round(n * 100) / 100 : 0; };
 const isDate = (v) => /^\d{4}-\d{2}-\d{2}$/.test(v);
 const isHttps = (v) => { try { return new URL(v).protocol === 'https:'; } catch { return false; } };
+
+// Todas las personas con acceso: la administradora y cada código
+async function roster_(env) {
+  const codes = await env.PHOTOS.get(KEYS.codes).then((o) => (o ? o.json() : [])).catch(() => []);
+  return [{ id: 'admin', name: 'אחראית', role: 'admin' }, ...codes.map((c) => ({ id: c.id, name: c.label, role: c.role }))];
+}
 
 // Vista de un viaje según el rol: las niñas solo ven su propio pago.
 function viewTrip(t, me, staff) {
@@ -41,32 +52,57 @@ export async function extraRoutes({ request, env, me, parts, method, json, readJ
   const staff = can(me, 'helper');
   const body = async () => request.json().catch(() => ({}));
 
-  // ---------- Ajustes (enlace del grupo, ciudad) ----------
+  // ---------- Ajustes (enlace del grupo, ciudad, moderación, foto del grupo) ----------
   if (route === 'settings') {
-    const cur = await readJson(env, KEYS.settings, { wa: '', city: 'jerusalem' });
+    const cur = { wa: '', city: 'jerusalem', moderate: false, gp: 0, ...(await readJson(env, KEYS.settings, {})) };
     if (method === 'GET') return json(cur);
     if (method === 'PUT') {
       if (!can(me, 'admin')) return json({ error: 'forbidden' }, 403);
       const b = await body();
       const wa = str(b.wa, 300);
       if (wa && !isHttps(wa)) return json({ error: 'wa' }, 400);
-      const next = { wa, city: str(b.city, 30) || 'jerusalem' };
+      const next = { ...cur, wa, city: str(b.city, 30) || 'jerusalem', moderate: !!b.moderate };
       await saveJson(env, KEYS.settings, next);
       return json(next);
     }
+  }
+
+  // ---------- Foto del grupo (dashboard) ----------
+  if (route === 'group-photo' && method === 'POST') {
+    if (!staff) return json({ error: 'forbidden' }, 403);
+    const f = (await request.formData()).get('file');
+    if (!f || typeof f === 'string' || f.size > MAX_IMG) return json({ error: 'file' }, 400);
+    await env.PHOTOS.put(KEYS.group, f.stream(), { httpMetadata: { contentType: 'image/jpeg' } });
+    const cur = await readJson(env, KEYS.settings, {});
+    cur.gp = Date.now();
+    await saveJson(env, KEYS.settings, cur);
+    return json({ ok: true, gp: cur.gp });
+  }
+  if (route === 'img' && method === 'GET' && (parts[1] === 'group' || (parts[1] === 'profile' && /^[a-z0-9]{1,12}$/i.test(parts[2] || '')))) {
+    const obj = await env.PHOTOS.get(parts[1] === 'group' ? KEYS.group : `profiles/${parts[2]}.jpg`);
+    if (!obj) return new Response('Not found', { status: 404 });
+    return new Response(obj.body, { headers: { 'content-type': 'image/jpeg', 'cache-control': 'private, max-age=31536000, immutable' } });
   }
 
   // ---------- Calendario ----------
   if (route === 'events') {
     const list = await readJson(env, KEYS.events, []);
     if (method === 'GET') {
-      return json({
-        events: list.map((e) => ({
-          id: e.id, type: e.type, title: e.title, date: e.date, time: e.time, place: e.place, desc: e.desc,
-          going: e.going.length, mine: e.going.some((g) => g.id === me.id),
-          names: staff ? e.going.map((g) => g.name) : undefined,
-        })),
-      });
+      const out = list.map((e) => ({
+        id: e.id, type: e.type, title: e.title, date: e.date, time: e.time, place: e.place, desc: e.desc,
+        going: e.going.length, mine: e.going.some((g) => g.id === me.id),
+        names: staff ? e.going.map((g) => g.name) : undefined,
+      }));
+      // cumpleaños que salen solos de las fichas (si la niña quiere mostrarlo)
+      const profiles = await readJson(env, KEYS.profiles, {});
+      const roster = await roster_(env);
+      for (const u of roster) {
+        const pr = profiles[u.id];
+        if (pr && isDate(pr.birthday) && (pr.show?.birthday !== false || staff)) {
+          out.push({ id: 'b-' + u.id, type: 'birthday', auto: true, title: u.name, date: pr.birthday, time: '', place: '', desc: '', going: 0, mine: false });
+        }
+      }
+      return json({ events: out });
     }
     if (method === 'POST' && !parts[1]) {
       if (!staff) return json({ error: 'forbidden' }, 403);
@@ -244,6 +280,109 @@ export async function extraRoutes({ request, env, me, parts, method, json, readJ
       if (!staff && m.byId !== me.id) return json({ error: 'forbidden' }, 403);
       await saveJson(env, KEYS.music, list.filter((x) => x.id !== m.id));
       return json({ ok: true });
+    }
+  }
+
+  // ---------- Fichas (CRM) ----------
+  if (route === 'profiles') {
+    const profiles = await readJson(env, KEYS.profiles, {});
+    const FIELDS = ['phone', 'address', 'birthday'];            // visibles para las demás si ella lo permite
+    const PRIVATE = ['emergency', 'allergies', 'parents'];       // solo ella y el equipo de orden
+    if (method === 'GET' && !parts[1]) {
+      const roster = await roster_(env);
+      const people = roster.map((u) => {
+        const pr = profiles[u.id] || {};
+        const mine = u.id === me.id;
+        const full = staff || mine;
+        const o = { id: u.id, name: u.name, role: u.role, mine, photo: pr.photo || 0 };
+        for (const f of FIELDS) if (full || pr.show?.[f]) o[f] = pr[f] || '';
+        if (full) { for (const f of PRIVATE) o[f] = pr[f] || ''; o.show = { phone: !!pr.show?.phone, address: !!pr.show?.address, birthday: pr.show?.birthday !== false }; }
+        return o;
+      });
+      return json({ people });
+    }
+    const target = parts[1] === 'me' ? me.id : parts[1];
+    if (target !== me.id && !staff) return json({ error: 'forbidden' }, 403);
+    const roster = await roster_(env);
+    if (!roster.some((u) => u.id === target)) return json({ error: 'nf' }, 404);
+    if (method === 'PUT' && !parts[2]) {
+      const b = await body();
+      const cur = profiles[target] || {};
+      const next = {
+        ...cur,
+        phone: str(b.phone, 30), address: str(b.address, 120),
+        birthday: isDate(b.birthday) ? b.birthday : '',
+        emergency: str(b.emergency, 120), allergies: str(b.allergies, 120), parents: str(b.parents, 80),
+        show: { phone: !!b.showPhone, address: !!b.showAddress, birthday: b.showBirthday !== false },
+      };
+      profiles[target] = next;
+      await saveJson(env, KEYS.profiles, profiles);
+      return json({ ok: true });
+    }
+    if (method === 'POST' && parts[2] === 'photo') {
+      const f = (await request.formData()).get('file');
+      if (!f || typeof f === 'string' || f.size > MAX_IMG) return json({ error: 'file' }, 400);
+      await env.PHOTOS.put(`profiles/${target}.jpg`, f.stream(), { httpMetadata: { contentType: 'image/jpeg' } });
+      profiles[target] = { ...(profiles[target] || {}), photo: Date.now() };
+      await saveJson(env, KEYS.profiles, profiles);
+      return json({ ok: true, photo: profiles[target].photo });
+    }
+  }
+
+  // ---------- Publicaciones (מה חדש) ----------
+  if (route === 'posts') {
+    const posts = await readJson(env, KEYS.posts, []);
+    const view = (p) => ({
+      id: p.id, text: p.text, by: p.by, byId: p.byId, created: p.created, pinned: !!p.pinned, approved: p.approved !== false,
+      mine: p.byId === me.id,
+      reactions: Object.fromEntries(Object.entries(p.reactions || {}).map(([k, v]) => [k, { n: v.length, me: v.includes(me.id) }])),
+      comments: (p.comments || []).map((c) => ({ id: c.id, by: c.by, text: c.text, created: c.created, canDelete: staff || c.byId === me.id })),
+    });
+    if (method === 'GET') {
+      const vis = posts.filter((p) => p.approved !== false || staff || p.byId === me.id);
+      vis.sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || b.created - a.created);
+      return json({ posts: vis.slice(0, 60).map(view) });
+    }
+    if (method === 'POST' && !parts[1]) {
+      const text = str((await body()).text, 600);
+      if (!text) return json({ error: 'bad' }, 400);
+      const settings = await readJson(env, KEYS.settings, {});
+      const p = { id: rid('p'), text, by: me.label, byId: me.id, created: Date.now(), pinned: false, approved: staff || !settings.moderate, reactions: {}, comments: [] };
+      posts.unshift(p);
+      await saveJson(env, KEYS.posts, posts.slice(0, 300));
+      return json({ ok: true, approved: p.approved });
+    }
+    const p = posts.find((x) => x.id === parts[1]);
+    if (p) {
+      const save = () => saveJson(env, KEYS.posts, posts);
+      if (method === 'DELETE' && !parts[2]) {
+        if (!staff && p.byId !== me.id) return json({ error: 'forbidden' }, 403);
+        await saveJson(env, KEYS.posts, posts.filter((x) => x.id !== p.id));
+        return json({ ok: true });
+      }
+      if (method === 'POST' && parts[2] === 'react') {
+        const emoji = str((await body()).emoji, 4);
+        if (!['👍', '❤️', '😂', '🙏'].includes(emoji)) return json({ error: 'bad' }, 400);
+        p.reactions ||= {};
+        const arr = p.reactions[emoji] || [];
+        p.reactions[emoji] = arr.includes(me.id) ? arr.filter((x) => x !== me.id) : [...arr, me.id];
+        await save();
+        return json({ ok: true });
+      }
+      if (method === 'POST' && parts[2] === 'comment') {
+        const text = str((await body()).text, 300);
+        if (!text) return json({ error: 'bad' }, 400);
+        (p.comments ||= []).push({ id: rid('c'), by: me.label, byId: me.id, text, created: Date.now() });
+        await save();
+        return json({ ok: true });
+      }
+      if (method === 'DELETE' && parts[2] === 'comment') {
+        const c = (p.comments || []).find((x) => x.id === parts[3]);
+        if (c && (staff || c.byId === me.id)) { p.comments = p.comments.filter((x) => x.id !== c.id); await save(); }
+        return json({ ok: true });
+      }
+      if (method === 'POST' && parts[2] === 'pin') { if (!staff) return json({ error: 'forbidden' }, 403); p.pinned = !p.pinned; await save(); return json({ ok: true }); }
+      if (method === 'POST' && parts[2] === 'approve') { if (!staff) return json({ error: 'forbidden' }, 403); p.approved = true; await save(); return json({ ok: true }); }
     }
   }
 

@@ -18,36 +18,39 @@
 <body>
   <header class="top">
     <div class="bar-row">
-      <h1 class="mark">התמונות שלנו</h1>
-      <div class="who" id="who" hidden>
+      <h1 class="mark" id="pageTitle">בית</h1>
+      <div class="tools">
         <a id="waBtn" class="wa" href="#" target="_blank" rel="noopener noreferrer" hidden aria-label="לקבוצת הוואטסאפ">
           <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 3a9 9 0 0 0-7.8 13.5L3 21l4.6-1.2A9 9 0 1 0 12 3z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
           <span>קבוצה</span>
         </a>
-        <span id="whoName"></span>
-        <span id="whoRole" class="role"></span>
-        <button id="settingsBtn" class="link" hidden>הגדרות</button>
-        <button id="adminBtn" class="link" hidden>ניהול גישה</button>
-        <button id="logoutBtn" class="link">יציאה</button>
+        <button id="meBtn" class="avatar" aria-label="הפרופיל שלי"></button>
       </div>
     </div>
-    <nav id="sections" class="sections" aria-label="אזורים">
-      <button class="sec" data-sec="photos" aria-selected="true">תמונות</button>
-      <button class="sec" data-sec="cal" aria-selected="false">לוח שנה</button>
-      <button class="sec" data-sec="trips" aria-selected="false">טיולים</button>
-      <button class="sec" data-sec="music" aria-selected="false">מוזיקה</button>
-    </nav>
-    <nav id="tabs" class="tabs" aria-label="קטגוריות"></nav>
+    <nav id="tabs" class="tabs" aria-label="קטגוריות" hidden></nav>
   </header>
 
-  <main id="sec-photos">
+  <!-- בית -->
+  <main id="sec-home">
+    <section id="hero" class="hero" aria-label="תמונת הקבוצה"></section>
+    <p id="greet" class="greet"></p>
+    <div id="homeShabbat" class="shabbat" hidden></div>
+    <div id="attn" class="attn" hidden></div>
+    <section class="blk"><div class="blk-h"><h2>הקרוב בלוח</h2><button class="link" data-go="cal">הכל</button></div><ul id="homeEvents" class="tbl"></ul></section>
+    <section class="blk"><div class="blk-h"><h2>מה חדש</h2><button class="link" data-go="news">הכל</button></div><div id="homePosts" class="list"></div></section>
+    <section class="blk"><div class="blk-h"><h2>תמונות אחרונות</h2><button class="link" data-go="photos">הכל</button></div><div id="homePhotos" class="strip"></div></section>
+    <section id="homeTripBlk" class="blk" hidden><div class="blk-h"><h2>הטיול הבא</h2><button class="link" data-go="trips">הכל</button></div><div id="homeTrip"></div></section>
+  </main>
+
+  <!-- תמונות -->
+  <main id="sec-photos" hidden>
     <div id="selBar" class="selbar" hidden>
       <span id="selCount"></span>
       <select id="selCat" aria-label="העברה לקטגוריה"></select>
       <button id="selGo" class="btn solid small">העברה</button>
       <button id="selCancel" class="btn line small">ביטול</button>
     </div>
-    <button id="selToggle" class="link selt" hidden>בחירה מרובה</button>
+    <div class="photo-tools"><button id="selToggle" class="link" hidden>בחירה מרובה</button><button id="catMgr" class="link" hidden>ניהול קטגוריות</button></div>
     <div id="grid" class="grid"></div>
     <div id="empty" class="empty" hidden>
       <p class="empty-t">עדיין אין כאן תמונות</p>
@@ -56,33 +59,71 @@
     <button id="more" class="btn line" hidden>טעינת עוד תמונות</button>
   </main>
 
+  <!-- לוח שנה -->
   <main id="sec-cal" hidden>
     <div id="shabbat" class="shabbat" hidden></div>
     <div class="sec-h"><h2>הקרוב בלוח</h2><button id="addEvent" class="btn solid small" hidden>הוספה</button></div>
     <ul id="eventList" class="list"></ul>
   </main>
 
+  <!-- מה חדש -->
+  <main id="sec-news" hidden>
+    <div class="sec-h"><button id="addPost" class="btn solid small">פרסום חדש</button></div>
+    <div id="postList" class="list"></div>
+  </main>
+
+  <!-- טיולים -->
   <main id="sec-trips" hidden>
-    <div class="sec-h"><h2>טיולים</h2><button id="addTrip" class="btn solid small" hidden>טיול חדש</button></div>
+    <div class="sec-h"><button id="addTrip" class="btn solid small" hidden>טיול חדש</button></div>
     <ul id="tripList" class="list"></ul>
   </main>
 
+  <!-- מוזיקה -->
   <main id="sec-music" hidden>
-    <div class="sec-h"><h2>מוזיקה</h2><button id="addSong" class="btn solid small">הוספת שיר</button></div>
+    <div class="sec-h"><button id="addSong" class="btn solid small">הוספת שיר</button></div>
     <p class="hint">הדביקי קישור של YouTube או Spotify. שירים של חברות מופיעים אחרי אישור של האחראית או של עוזרת.</p>
     <ul id="songList" class="list"></ul>
   </main>
 
-  <div class="dock"><button id="fab" class="btn solid wide">העלאת תמונות</button></div>
+  <!-- חברות -->
+  <main id="sec-people" hidden>
+    <div class="sec-h"></div>
+    <input id="peopleSearch" type="search" class="search" placeholder="חיפוש לפי שם" aria-label="חיפוש">
+    <div id="peopleList" class="people"></div>
+  </main>
+
+  <div class="dock"><button id="fab" class="btn solid">העלאת תמונות</button></div>
+
+  <nav class="tabbar" id="tabbar" aria-label="ניווט ראשי">
+    <button data-sec="home" aria-selected="true"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span>בית</span></button>
+    <button data-sec="photos" aria-selected="false"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="M21 16l-5-5-8 8"/></svg><span>תמונות</span></button>
+    <button data-sec="cal" aria-selected="false"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span>לוח שנה</span></button>
+    <button data-sec="news" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg><span>מה חדש</span></button>
+    <button data-sec="more" aria-selected="false"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/></svg><span>עוד</span></button>
+  </nav>
+
+  <!-- עוד -->
+  <div id="more-sheet" class="overlay" hidden>
+    <section class="sheet" role="dialog" aria-modal="true" aria-labelledby="moreT">
+      <header class="sheet-h"><h2 id="moreT">עוד</h2><button class="x" id="moreClose" aria-label="סגירה">✕</button></header>
+      <div class="menu">
+        <button data-go="trips">טיולים</button>
+        <button data-go="music">מוזיקה</button>
+        <button data-go="people">חברות</button>
+        <button id="menuCats" hidden>ניהול קטגוריות</button>
+        <button id="settingsBtn" hidden>הגדרות</button>
+        <button id="adminBtn" hidden>ניהול גישה</button>
+        <button id="logoutBtn" class="red">יציאה</button>
+      </div>
+    </section>
+  </div>
 
   <!-- העלאה -->
   <div id="sheet" class="overlay" hidden>
     <section class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetT">
       <header class="sheet-h"><h2 id="sheetT">העלאת תמונות</h2><button class="x" id="sheetClose" aria-label="סגירה">✕</button></header>
-
       <p class="lbl">לאיזו קטגוריה התמונות שייכות?</p>
       <div id="catPick" class="pick"></div>
-
       <div id="catAdd" hidden>
         <p class="lbl">קטגוריה חדשה</p>
         <div class="row">
@@ -92,15 +133,23 @@
         <div id="sugg" class="pick sugg"></div>
       </div>
       <p id="catHint" class="hint" hidden>רוצה קטגוריה חדשה? אפשר לבקש מהאחראית.</p>
-
       <div class="row two">
         <label class="btn line big">מהגלריה<input id="fileGallery" type="file" accept="image/*" multiple hidden></label>
         <label class="btn line big">צילום עכשיו<input id="fileCamera" type="file" accept="image/*" capture="environment" hidden></label>
       </div>
-
       <p id="queueInfo" class="hint" hidden></p>
       <div id="prog" class="prog" hidden><i></i></div>
       <button id="go" class="btn solid wide" hidden>העלאה</button>
+    </section>
+  </div>
+
+  <!-- ניהול קטגוריות -->
+  <div id="cats" class="overlay" hidden>
+    <section class="sheet" role="dialog" aria-modal="true" aria-labelledby="catsT">
+      <header class="sheet-h"><h2 id="catsT">ניהול קטגוריות</h2><button class="x" id="catsClose" aria-label="סגירה">✕</button></header>
+      <p class="hint">שנו שם, סדרו, הסתירו או מחקו. מחיקת קטגוריה מעבירה את התמונות שלה אל "ממתינות לסידור". את הקטגוריות הקבועות אפשר להסתיר ולשנות להן שם.</p>
+      <div class="row"><input id="catNew" type="text" maxlength="30" placeholder="קטגוריה חדשה"><button id="catNewBtn" class="btn solid small">הוספה</button></div>
+      <ul id="catList" class="catlist"></ul>
     </section>
   </div>
 
@@ -111,14 +160,25 @@
       <p class="hint">כל אחת מקבלת קוד אישי. אפשר לשלוח לה קישור שנכנס ישר לאלבום, או לכתוב אותו על הצמיד ה-NFC שלה. "עוזרת" יכולה גם לסדר: להעביר, למחוק וליצור קטגוריות.</p>
       <form id="codeForm" class="row">
         <input id="codeLabel" type="text" maxlength="30" placeholder="שם החברה" required>
-        <select id="codeRole" aria-label="סוג גישה">
-          <option value="member">חברה</option>
-          <option value="helper">עוזרת</option>
-        </select>
+        <select id="codeRole" aria-label="סוג גישה"><option value="member">חברה</option><option value="helper">עוזרת</option></select>
         <button class="btn solid small">יצירת קוד</button>
       </form>
       <ul id="codeList" class="codes"></ul>
     </section>
+  </div>
+
+  <!-- פרופיל -->
+  <div id="prof" class="overlay" hidden>
+    <form class="sheet tall" id="profForm">
+      <header class="sheet-h"><h2 id="profT">הפרופיל שלי</h2><button type="button" class="x" id="profClose" aria-label="סגירה">✕</button></header>
+      <div class="profhead">
+        <div id="profAvatar" class="avatar big"></div>
+        <label class="btn line small">החלפת תמונה<input id="profPhoto" type="file" accept="image/*" hidden></label>
+      </div>
+      <div id="profFields" class="fields"></div>
+      <p id="profErr" class="err" role="alert" hidden></p>
+      <button class="btn solid wide">שמירה</button>
+    </form>
   </div>
 
   <!-- טופס כללי -->
@@ -168,5 +228,6 @@
   <div id="toast" class="toast" role="status" hidden></div>
   <script src="/app.js"></script>
   <script src="/extra.js"></script>
+  <script src="/home.js"></script>
 </body>
 </html>

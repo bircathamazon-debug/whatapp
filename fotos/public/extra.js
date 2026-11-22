@@ -24,8 +24,8 @@
   const today0 = () => { const t = new Date(); t.setHours(0, 0, 0, 0); return t; };
 
   // ======================= לוח שנה =======================
-  async function loadShabbat() {
-    const box = $('shabbat'); const c = window.CITIES[S.settings.city] || window.CITIES.jerusalem;
+  async function loadShabbat(boxId = 'shabbat') {
+    const box = $(boxId); const c = window.CITIES[S.settings.city] || window.CITIES.jerusalem;
     try {
       const r = await fetch(`https://www.hebcal.com/shabbat?cfg=json&geo=pos&latitude=${c.lat}&longitude=${c.lon}&tzid=Asia%2FJerusalem&M=on`);
       const d = await r.json();
@@ -67,7 +67,7 @@
 
   async function loadCal() {
     $('addEvent').hidden = !can('helper');
-    loadShabbat();
+    loadShabbat('shabbat');
     const { events } = await api('events');
     const t = today0();
     const items = events.map((e) => ({ e, when: nextDate(e) })).filter((x) => x.when >= t).sort((a, b) => a.when - b.when);
@@ -86,8 +86,8 @@
             el('span', { class: 'pill' }, soon),
             e.type === 'event' ? el('button', { class: 'opt', 'aria-pressed': String(e.mine), onclick: async () => { await post(`events/${e.id}/rsvp`, { going: !e.mine }); loadCal(); } }, e.mine ? 'אני באה ✓' : 'אני באה') : null,
             e.type === 'event' ? el('span', { class: 'ev-s' }, e.going ? `${e.going} מגיעות` : '') : null,
-            can('helper') ? el('button', { class: 'link', onclick: () => eventForm(e) }, 'עריכה') : null,
-            can('helper') ? el('button', { class: 'link', onclick: async (ev) => { const b = ev.currentTarget; if (b.dataset.arm) { await api('events/' + e.id, { method: 'DELETE' }); loadCal(); } else { b.dataset.arm = 1; b.textContent = 'לחצי שוב למחיקה'; } } }, 'מחיקה') : null),
+            can('helper') && !e.auto ? el('button', { class: 'link', onclick: () => eventForm(e) }, 'עריכה') : null,
+            can('helper') && !e.auto ? el('button', { class: 'link', onclick: async (ev) => { const b = ev.currentTarget; if (b.dataset.arm) { await api('events/' + e.id, { method: 'DELETE' }); loadCal(); } else { b.dataset.arm = 1; b.textContent = 'לחצי שוב למחיקה'; } } }, 'מחיקה') : null),
           e.names && e.names.length ? el('p', { class: 'ev-s' }, 'מגיעות: ' + e.names.join(', ')) : null)));
     }
   }
@@ -251,5 +251,6 @@
   });
 
   window.App.load = { cal: loadCal, trips: loadTrips, music: loadMusic };
-  window.App.onSettings = () => { if (S.sec === 'cal') loadShabbat(); };
+  window.App.onSettings = () => { if (S.sec === 'cal') loadShabbat('shabbat'); if (S.sec === 'home') window.App.load.home(); };
+  window.App.util = { civil, hebrew, nextDate, parseDay, fmt, today0, ils, loadShabbat };
 })();

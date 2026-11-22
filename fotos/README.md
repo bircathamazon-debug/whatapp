@@ -65,6 +65,15 @@ El chip NFC **no guarda las fotos**, guarda solo un enlace. Las fotos están en 
 
 Recomendaciones: usa etiquetas NTAG215 o NTAG216 (aprox. 1 USD cada una). El enlace queda grabado, así que si quieres cambiar el acceso de esa niña, cancela su código y graba uno nuevo.
 
+## Pantalla de inicio y secciones nuevas
+
+- **בית (dashboard)**: foto del grupo (la administradora y las ayudantes la cambian con "החלפת תמונה"), saludo con fecha civil y hebrea, horario de Shabat, avisos para el equipo (fotos por ordenar, canciones o publicaciones por aprobar, pagos pendientes), tabla de próximos eventos con "voy", últimas publicaciones y fotos, y el próximo viaje.
+- **מה חדש**: muro de publicaciones con reacciones y comentarios. Las ayudantes pueden fijar o borrar. En **"הגדרות"** se puede exigir aprobación previa para las publicaciones de las amigas.
+- **חברות (CRM)**: una ficha por persona con **foto de perfil** (cada una sube la suya desde el círculo de arriba), teléfono, dirección y cumpleaños, que cada niña decide si muestra. Los datos de padres, contacto de emergencia y salud los ven solo ella y el equipo. Los cumpleaños aparecen solos en el calendario.
+- **ניהול קטגוריות** (en la pestaña Fotos y en "עוד"): agregar, renombrar, reordenar, ocultar y borrar. Borrar una categoría pasa sus fotos a "ממתינות לסידור". Las 6 fijas solo se ocultan o se renombran.
+
+La navegación es una barra inferior (בית, תמונות, לוח שנה, מה חדש, עוד). En "עוד" están los viajes, la música, las fichas y los ajustes.
+
 ## Secciones (Etapa 1)
 
 | Sección | Qué hace | Quién edita |
@@ -98,7 +107,7 @@ La administradora y las ayudantes pueden crear más (יום הולדת, סמינ
 ```
 fotos/
 ├── public/                 Web estática (HTML, CSS, JS), app instalable
-│   ├── index.html  style.css  app.js  extra.js
+│   ├── index.html  style.css  app.js  extra.js  home.js
 │   ├── sw.js  manifest.webmanifest  icon.svg
 ├── functions/api/[[path]].js   API principal (fotos, roles, códigos)
 ├── lib/extras.js           API de ajustes, calendario, viajes y música

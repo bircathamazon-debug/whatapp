@@ -64,6 +64,22 @@ async function session(request, env) {
   return null;
 }
 
+
+const CATCFG_KEY = '_meta/catconfig.json';
+// Lista final de categorías: fijas + propias, con nombres cambiados, ocultas y orden. "pendientes" siempre al final.
+async function loadCats(env) {
+  const custom = await readJson(env, CATS_KEY, []);
+  const cfg = await readJson(env, CATCFG_KEY, { renames: {}, hidden: [], order: [] });
+  cfg.renames ||= {}; cfg.hidden ||= []; cfg.order ||= [];
+  const list = [...FIXED.filter((c) => c.id !== 'pending'), ...custom].map((c) => ({
+    id: c.id, name: cfg.renames[c.id] || c.name, hidden: cfg.hidden.includes(c.id), fixed: FIXED.some((f) => f.id === c.id),
+  }));
+  const rank = (id) => { const i = cfg.order.indexOf(id); return i < 0 ? 999 : i; };
+  list.sort((a, b) => rank(a.id) - rank(b.id));
+  list.push({ ...PENDING, hidden: false, fixed: true, system: true });
+  return { list, custom, cfg, ids: new Set(list.map((c) => c.id)) };
+}
+
 const safeName = (n) => /^[0-9]{13}-[a-z0-9]{6}\.jpg$/.test(n);
 const can = (me, role) => RANK[me.role] >= RANK[role];
 
@@ -101,7 +117,11 @@ export async function onRequest({ request, env, params }) {
   }
 
   const me = await session(request, env);
-  if (route === 'me') return json(me ? { authed: true, role: me.role, label: me.label } : { authed: false });
+  if (route === 'me') {
+    if (!me) return json({ authed: false });
+    const prof = await readJson(env, '_meta/profiles.json', {});
+    return json({ authed: true, id: me.id, role: me.role, label: me.label, photo: (prof[me.id] || {}).photo || 0 });
+  }
   if (!me) return json({ error: 'auth' }, 401);
 
   // ---------- Códigos de acceso (solo admin) ----------
@@ -126,21 +146,44 @@ export async function onRequest({ request, env, params }) {
 
   // ---------- Categorías ----------
   if (route === 'categories') {
-    const custom = await readJson(env, CATS_KEY, []);
+    const C = await loadCats(env);
     if (method === 'GET') {
-      return json({ fixed: FIXED, custom, suggestions: SUGGESTIONS.filter((s) => !custom.some((c) => c.name === s)) });
+      return json({ cats: C.list, suggestions: SUGGESTIONS.filter((s) => !C.list.some((c) => c.name === s)) });
     }
-    if (method === 'POST') {
-      if (!can(me, 'helper')) return json({ error: 'forbidden' }, 403);
-      const { name } = await request.json().catch(() => ({}));
-      const clean = String(name || '').trim().slice(0, 30);
-      if (!clean) return json({ error: 'name' }, 400);
-      const dup = [...FIXED, ...custom].find((c) => c.name === clean);
+    if (!can(me, 'helper')) return json({ error: 'forbidden' }, 403);
+    const b = await request.json().catch(() => ({}));
+    const clean = (v) => String(v || '').trim().slice(0, 30);
+    if (method === 'POST' && !parts[1]) {
+      const name = clean(b.name);
+      if (!name) return json({ error: 'name' }, 400);
+      const dup = C.list.find((c) => c.name === name);
       if (dup) return json(dup);
-      const cat = { id: 'c' + Math.random().toString(36).slice(2, 8), name: clean };
-      custom.push(cat);
-      await saveJson(env, CATS_KEY, custom);
+      const cat = { id: 'c' + Math.random().toString(36).slice(2, 8), name };
+      C.custom.push(cat);
+      await saveJson(env, CATS_KEY, C.custom);
       return json(cat);
+    }
+    if (method === 'PUT' && parts[1] === 'order') {
+      C.cfg.order = (Array.isArray(b.order) ? b.order : []).filter((id) => C.ids.has(id) && id !== 'pending');
+      await saveJson(env, CATCFG_KEY, C.cfg);
+      return json({ ok: true });
+    }
+    const id = parts[1];
+    if (id && C.ids.has(id) && id !== 'pending') {
+      if (method === 'PATCH') {
+        if (b.name !== undefined && clean(b.name)) C.cfg.renames[id] = clean(b.name);
+        if (b.hidden !== undefined) C.cfg.hidden = C.cfg.hidden.filter((x) => x !== id).concat(b.hidden ? [id] : []);
+        await saveJson(env, CATCFG_KEY, C.cfg);
+        return json({ ok: true });
+      }
+      if (method === 'DELETE') {
+        if (FIXED.some((f) => f.id === id)) return json({ error: 'fixed' }, 400); // las fijas solo se ocultan
+        await saveJson(env, CATS_KEY, C.custom.filter((c) => c.id !== id));
+        C.cfg.order = C.cfg.order.filter((x) => x !== id); delete C.cfg.renames[id];
+        C.cfg.hidden = C.cfg.hidden.filter((x) => x !== id);
+        await saveJson(env, CATCFG_KEY, C.cfg);
+        return json({ ok: true }); // sus fotos pasan a "pendientes" automáticamente
+      }
     }
   }
 
@@ -149,6 +192,7 @@ export async function onRequest({ request, env, params }) {
     const cat = url.searchParams.get('cat') || '';
     const want = 120;
     const staff = can(me, 'helper');
+    const { ids: validIds } = await loadCats(env);
     const items = [];
     let cursor = url.searchParams.get('cursor') || undefined;
     let done = false;
@@ -156,11 +200,12 @@ export async function onRequest({ request, env, params }) {
       const res = await env.PHOTOS.list({ prefix: 'photos/', limit: 500, cursor, include: ['customMetadata'] });
       for (const o of res.objects) {
         const meta = o.customMetadata || {};
-        if (cat && meta.cat !== cat) continue;
-        if (!staff && meta.cat === 'pending' && meta.by !== me.id) continue; // la bandeja es privada
+        const eff = validIds.has(meta.cat) ? meta.cat : 'pending'; // categoría borrada -> pendientes
+        if (cat && eff !== cat) continue;
+        if (!staff && eff === 'pending' && meta.by !== me.id) continue; // la bandeja es privada
         items.push({
           name: o.key.slice('photos/'.length),
-          cat: meta.cat || '',
+          cat: eff,
           date: Number(meta.date) || o.uploaded.getTime(),
           by: meta.byLabel || '',
           mine: meta.by === me.id,
@@ -180,8 +225,7 @@ export async function onRequest({ request, env, params }) {
     const takenAt = Number(form.get('date')) || Date.now();
     if (!file || typeof file === 'string' || !thumb || typeof thumb === 'string') return json({ error: 'files' }, 400);
     if (file.size > MAX_BYTES) return json({ error: 'too_big' }, 413);
-    const custom = await readJson(env, CATS_KEY, []);
-    if (![...FIXED, ...custom].some((c) => c.id === cat)) return json({ error: 'cat' }, 400);
+    if (!(await loadCats(env)).ids.has(cat)) return json({ error: 'cat' }, 400);
     const rev = String(9999999999999 - Date.now()).padStart(13, '0'); // las nuevas primero
     const name = `${rev}-${Math.random().toString(36).slice(2, 8).padEnd(6, '0')}.jpg`;
     const http = { httpMetadata: { contentType: 'image/jpeg' } };
@@ -207,8 +251,7 @@ export async function onRequest({ request, env, params }) {
     if (method === 'PATCH') {
       if (!can(me, 'helper')) return json({ error: 'forbidden' }, 403);
       const { cat } = await request.json().catch(() => ({}));
-      const custom = await readJson(env, CATS_KEY, []);
-      if (![...FIXED, ...custom].some((c) => c.id === cat)) return json({ error: 'cat' }, 400);
+      if (!(await loadCats(env)).ids.has(cat)) return json({ error: 'cat' }, 400);
       const obj = await env.PHOTOS.get('photos/' + name);
       await env.PHOTOS.put('photos/' + name, obj.body, {
         httpMetadata: obj.httpMetadata,

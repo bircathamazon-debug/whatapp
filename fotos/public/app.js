@@ -4,7 +4,7 @@
   const RANK = { member: 1, helper: 2, admin: 3 };
   const ROLE_HE = { admin: 'אחראית', helper: 'עוזרת', member: 'חברה' };
 
-  const S = { me: null, cats: [], suggestions: [], cat: '', items: [], cursor: null, queue: [], viewIdx: -1, uploading: false, pickCat: '', sec: 'photos', sel: null, settings: { wa: '', city: 'jerusalem' } };
+  const S = { me: null, cats: [], suggestions: [], cat: '', items: [], cursor: null, queue: [], viewIdx: -1, uploading: false, pickCat: '', sec: 'home', sel: null, settings: { wa: '', city: 'jerusalem' } };
   const can = (role) => S.me && RANK[S.me.role] >= RANK[role];
   const catName = (id) => (S.cats.find((c) => c.id === id) || {}).name || '';
 
@@ -63,29 +63,29 @@
 
   async function boot() {
     S.me = await api('me');
-    $('who').hidden = false;
-    $('whoName').textContent = S.me.label;
-    $('whoRole').textContent = ROLE_HE[S.me.role];
     $('adminBtn').hidden = S.me.role !== 'admin';
     $('settingsBtn').hidden = S.me.role !== 'admin';
+    $('menuCats').hidden = !can('helper');
+    $('catMgr').hidden = !can('helper');
     $('selToggle').hidden = !can('helper');
     await loadSettings();
     await loadCats();
-    await loadPhotos(true);
+    paintAvatar();
+    setSection('home');
     consumeShare();
   }
 
   // ---------- categorías ----------
   async function loadCats() {
     const d = await api('categories');
-    S.cats = [...d.fixed, ...d.custom];
+    S.cats = d.cats;
     S.suggestions = d.suggestions;
     renderTabs();
   }
   function renderTabs() {
     const tabs = $('tabs'); tabs.replaceChildren();
     const mk = (id, name) => el('button', { class: 'tab', role: 'tab', 'aria-selected': String(S.cat === id), onclick: () => { S.cat = id; renderTabs(); loadPhotos(true); } }, name);
-    tabs.append(mk('', 'הכל'), ...S.cats.map((c) => mk(c.id, c.name)));
+    tabs.append(mk('', 'הכל'), ...S.cats.filter((c) => !c.hidden).map((c) => mk(c.id, c.name)));
     tabs.hidden = S.sec !== 'photos';
   }
 
@@ -122,7 +122,7 @@
     $('vBy').textContent = it.by ? 'הועלתה על ידי ' + it.by : '';
     $('vDate').textContent = fmtDate(it.date);
     const dl = $('vDl'); dl.href = '/api/img/full/' + it.name; dl.setAttribute('download', 'photo-' + it.name);
-    const sel = $('vCat'); sel.replaceChildren(...S.cats.map((c) => el('option', { value: c.id }, c.name)));
+    const sel = $('vCat'); sel.replaceChildren(...S.cats.filter((c) => !c.hidden || c.id === it.cat).map((c) => el('option', { value: c.id }, c.name)));
     sel.value = it.cat; sel.hidden = !can('helper');
     const del = $('vDel'); del.hidden = !(can('helper') || it.mine);
     del.textContent = 'מחיקה'; del.classList.remove('armed');
@@ -161,7 +161,7 @@
   }
   function closeSheet() { if (S.uploading) return; $('sheet').hidden = true; document.body.style.overflow = ''; }
   function renderPick() {
-    const box = $('catPick'); box.replaceChildren(...S.cats.filter((c) => c.id !== 'pending').map((c) => el('button', { class: 'opt', type: 'button', 'aria-pressed': String(S.pickCat === c.id), onclick: () => { S.pickCat = S.pickCat === c.id ? '' : c.id; renderPick(); updateQueue(); } }, c.name)));
+    const box = $('catPick'); box.replaceChildren(...S.cats.filter((c) => c.id !== 'pending' && !c.hidden).map((c) => el('button', { class: 'opt', type: 'button', 'aria-pressed': String(S.pickCat === c.id), onclick: () => { S.pickCat = S.pickCat === c.id ? '' : c.id; renderPick(); updateQueue(); } }, c.name)));
     const sg = $('sugg'); sg.replaceChildren(...S.suggestions.slice(0, 6).map((s) => el('button', { class: 'opt', type: 'button', onclick: () => addCategory(s) }, '+ ' + s)));
   }
   async function addCategory(name) {
@@ -279,8 +279,9 @@
     fields: [
       { name: 'wa', label: 'קישור להזמנה לקבוצת הוואטסאפ', type: 'url', value: S.settings.wa, placeholder: 'https://chat.whatsapp.com/…' },
       { name: 'city', label: 'עיר (לזמני הדלקת נרות)', type: 'select', value: S.settings.city, options: Object.entries(window.CITIES || {}).map(([k, v]) => [k, v.name]) },
+      { name: 'moderate', label: 'פרסומים של חברות מופיעים רק אחרי אישור', type: 'checkbox', value: S.settings.moderate },
     ],
-    onSubmit: async (v) => { S.settings = await post('settings', { wa: v.wa, city: v.city }, 'PUT'); await loadSettings(); toast('ההגדרות נשמרו'); if (App.onSettings) App.onSettings(); },
+    onSubmit: async (v) => { S.settings = await post('settings', { wa: v.wa, city: v.city, moderate: v.moderate }, 'PUT'); await loadSettings(); toast('ההגדרות נשמרו'); if (App.onSettings) App.onSettings(); },
   });
 
   // ---------- בחירה מרובה (עוזרות ואחראית) ----------
@@ -293,7 +294,7 @@
   }
   $('selToggle').onclick = () => {
     S.sel = new Set();
-    $('selCat').replaceChildren(...S.cats.map((c) => el('option', { value: c.id }, c.name)));
+    $('selCat').replaceChildren(...S.cats.filter((c) => !c.hidden).map((c) => el('option', { value: c.id }, c.name)));
     renderGrid();
   };
   $('selCancel').onclick = () => { S.sel = null; renderGrid(); };
@@ -310,10 +311,16 @@
   function openOv(id) { $(id).hidden = false; document.body.style.overflow = 'hidden'; }
   function closeOv(id) { $(id).hidden = true; if (!document.querySelector('.overlay:not([hidden])')) document.body.style.overflow = ''; }
   let formHandler = null;
-  function formSheet({ title, fields, onSubmit, submit = 'שמירה' }) {
+  function formSheet({ title, fields, onSubmit, submit = 'שמירה', top }) {
     $('formT').textContent = title; $('formSubmit').textContent = submit; $('formErr').hidden = true;
     const body = $('formBody'); body.replaceChildren();
+    if (top) body.append(top);
     for (const f of fields) {
+      if (f.type === 'checkbox') {
+        const cb = el('input', { id: 'f_' + f.name, type: 'checkbox' }); cb.checked = !!f.value;
+        body.append(el('label', { class: 'chk', for: 'f_' + f.name }, cb, el('span', {}, f.label)));
+        continue;
+      }
       const id = 'f_' + f.name;
       let input;
       if (f.type === 'textarea') input = el('textarea', { id, rows: f.rows || 3, maxlength: f.max || 400 });
@@ -327,7 +334,7 @@
       body.append(el('label', { class: 'fld', for: id }, el('span', { class: 'lbl' }, f.label), input));
     }
     formHandler = async () => {
-      const v = {}; for (const f of fields) v[f.name] = $('f_' + f.name).value;
+      const v = {}; for (const f of fields) { const n = $('f_' + f.name); v[f.name] = f.type === 'checkbox' ? n.checked : n.value; }
       try { await onSubmit(v); closeOv('form'); } catch (e) { const er = $('formErr'); er.textContent = 'לא הצלחנו לשמור. בדקי את הפרטים ונסי שוב.'; er.hidden = false; }
     };
     openOv('form');
@@ -338,20 +345,39 @@
   $('form').addEventListener('click', (e) => { if (e.target === $('form')) closeOv('form'); });
 
   // ---------- אזורים ----------
-  const SECTIONS = ['photos', 'cal', 'trips', 'music'];
+  const SECTIONS = ['home', 'photos', 'cal', 'news', 'trips', 'music', 'people'];
+  const TITLES = { home: 'בית', photos: 'תמונות', cal: 'לוח שנה', news: 'מה חדש', trips: 'טיולים', music: 'מוזיקה', people: 'חברות' };
+  const PRIMARY = ['home', 'photos', 'cal', 'news'];
   function setSection(name) {
-    S.sec = name;
+    S.sec = name; closeOv('more-sheet');
     for (const s of SECTIONS) $('sec-' + s).hidden = s !== name;
-    document.querySelectorAll('.sec').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.sec === name)));
+    document.querySelectorAll('#tabbar button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.sec === (PRIMARY.includes(name) ? name : 'more'))));
+    $('pageTitle').textContent = TITLES[name];
     $('tabs').hidden = name !== 'photos';
     document.querySelector('.dock').hidden = name !== 'photos';
     updateSel();
     window.scrollTo(0, 0);
-    if (name !== 'photos' && App.load && App.load[name]) App.load[name]();
+    if (name === 'photos') loadPhotos(true);
+    else if (App.load && App.load[name]) App.load[name]();
   }
-  document.querySelectorAll('.sec').forEach((b) => b.addEventListener('click', () => setSection(b.dataset.sec)));
+  document.querySelectorAll('#tabbar button').forEach((b) => b.addEventListener('click', () => (b.dataset.sec === 'more' ? openOv('more-sheet') : setSection(b.dataset.sec))));
+  document.addEventListener('click', (e) => { const g = e.target.closest('[data-go]'); if (g) setSection(g.dataset.go); });
+  $('moreClose').onclick = () => closeOv('more-sheet');
+  $('more-sheet').addEventListener('click', (e) => { if (e.target === $('more-sheet')) closeOv('more-sheet'); });
+  $('menuCats').onclick = () => { closeOv('more-sheet'); App.openCats && App.openCats(); };
+  $('catMgr').onclick = () => App.openCats && App.openCats();
+  $('settingsBtn').onclick = (() => { const f = $('settingsBtn').onclick; return () => { closeOv('more-sheet'); f(); }; })();
+  $('meBtn').onclick = () => App.openProfile && App.openProfile('me');
 
-  const App = { S, api, post, el, toast, can, fmtDate, formSheet, openOv, closeOv, catName, load: {} };
+  // avatar
+  function avatar(cls, id, name, photo) {
+    const d = el('div', { class: 'avatar ' + (cls || '') });
+    if (photo) d.append(el('img', { src: `/api/img/profile/${id}?v=${photo}`, alt: '' })); else d.textContent = (name || '?').trim().charAt(0);
+    return d;
+  }
+  function paintAvatar() { const b = $('meBtn'); b.replaceChildren(); b.textContent = (S.me.label || '?').trim().charAt(0); if (S.me.photo) { b.textContent = ''; b.append(el('img', { src: `/api/img/profile/${S.me.id}?v=${S.me.photo}`, alt: '' })); } }
+
+  const App = { S, api, post, el, toast, can, fmtDate, formSheet, openOv, closeOv, catName, setSection, avatar, paintAvatar, loadCats, renderTabs, renderPick, load: {} };
   window.App = App;
 
   init();
