@@ -3,13 +3,21 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f2f2f7">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="התמונות שלנו">
+  <meta name="format-detection" content="telephone=no">
+  <script>
+    // Claro por defecto (aunque el teléfono esté en modo oscuro). Se cambia en "עוד".
+    (function () { try { var t = localStorage.getItem('theme') || 'light'; if (t !== 'auto') document.documentElement.setAttribute('data-theme', t); } catch (e) { document.documentElement.setAttribute('data-theme', 'light'); } })();
+  </script>
   <meta name="robots" content="noindex, nofollow">
   <title>התמונות שלנו</title>
   <link rel="manifest" href="/manifest.webmanifest">
-  <link rel="icon" href="/icon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="/icon.svg">
+  <link rel="icon" href="/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap">
@@ -32,6 +40,7 @@
 
   <!-- בית -->
   <main id="sec-home">
+    <div id="install" class="install" hidden></div>
     <section id="hero" class="hero" aria-label="תמונת הקבוצה"></section>
     <p id="greet" class="greet"></p>
     <div id="homeShabbat" class="shabbat" hidden></div>
@@ -110,6 +119,7 @@
         <button data-go="trips">טיולים</button>
         <button data-go="music">מוזיקה</button>
         <button data-go="people">חברות</button>
+        <button id="themeBtn"></button>
         <button id="menuCats" hidden>ניהול קטגוריות</button>
         <button id="settingsBtn" hidden>הגדרות</button>
         <button id="adminBtn" hidden>ניהול גישה</button>

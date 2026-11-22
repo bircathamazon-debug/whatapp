@@ -377,6 +377,38 @@
   }
   function paintAvatar() { const b = $('meBtn'); b.replaceChildren(); b.textContent = (S.me.label || '?').trim().charAt(0); if (S.me.photo) { b.textContent = ''; b.append(el('img', { src: `/api/img/profile/${S.me.id}?v=${S.me.photo}`, alt: '' })); } }
 
+  // ---------- מראה (בהיר / כהה / אוטומטי) ----------
+  const THEMES = { light: 'מראה: בהיר', dark: 'מראה: כהה', auto: 'מראה: לפי הטלפון' };
+  const getTheme = () => { try { return localStorage.getItem('theme') || 'light'; } catch { return 'light'; } };
+  function applyTheme(t) {
+    try { localStorage.setItem('theme', t); } catch {}
+    if (t === 'auto') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme', t);
+    const dark = t === 'dark' || (t === 'auto' && matchMedia('(prefers-color-scheme: dark)').matches);
+    document.querySelector('meta[name=theme-color]').setAttribute('content', dark ? '#000000' : '#f2f2f7');
+    $('themeBtn').textContent = THEMES[t];
+  }
+  $('themeBtn').onclick = () => applyTheme({ light: 'dark', dark: 'auto', auto: 'light' }[getTheme()]);
+  applyTheme(getTheme());
+
+  // ---------- התקנה כאפליקציה ----------
+  let deferredInstall = null;
+  const isStandalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  function renderInstall() {
+    const b = $('install'); b.replaceChildren();
+    let dismissed = false; try { dismissed = localStorage.getItem('noinstall') === '1'; } catch {}
+    if (isStandalone() || dismissed) { b.hidden = true; return; }
+    const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    b.append(el('div', { class: 'in-t' }, el('b', {}, 'להתקין כאפליקציה'),
+      el('span', {}, ios ? 'בספארי: לחצי על כפתור השיתוף ואז "הוספה למסך הבית". האלבום ייפתח במסך מלא, כמו אפליקציה.' : deferredInstall ? 'האלבום ייפתח במסך מלא, בלי דפדפן, ויהיה זמין גם בתפריט השיתוף.' : 'בתפריט של כרום (⋮) בחרי "הוספה למסך הבית" או "התקנת אפליקציה".')),
+      el('div', { class: 'in-a' },
+        deferredInstall ? el('button', { class: 'btn solid small', onclick: async () => { deferredInstall.prompt(); await deferredInstall.userChoice; deferredInstall = null; renderInstall(); } }, 'התקנה') : null,
+        el('button', { class: 'link', onclick: () => { try { localStorage.setItem('noinstall', '1'); } catch {} b.hidden = true; } }, 'לא עכשיו')));
+    b.hidden = false;
+  }
+  window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredInstall = e; renderInstall(); });
+  window.addEventListener('appinstalled', () => { $('install').hidden = true; toast('האפליקציה הותקנה'); });
+  renderInstall();
+
   const App = { S, api, post, el, toast, can, fmtDate, formSheet, openOv, closeOv, catName, setSection, avatar, paintAvatar, loadCats, renderTabs, renderPick, load: {} };
   window.App = App;
 

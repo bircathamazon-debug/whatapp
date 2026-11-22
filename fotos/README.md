@@ -65,6 +65,15 @@ El chip NFC **no guarda las fotos**, guarda solo un enlace. Las fotos están en 
 
 Recomendaciones: usa etiquetas NTAG215 o NTAG216 (aprox. 1 USD cada una). El enlace queda grabado, así que si quieres cambiar el acceso de esa niña, cancela su código y graba uno nuevo.
 
+## Instalar como app en el teléfono
+
+- **Android (Chrome)**: abre el sitio → aparece la tarjeta **"להתקין כאפליקציה"** en Inicio → "התקנה". O menú ⋮ → "Instalar aplicación".
+- **iPhone (Safari, no Chrome)**: botón Compartir → **"Añadir a pantalla de inicio"**.
+
+Se abre en pantalla completa, sin barra del navegador, con su ícono y nombre propios, y la carcasa funciona sin conexión.
+La app es **clara por defecto**, aunque el teléfono esté en modo oscuro. En **"עוד"** se cambia a oscuro o a "según el teléfono".
+Si ya habías agregado el sitio a la pantalla de inicio antes, bórralo y agrégalo de nuevo para que tome el ícono nuevo.
+
 ## Pantalla de inicio y secciones nuevas
 
 - **בית (dashboard)**: foto del grupo (la administradora y las ayudantes la cambian con "החלפת תמונה"), saludo con fecha civil y hebrea, horario de Shabat, avisos para el equipo (fotos por ordenar, canciones o publicaciones por aprobar, pagos pendientes), tabla de próximos eventos con "voy", últimas publicaciones y fotos, y el próximo viaje.

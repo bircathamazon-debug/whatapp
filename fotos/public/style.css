@@ -246,3 +246,14 @@ body{padding-bottom:calc(150px + env(safe-area-inset-bottom))}
 
 .sec-h:not(:has(h2)){justify-content:flex-end}
 .sec-h:empty{display:none}
+
+/* ---------- Sensación de app ---------- */
+html{background:var(--bg);overscroll-behavior-y:none;-webkit-text-size-adjust:100%}
+body{overscroll-behavior-y:none;-webkit-touch-callout:none}
+button,.tabbar,.tabs,.tab,.opt,.chip,.btn,.menu,.sec-h,.top{-webkit-user-select:none;user-select:none}
+main:not([hidden]){animation:fade .22s ease-out}
+.install{display:flex;flex-direction:column;gap:10px;background:var(--surface);border-radius:16px;padding:14px 16px;margin-bottom:14px;box-shadow:var(--shadow)}
+.install[hidden]{display:none}
+.in-t{display:flex;flex-direction:column;gap:2px}.in-t b{font-size:17px}.in-t span{font-size:14px;color:var(--mute)}
+.in-a{display:flex;align-items:center;gap:14px}
+@media (display-mode:standalone){.install{display:none!important}}
