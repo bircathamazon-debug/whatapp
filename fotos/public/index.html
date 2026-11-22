@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f4f3f1" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#141316" media="(prefers-color-scheme: dark)">
+  <meta name="robots" content="noindex, nofollow">
+  <title>התמונות שלנו</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/icon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700&family=Heebo:wght@400;500;700&display=swap">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="bar-row">
+      <h1 class="mark">התמונות שלנו</h1>
+      <div class="who" id="who" hidden>
+        <span id="whoName"></span>
+        <span id="whoRole" class="role"></span>
+        <button id="adminBtn" class="link" hidden>ניהול גישה</button>
+        <button id="logoutBtn" class="link">יציאה</button>
+      </div>
+    </div>
+    <nav id="tabs" class="tabs" aria-label="קטגוריות"></nav>
+  </header>
+
+  <main>
+    <div id="grid" class="grid"></div>
+    <div id="empty" class="empty" hidden>
+      <p class="empty-t">עדיין אין כאן תמונות</p>
+      <p class="empty-s">לחצי על "העלאת תמונות" כדי להתחיל את האלבום.</p>
+    </div>
+    <button id="more" class="btn line" hidden>טעינת עוד תמונות</button>
+  </main>
+
+  <div class="dock"><button id="fab" class="btn solid wide">העלאת תמונות</button></div>
+
+  <!-- העלאה -->
+  <div id="sheet" class="overlay" hidden>
+    <section class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetT">
+      <header class="sheet-h"><h2 id="sheetT">העלאת תמונות</h2><button class="x" id="sheetClose" aria-label="סגירה">✕</button></header>
+
+      <p class="lbl">לאיזו קטגוריה התמונות שייכות?</p>
+      <div id="catPick" class="pick"></div>
+
+      <div id="catAdd" hidden>
+        <p class="lbl">קטגוריה חדשה</p>
+        <div class="row">
+          <input id="newCat" type="text" maxlength="30" placeholder="למשל: יום הולדת 18">
+          <button id="addCat" class="btn line small">הוספה</button>
+        </div>
+        <div id="sugg" class="pick sugg"></div>
+      </div>
+      <p id="catHint" class="hint" hidden>רוצה קטגוריה חדשה? אפשר לבקש מהאחראית.</p>
+
+      <div class="row two">
+        <label class="btn line big">מהגלריה<input id="fileGallery" type="file" accept="image/*" multiple hidden></label>
+        <label class="btn line big">צילום עכשיו<input id="fileCamera" type="file" accept="image/*" capture="environment" hidden></label>
+      </div>
+
+      <p id="queueInfo" class="hint" hidden></p>
+      <div id="prog" class="prog" hidden><i></i></div>
+      <button id="go" class="btn solid wide" hidden>העלאה</button>
+    </section>
+  </div>
+
+  <!-- ניהול גישה -->
+  <div id="admin" class="overlay" hidden>
+    <section class="sheet" role="dialog" aria-modal="true" aria-labelledby="adminT">
+      <header class="sheet-h"><h2 id="adminT">ניהול גישה</h2><button class="x" id="adminClose" aria-label="סגירה">✕</button></header>
+      <p class="hint">כל אחת מקבלת קוד אישי. אפשר לשלוח לה קישור שנכנס ישר לאלבום, או לכתוב אותו על הצמיד ה-NFC שלה. "עוזרת" יכולה גם לסדר: להעביר, למחוק וליצור קטגוריות.</p>
+      <form id="codeForm" class="row">
+        <input id="codeLabel" type="text" maxlength="30" placeholder="שם החברה" required>
+        <select id="codeRole" aria-label="סוג גישה">
+          <option value="member">חברה</option>
+          <option value="helper">עוזרת</option>
+        </select>
+        <button class="btn solid small">יצירת קוד</button>
+      </form>
+      <ul id="codeList" class="codes"></ul>
+    </section>
+  </div>
+
+  <!-- תצוגה במסך מלא -->
+  <div id="viewer" class="viewer" hidden>
+    <button class="x on-dark" id="vClose" aria-label="סגירה">✕</button>
+    <button class="nav next" id="vNext" aria-label="הבאה">‹</button>
+    <button class="nav prev" id="vPrev" aria-label="הקודמת">›</button>
+    <img id="vImg" alt="">
+    <div class="vinfo"><span id="vBy"></span><span id="vDate"></span></div>
+    <div class="vbar">
+      <select id="vCat" aria-label="העברה לקטגוריה"></select>
+      <a id="vDl" class="btn ondark small" download>הורדה</a>
+      <button id="vDel" class="btn ondark small danger">מחיקה</button>
+    </div>
+  </div>
+
+  <!-- כניסה -->
+  <div id="gate" class="gate" hidden>
+    <form id="gateForm" class="gate-card">
+      <p class="eyebrow">אלבום פרטי</p>
+      <h2 class="gate-t">התמונות שלנו</h2>
+      <label for="gateInput" class="lbl">קוד הכניסה שלך</label>
+      <input id="gateInput" type="password" inputmode="numeric" autocomplete="off" maxlength="12" dir="ltr">
+      <button class="btn solid wide">כניסה</button>
+      <p id="gateErr" class="err" role="alert" hidden>הקוד לא נכון. אפשר לבקש קוד חדש מהאחראית.</p>
+    </form>
+  </div>
+
+  <div id="toast" class="toast" role="status" hidden></div>
+  <script src="/app.js"></script>
+</body>
+</html>

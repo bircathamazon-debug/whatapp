@@ -1,0 +1,7 @@
+name = "tmunot"
+compatibility_date = "2024-11-01"
+pages_build_output_dir = "public"
+
+[[r2_buckets]]
+binding = "PHOTOS"
+bucket_name = "tmunot-photos"
