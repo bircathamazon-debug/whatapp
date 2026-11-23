@@ -81,7 +81,9 @@ Si ya habías agregado el sitio a la pantalla de inicio antes, bórralo y agrég
 - **חברות (CRM)**: una ficha por persona con **foto de perfil** (cada una sube la suya desde el círculo de arriba), teléfono, dirección y cumpleaños, que cada niña decide si muestra. Los datos de padres, contacto de emergencia y salud los ven solo ella y el equipo. Los cumpleaños aparecen solos en el calendario.
 - **ניהול קטגוריות** (en la pestaña Fotos y en "עוד"): agregar, renombrar, reordenar, ocultar y borrar. Borrar una categoría pasa sus fotos a "ממתינות לסידור". Las 6 fijas solo se ocultan o se renombran.
 
-La navegación es una barra inferior (בית, תמונות, לוח שנה, מה חדש, עוד). En "עוד" están los viajes, la música, las fichas y los ajustes.
+**Menú lateral**: un panel con íconos a la derecha. Se despliega al tocar ☰ y muestra todo ordenado: *principal* (בית, תמונות, לוח שנה, מה חדש), *קהילה* (טיולים, מוזיקה, חברות) y *ניהול* (categorías, acceso, ajustes), más el cambio de tema y la salida.
+
+**Agregar amigas al CRM**: en **חברות → "הוספת חברות"** se escribe un nombre por línea. Quedan en la lista **sin código de acceso**. Se abre su ficha para completar teléfono, dirección, cumpleaños y foto. Con **"יצירת קוד גישה"** se les da acceso más tarde: la ficha y la foto pasan al nuevo código.
 
 ## Secciones (Etapa 1)
 

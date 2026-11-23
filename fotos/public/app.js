@@ -67,6 +67,8 @@
     $('settingsBtn').hidden = S.me.role !== 'admin';
     $('menuCats').hidden = !can('helper');
     $('catMgr').hidden = !can('helper');
+    $('railAdminG').hidden = !can('helper');
+    $('addPerson').hidden = !can('helper');
     $('selToggle').hidden = !can('helper');
     await loadSettings();
     await loadCats();
@@ -347,11 +349,10 @@
   // ---------- אזורים ----------
   const SECTIONS = ['home', 'photos', 'cal', 'news', 'trips', 'music', 'people'];
   const TITLES = { home: 'בית', photos: 'תמונות', cal: 'לוח שנה', news: 'מה חדש', trips: 'טיולים', music: 'מוזיקה', people: 'חברות' };
-  const PRIMARY = ['home', 'photos', 'cal', 'news'];
   function setSection(name) {
-    S.sec = name; closeOv('more-sheet');
+    S.sec = name; collapseRail();
     for (const s of SECTIONS) $('sec-' + s).hidden = s !== name;
-    document.querySelectorAll('#tabbar button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.sec === (PRIMARY.includes(name) ? name : 'more'))));
+    document.querySelectorAll('#rail [data-go]').forEach((b) => b.setAttribute('aria-current', String(b.dataset.go === name)));
     $('pageTitle').textContent = TITLES[name];
     $('tabs').hidden = name !== 'photos';
     document.querySelector('.dock').hidden = name !== 'photos';
@@ -360,13 +361,18 @@
     if (name === 'photos') loadPhotos(true);
     else if (App.load && App.load[name]) App.load[name]();
   }
-  document.querySelectorAll('#tabbar button').forEach((b) => b.addEventListener('click', () => (b.dataset.sec === 'more' ? openOv('more-sheet') : setSection(b.dataset.sec))));
+  // panel lateral con íconos: se despliega al tocarlo
+  function collapseRail() { $('rail').classList.remove('open'); $('railShade').hidden = true; $('railToggle').setAttribute('aria-expanded', 'false'); }
+  function toggleRail() { const o = $('rail').classList.toggle('open'); $('railShade').hidden = !o; $('railToggle').setAttribute('aria-expanded', String(o)); }
+  $('railToggle').onclick = toggleRail;
+  $('railShade').onclick = collapseRail;
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') collapseRail(); });
   document.addEventListener('click', (e) => { const g = e.target.closest('[data-go]'); if (g) setSection(g.dataset.go); });
-  $('moreClose').onclick = () => closeOv('more-sheet');
-  $('more-sheet').addEventListener('click', (e) => { if (e.target === $('more-sheet')) closeOv('more-sheet'); });
-  $('menuCats').onclick = () => { closeOv('more-sheet'); App.openCats && App.openCats(); };
+  $('menuCats').onclick = () => { collapseRail(); App.openCats && App.openCats(); };
   $('catMgr').onclick = () => App.openCats && App.openCats();
-  $('settingsBtn').onclick = (() => { const f = $('settingsBtn').onclick; return () => { closeOv('more-sheet'); f(); }; })();
+  $('settingsBtn').addEventListener('click', collapseRail);
+  $('adminBtn').addEventListener('click', collapseRail);
+  $('logoutBtn').addEventListener('click', collapseRail);
   $('meBtn').onclick = () => App.openProfile && App.openProfile('me');
 
   // avatar
@@ -386,11 +392,11 @@
     const dark = t === 'dark' || (t === 'auto' && matchMedia('(prefers-color-scheme: dark)').matches);
     document.querySelector('meta[name=theme-color]').setAttribute('content', dark ? '#160e12' : '#fff5f8');
     document.querySelector('meta[name=color-scheme]').setAttribute('content', t === 'dark' ? 'dark' : t === 'auto' ? 'light dark' : 'only light');
-    $('themeBtn').textContent = THEMES[t];
+    $('themeBtn').querySelector('.lab').textContent = THEMES[t];
   }
   $('themeBtn').onclick = () => applyTheme({ light: 'dark', dark: 'auto', auto: 'light' }[getTheme()]);
   applyTheme(getTheme());
-  const BUILD = 'גרסה 6';
+  const BUILD = 'גרסה 7';
   $('ver').textContent = BUILD + ' · הטלפון במצב ' + (matchMedia('(prefers-color-scheme: dark)').matches ? 'כהה' : 'בהיר');
 
   // ---------- התקנה כאפליקציה ----------

@@ -177,7 +177,7 @@
       const card = el('div', { class: 'person' + (p.mine || can('helper') ? ' tap' : ''), tabindex: p.mine || can('helper') ? '0' : null, onclick: () => (p.mine || can('helper')) && openProfile(p.id, p) },
         avatar('md', p.id, p.name, p.photo),
         el('div', { class: 'pmain' }, el('b', {}, p.name + (p.mine ? ' (את)' : '')),
-          el('span', { class: 'pill' }, p.role === 'admin' ? 'אחראית' : p.role === 'helper' ? 'עוזרת' : 'חברה'),
+          el('span', { class: 'pill' + (p.role === 'contact' ? ' warn' : '') }, p.role === 'admin' ? 'אחראית' : p.role === 'helper' ? 'עוזרת' : p.role === 'contact' ? 'ללא קוד גישה' : 'חברה'),
           ...lines.map(([k, v]) => el('span', { class: 'pl' }, el('i', {}, k), v)),
           can('helper') && (p.emergency || p.allergies || p.parents) ? el('span', { class: 'pl priv' }, el('i', {}, 'לצוות בלבד'), [p.parents && 'הורים: ' + p.parents, p.emergency && 'חירום: ' + p.emergency, p.allergies && 'אלרגיות: ' + p.allergies].filter(Boolean).join(' · ')) : null));
       box.append(card);
@@ -197,15 +197,50 @@
       const F = (name, label, o = {}) => el('label', { class: 'fld', for: 'p_' + name }, el('span', { class: 'lbl' }, label), el('input', { id: 'p_' + name, type: o.type || 'text', maxlength: '120', value: d[name] || '', dir: o.dir || null, placeholder: o.ph || null }));
       const C = (name, label, on) => { const cb = el('input', { id: 'p_' + name, type: 'checkbox' }); cb.checked = on; return el('label', { class: 'chk', for: 'p_' + name }, cb, el('span', {}, label)); };
       const f = $('profFields'); f.replaceChildren(
+        ...(d.role === 'contact' && can('helper') ? [F('name', 'שם')] : []),
         F('phone', 'טלפון', { type: 'tel', dir: 'ltr' }), F('address', 'כתובת'), F('birthday', 'תאריך יום הולדת', { type: 'date' }),
         el('p', { class: 'hint' }, 'מה החברות האחרות רואות?'),
         C('showBirthday', 'להראות את יום ההולדת (ויופיע בלוח השנה)', d.show ? d.show.birthday : true), C('showPhone', 'להראות את הטלפון', d.show && d.show.phone), C('showAddress', 'להראות את הכתובת', d.show && d.show.address),
         el('p', { class: 'hint' }, 'פרטים אלה גלויים רק לך ולאחראית ולעוזרות:'),
         F('parents', 'שם ההורים'), F('emergency', 'איש קשר לחירום'), F('allergies', 'אלרגיות / בריאות'));
-      $('profErr').hidden = true; openOv('prof');
+      $('profErr').hidden = true; renderProfStaff(d); openOv('prof');
     };
     if (data) go(data); else api('profiles').then(({ people: ps }) => go(ps.find((p) => p.mine)));
   }
+
+  // acciones del equipo sobre una ficha: crear código de acceso o quitar a una amiga que aún no tiene
+  function renderProfStaff(d) {
+    const box = $('profStaff'); box.replaceChildren();
+    box.hidden = !(can('helper') && !d.mine);
+    if (box.hidden) return;
+    if (d.role !== 'contact') { box.append(el('p', { class: 'hint' }, 'לחברה הזו יש קוד גישה. אפשר לנהל אותו ב"ניהול גישה".')); return; }
+    box.append(el('p', { class: 'hint' }, 'אפשר להשאיר אותה רק ברשימה, או לתת לה קוד כדי שתיכנס לאלבום.'));
+    const role = el('select', { id: 'accRole', 'aria-label': 'סוג גישה' }, el('option', { value: 'member' }, 'חברה'), el('option', { value: 'helper' }, 'עוזרת'));
+    box.append(el('div', { class: 'row' }, role, el('button', { type: 'button', class: 'btn line small', onclick: async () => {
+      try {
+        const r = await post(`profiles/${d.id}/access`, { role: role.value });
+        const link = location.origin + '/?c=' + r.code;
+        box.replaceChildren(el('p', { class: 'hint' }, 'הקוד של ' + d.name + ':'), el('p', { class: 'bigcode' }, r.code),
+          el('div', { class: 'ev-a' }, el('button', { type: 'button', class: 'btn solid small', onclick: async () => { try { await navigator.clipboard.writeText(link); toast('הקישור הועתק'); } catch { toast(link); } } }, 'העתקת קישור'),
+            el('button', { type: 'button', class: 'link', onclick: () => { closeOv('prof'); loadPeople(); } }, 'סיום')));
+        loadPeople();
+      } catch { toast('יצירת הקוד נכשלה'); }
+    } }, 'יצירת קוד גישה')));
+    box.append(el('button', { type: 'button', class: 'link red', onclick: async (e) => {
+      const b = e.currentTarget;
+      if (!b.dataset.arm) { b.dataset.arm = 1; b.textContent = 'לחצי שוב כדי להסיר מהרשימה'; return; }
+      try { await api('profiles/' + d.id, { method: 'DELETE' }); closeOv('prof'); toast('הוסרה מהרשימה'); loadPeople(); } catch { toast('המחיקה נכשלה'); }
+    } }, 'הסרה מהרשימה'));
+  }
+  $('addPerson').onclick = () => formSheet({
+    title: 'הוספת חברות', submit: 'הוספה',
+    fields: [{ name: 'names', label: 'שם בכל שורה', type: 'textarea', rows: 6, max: 2000, required: true, placeholder: 'שרה כהן\nרחל לוי\nדינה מזרחי' }],
+    onSubmit: async (v) => {
+      const names = v.names.split('\n').map((x) => x.trim()).filter(Boolean);
+      const r = await post('profiles', { names }); toast(`נוספו ${r.added.length} חברות`); await loadPeople();
+      if (r.added.length === 1) { const p = people.find((x) => x.id === r.added[0].id); if (p) openProfile(p.id, p); }
+    },
+  });
   $('profClose').onclick = () => closeOv('prof');
   $('prof').addEventListener('click', (e) => { if (e.target === $('prof')) closeOv('prof'); });
   $('profPhoto').addEventListener('change', async (e) => {
@@ -222,7 +257,7 @@
     e.preventDefault();
     const v = (n) => $('p_' + n).value, c = (n) => $('p_' + n).checked;
     try {
-      await post(`profiles/${profData.mine ? 'me' : profData.id}`, { phone: v('phone'), address: v('address'), birthday: v('birthday'), parents: v('parents'), emergency: v('emergency'), allergies: v('allergies'), showPhone: c('showPhone'), showAddress: c('showAddress'), showBirthday: c('showBirthday') }, 'PUT');
+      await post(`profiles/${profData.mine ? 'me' : profData.id}`, { name: profData.role === 'contact' && can('helper') ? v('name') : undefined, phone: v('phone'), address: v('address'), birthday: v('birthday'), parents: v('parents'), emergency: v('emergency'), allergies: v('allergies'), showPhone: c('showPhone'), showAddress: c('showAddress'), showBirthday: c('showBirthday') }, 'PUT');
       closeOv('prof'); toast('נשמר'); if (S.sec === 'people') loadPeople();
     } catch { const er = $('profErr'); er.textContent = 'לא הצלחנו לשמור. בדקי את הפרטים.'; er.hidden = false; }
   });

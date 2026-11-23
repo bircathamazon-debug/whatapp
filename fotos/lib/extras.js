@@ -9,6 +9,7 @@ const KEYS = {
   posts: '_meta/posts.json',
   profiles: '_meta/profiles.json',
   codes: '_meta/codes.json',
+  contacts: '_meta/contacts.json',
   group: '_meta/group.jpg',
 };
 const MAX_IMG = 6 * 1024 * 1024;
@@ -18,10 +19,15 @@ const num = (v) => { const n = Number(v); return Number.isFinite(n) && n >= 0 ? 
 const isDate = (v) => /^\d{4}-\d{2}-\d{2}$/.test(v);
 const isHttps = (v) => { try { return new URL(v).protocol === 'https:'; } catch { return false; } };
 
-// Todas las personas con acceso: la administradora y cada código
+// Todas las personas: la administradora, cada código de acceso y los contactos agregados a mano (sin acceso)
 async function roster_(env) {
-  const codes = await env.PHOTOS.get(KEYS.codes).then((o) => (o ? o.json() : [])).catch(() => []);
-  return [{ id: 'admin', name: 'אחראית', role: 'admin' }, ...codes.map((c) => ({ id: c.id, name: c.label, role: c.role }))];
+  const get = (k) => env.PHOTOS.get(k).then((o) => (o ? o.json() : [])).catch(() => []);
+  const [codes, contacts] = await Promise.all([get(KEYS.codes), get(KEYS.contacts)]);
+  return [
+    { id: 'admin', name: 'אחראית', role: 'admin' },
+    ...codes.map((c) => ({ id: c.id, name: c.label, role: c.role })),
+    ...contacts.map((c) => ({ id: c.id, name: c.name, role: 'contact' })),
+  ];
 }
 
 // Vista de un viaje según el rol: las niñas solo ven su propio pago.
@@ -301,12 +307,59 @@ export async function extraRoutes({ request, env, me, parts, method, json, readJ
       });
       return json({ people });
     }
+    // agregar amigas a mano (sin código de acceso todavía)
+    if (method === 'POST' && !parts[1]) {
+      if (!staff) return json({ error: 'forbidden' }, 403);
+      const b = await body();
+      const names = (Array.isArray(b.names) ? b.names : [b.name]).map((n) => str(n, 40)).filter(Boolean).slice(0, 60);
+      if (!names.length) return json({ error: 'bad' }, 400);
+      const contacts = await readJson(env, KEYS.contacts, []);
+      if (contacts.length + names.length > 300) return json({ error: 'limit' }, 400);
+      const added = names.map((name) => ({ id: rid('k'), name }));
+      await saveJson(env, KEYS.contacts, contacts.concat(added));
+      return json({ ok: true, added });
+    }
     const target = parts[1] === 'me' ? me.id : parts[1];
     if (target !== me.id && !staff) return json({ error: 'forbidden' }, 403);
     const roster = await roster_(env);
     if (!roster.some((u) => u.id === target)) return json({ error: 'nf' }, 404);
+    const isContact = target.startsWith('k');
+    if (method === 'DELETE' && !parts[2]) {
+      if (!staff || !isContact) return json({ error: 'forbidden' }, 403);
+      const contacts = await readJson(env, KEYS.contacts, []);
+      await saveJson(env, KEYS.contacts, contacts.filter((c) => c.id !== target));
+      delete profiles[target];
+      await saveJson(env, KEYS.profiles, profiles);
+      await env.PHOTOS.delete(`profiles/${target}.jpg`);
+      return json({ ok: true });
+    }
+    if (method === 'POST' && parts[2] === 'access') {
+      if (!staff || !isContact) return json({ error: 'forbidden' }, 403);
+      const b = await body();
+      const role = b.role === 'helper' ? 'helper' : 'member';
+      const contacts = await readJson(env, KEYS.contacts, []);
+      const c = contacts.find((x) => x.id === target);
+      if (!c) return json({ error: 'nf' }, 404);
+      const codes = await readJson(env, KEYS.codes, []);
+      let code; do { code = String(crypto.getRandomValues(new Uint32Array(1))[0] % 1000000).padStart(6, '0'); } while (codes.some((x) => x.code === code));
+      const entry = { id: rid('u'), code, role, label: c.name, created: Date.now() };
+      codes.push(entry);
+      await saveJson(env, KEYS.codes, codes);
+      // la ficha y la foto pasan a la nueva identidad
+      if (profiles[target]) { profiles[entry.id] = profiles[target]; delete profiles[target]; }
+      const img = await env.PHOTOS.get(`profiles/${target}.jpg`);
+      if (img) { await env.PHOTOS.put(`profiles/${entry.id}.jpg`, img.body, { httpMetadata: { contentType: 'image/jpeg' } }); await env.PHOTOS.delete(`profiles/${target}.jpg`); }
+      await saveJson(env, KEYS.profiles, profiles);
+      await saveJson(env, KEYS.contacts, contacts.filter((x) => x.id !== target));
+      return json({ ok: true, id: entry.id, code: entry.code, role });
+    }
     if (method === 'PUT' && !parts[2]) {
       const b = await body();
+      if (isContact && staff && str(b.name, 40)) {
+        const contacts = await readJson(env, KEYS.contacts, []);
+        const c = contacts.find((x) => x.id === target);
+        if (c) { c.name = str(b.name, 40); await saveJson(env, KEYS.contacts, contacts); }
+      }
       const cur = profiles[target] || {};
       const next = {
         ...cur,

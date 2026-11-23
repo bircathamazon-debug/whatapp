@@ -92,7 +92,7 @@ li.empty-s{padding:30px 0;text-align:center}
 .hint{margin:0;color:var(--mute);font-size:14px}
 .row{display:flex;gap:8px;align-items:stretch}
 .row.two{gap:10px}
-input[type=text],input[type=password],input[type=number],input[type=url],input[type=date],input[type=time],select,textarea{flex:1;min-width:0;padding:12px 14px;border-radius:10px;border:0;background:var(--fill);font-size:16px}
+input[type=text],input[type=password],input[type=number],input[type=url],input[type=tel],input[type=date],input[type=time],select,textarea{flex:1;min-width:0;padding:12px 14px;border-radius:10px;border:0;background:var(--fill);font-size:16px}
 textarea{width:100%;resize:vertical}
 .pick{display:flex;flex-wrap:wrap;gap:8px}
 .opt{border:0;background:var(--fill);border-radius:99px;padding:8px 15px;font-size:15px;cursor:pointer;transition:background .2s,color .2s}
@@ -234,15 +234,6 @@ body{padding-bottom:calc(150px + env(safe-area-inset-bottom))}
 .link.red{color:var(--danger)}
 .menu+.hint,.sheet .hint{line-height:1.5}
 
-.tabbar{position:fixed;inset-inline:0;bottom:0;z-index:7;display:flex;background:var(--glass);-webkit-backdrop-filter:saturate(180%) blur(24px);backdrop-filter:saturate(180%) blur(24px);border-top:.5px solid var(--sep);padding:6px max(8px,env(safe-area-inset-right)) calc(6px + env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left))}
-.tabbar button{flex:1;background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 0;color:var(--mute);font-size:11px;font-weight:500;cursor:pointer}
-.tabbar svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
-.tabbar button[aria-selected=true]{color:var(--accent)}
-.tabbar button[aria-selected=true] svg{fill:var(--tint)}
-.tabbar circle{fill:currentColor}.tabbar [data-sec=more] svg{stroke:none}
-/* el botón de subir flota sobre la barra */
-.dock{inset-inline:0;bottom:calc(62px + env(safe-area-inset-bottom));background:none;border:0;-webkit-backdrop-filter:none;backdrop-filter:none;padding:0;display:flex;justify-content:center;pointer-events:none}
-.dock .btn{pointer-events:auto;width:auto;max-width:none;margin:0;padding:13px 26px;border-radius:99px;box-shadow:0 6px 22px rgba(0,0,0,.28)}
 .toast{bottom:calc(120px + env(safe-area-inset-bottom))}
 
 .sec-h:not(:has(h2)){justify-content:flex-end}
@@ -251,8 +242,7 @@ body{padding-bottom:calc(150px + env(safe-area-inset-bottom))}
 /* ---------- Sensación de app ---------- */
 html{background:var(--bg);overscroll-behavior-y:none;-webkit-text-size-adjust:100%}
 body{overscroll-behavior-y:none;-webkit-touch-callout:none}
-button,.tabbar,.tabs,.tab,.opt,.chip,.btn,.menu,.sec-h,.top{-webkit-user-select:none;user-select:none}
-main:not([hidden]){animation:fade .22s ease-out}
+button,main:not([hidden]){animation:fade .22s ease-out}
 .install{display:flex;flex-direction:column;gap:10px;background:var(--surface);border-radius:16px;padding:14px 16px;margin-bottom:14px;box-shadow:var(--shadow)}
 .install[hidden]{display:none}
 .in-t{display:flex;flex-direction:column;gap:2px}.in-t b{font-size:17px}.in-t span{font-size:14px;color:var(--mute)}
@@ -260,3 +250,36 @@ main:not([hidden]){animation:fade .22s ease-out}
 @media (display-mode:standalone){.install{display:none!important}}
 
 .ver{margin:0;text-align:center;color:var(--mute);font-size:12px}
+
+/* ---------- Panel lateral con íconos (se despliega) ---------- */
+:root{--rail:60px}
+body{padding-inline-start:var(--rail);padding-bottom:calc(110px + env(safe-area-inset-bottom))}
+.rail{position:fixed;top:0;bottom:0;inset-inline-start:0;z-index:8;width:var(--rail);display:flex;flex-direction:column;gap:4px;
+  padding:calc(10px + env(safe-area-inset-top)) 8px calc(10px + env(safe-area-inset-bottom));
+  background:var(--surface);border-inline-end:.5px solid var(--sep);overflow-y:auto;overflow-x:hidden;transition:width .25s cubic-bezier(.2,.9,.3,1),box-shadow .25s;scrollbar-width:none}
+.rail::-webkit-scrollbar{display:none}
+.rail.open{width:min(264px,82vw);box-shadow:0 0 40px rgba(0,0,0,.25)}
+.rail-nav{display:flex;flex-direction:column;gap:2px;flex:1}
+.rail-foot{display:flex;flex-direction:column;gap:2px;border-top:.5px solid var(--sep);padding-top:8px;margin-top:8px}
+.rail-i{display:flex;align-items:center;gap:14px;width:100%;min-height:46px;padding:0 11px;background:none;border:0;border-radius:12px;color:var(--ink);font-size:16px;font-weight:500;text-align:start;cursor:pointer;white-space:nowrap;-webkit-user-select:none;user-select:none}
+.rail-i[hidden]{display:none}
+.rail-i svg{width:24px;height:24px;flex:none;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;color:var(--mute)}
+.rail-i:active{background:var(--fill)}
+.rail-i[aria-current=true]{background:var(--tint);color:var(--accent)}
+.rail-i[aria-current=true] svg{color:var(--accent)}
+.rail-i.toggle{margin-bottom:6px}
+.rail-g{margin:12px 12px 4px;font-size:12px;font-weight:600;color:var(--mute);letter-spacing:.02em}
+.rail .lab{opacity:0;max-width:0;overflow:hidden;transition:opacity .15s,max-width .25s}
+.rail.open .lab{opacity:1;max-width:200px}
+.rail-g.lab,.ver.lab{display:none}
+.rail.open .rail-g.lab,.rail.open .ver.lab{display:block}
+.rail.open .rail-g[hidden]{display:none}
+.rail-shade{position:fixed;inset:0;z-index:7;background:rgba(0,0,0,.3);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);animation:fade .2s}
+.rail .ver{margin:8px 12px 0;text-align:start}
+/* el botón de subir y los avisos respetan el panel */
+.dock{inset-inline-start:var(--rail);inset-inline-end:0;bottom:calc(16px + env(safe-area-inset-bottom));background:none;border:0;-webkit-backdrop-filter:none;backdrop-filter:none;padding:0;display:flex;justify-content:center;pointer-events:none}
+.dock .btn{pointer-events:auto;width:auto;max-width:none;margin:0;padding:13px 26px;border-radius:99px;box-shadow:0 6px 22px rgba(0,0,0,.28)}
+.toast{bottom:calc(84px + env(safe-area-inset-bottom))}
+.bigcode{margin:0;font:700 34px/1.2 var(--sans);letter-spacing:6px;direction:ltr;text-align:center;font-variant-numeric:tabular-nums}
+.profstaff{display:flex;flex-direction:column;gap:10px;border-top:.5px solid var(--sep);padding-top:14px}
+.top{padding-inline-start:16px}
